@@ -7,11 +7,24 @@
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Karma">
 <style>
-body,h1,h2,h3,h4,h5,h6 {font-family: "Karma", sans-serif; margin: 0; padding: 0;}
+body, h1, h2, h3, h4, h5, h6 {font-family: "Karma", sans-serif; margin: 0; padding: 0;}
 .w3-bar {background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
 .w3-main {margin-top: 80px;}
-.card {padding: 16px; margin: 16px 0; border: 1px solid #e0e0e0; border-radius: 8px; transition: box-shadow 0.3s;}
+.card {
+    padding: 16px;
+    margin: 16px 0;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    display: flex; /* Use flexbox */
+    align-items: center; /* Align items vertically center */
+    transition: box-shadow 0.3s;
+}
 .card:hover {box-shadow: 0 4px 8px rgba(0,0,0,0.2);}
+.card img {
+    width: 80px; /* Set a fixed size for the images */
+    height: auto; /* Maintain aspect ratio */
+    margin-right: 16px; /* Space between image and text */
+}
 footer {background-color: #f9f9f9; padding: 32px 0; text-align: center;}
 </style>
 </head>
@@ -33,16 +46,20 @@ footer {background-color: #f9f9f9; padding: 32px 0; text-align: center;}
   <div class="w3-row-padding">
     <div class="w3-col m12">
       <div class="card">
-        <h3>A sustainable traveling plan to Kaohsiung</h3>
-        <img src="https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/master/images/Gotta_Go_icon.jpg" alt="Gotta" style="width:100%; height:auto;">
-        <p>We have partnered with HKExpress and EcoAsia to design a green traveling plan!</p>
+        <img src="https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/master/images/Gotta_Go_icon.jpg" alt="Gotta">
+        <div>
+          <h3>A sustainable traveling plan to Kaohsiung</h3>
+          <p>We have partnered with HKExpress and EcoAsia to design a green traveling plan!</p>
+        </div>
       </div>
     </div>
     <div class="w3-col m12">
       <div class="card">
-        <h3>An SDG Game-based Start up I hosted before</h3>
-        <img src="https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/master/images/SubGameLab_Icon.png" alt="SubGameLab_Icon" style="width:100%; height:auto;">
-        <p>We have organized quite a few workshops and sharings.</p>
+        <img src="https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/master/images/SubGameLab_Icon.png" alt="SubGameLab_Icon">
+        <div>
+          <h3>An SDG Game-based Start up I hosted before</h3>
+          <p>We have organized quite a few workshops and sharings.</p>
+        </div>
       </div>
     </div>
   </div>
