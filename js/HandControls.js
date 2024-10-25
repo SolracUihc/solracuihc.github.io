@@ -145,9 +145,7 @@ export class HandControls extends THREE.EventDispatcher {
       // This distance between landmarks 0 and 10 is used to determine z-axis movement in 3D space
       // I only limit this value between -3 and 5 to make it friendly but it is not necessary
       this.depthZ = THREE.MathUtils.clamp(
-        // THREE.MathUtils.mapLinear(depthDistance, 0, 1000, -3, 5),
-        // inverted the depth calculation
-        THREE.MathUtils.mapLinear(depthDistance, 0, 1000, 5, -3),
+        THREE.MathUtils.mapLinear(depthDistance, 0, 1000, -3, 5),
         -2,
         4
       );
