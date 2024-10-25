@@ -104,7 +104,7 @@ const musicHelper = (function(){
  * Loader Helper
  */
 const LoaderHelper = {
- _base: 'https://raw.githubusercontent.com/rainner/codepen-assets/master/',
+ _base: 'https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/master/',
  _data: {}, 
  _loaded: 0, 
  _cb: null,
@@ -410,7 +410,7 @@ const gunShip = {
  scene: null, 
  group: null,
  engineTexture: null, 
- gunSound: 'https://raw.githubusercontent.com/rainner/codepen-assets/master/audio/effects/lazer.mp3', 
+ gunSound: 'https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/master/images/lazer.mp3', 
  shots: [], 
  ease: 12, 
  move: { x: 0, y: 0, z: -40 },
@@ -678,4 +678,4 @@ LoaderHelper.loadTexture( 'mountainTexture', 'images/terrain2.jpg' );
 LoaderHelper.loadTexture( 'engineTexture', 'images/water.jpg' ); 
 
 // SHIP GO BRR.. THIS USED TO WORK BUT STOPPED  ¯\_(ツ)_/¯ 
-// LoaderHelper.loadGeometry( 'shipGeometry', 'models/SpaceFighter03.obj' ); 
+// LoaderHelper.loadGeometry( 'shipGeometry', 'images/SpaceFighter03.obj' ); 
