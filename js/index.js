@@ -185,7 +185,7 @@ export class App {
       box.position.z += 0.05; // Move box towards the camera
 
       // Check if the box has passed the camera
-      if (box.position.z > 0) {
+      if (box.position.z > 2.5) {
         // Reset the box to a far Z position with random X and Y
         box.position.z = -10; // Reset to far Z
         box.position.x = Math.random() * 2 - 1; // Randomize X position
