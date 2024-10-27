@@ -120,16 +120,15 @@ export class App {
     
     // Function to update the positions of the boxes
     function updateBoxes() {
-      for (let i = objects.length - 1; i >= 0; i--) {
+      for (let i = 0; i < objects.length; i++) {
         const box = objects[i];
     
         // Move the box towards the camera
         box.position.z += 0.1; // Adjust the speed as needed
     
-        // Remove the box if it is too close to the camera
+        // Reset the box position if it is too close to the camera
         if (box.position.z > ScenesManager.camera.position.z) {
-          ScenesManager.scene.remove(box); // Remove from the scene
-          objects.splice(i, 1); // Remove from the objects array
+          box.position.z = farZ; // Move the box back to the starting position
         }
       }
     }
