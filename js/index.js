@@ -94,7 +94,7 @@ export class App {
     );
     
     // Specify the starting position for the boxes
-    const farZ = -10; // Starting Z position (far away from the camera)
+    const farZ = -1; // Starting Z position (far away from the camera)
     const boxCount = 5; // Number of boxes to create
     
     for (let i = 0; i < boxCount; i++) {
@@ -202,7 +202,7 @@ export class App {
    * Animate the scene and update hand controls.
    */
   animate() {
-    updateBoxes(); // Animate moving box
+    // updateBoxes(); // Animate moving box
     this.handControls?.animate(); // Animate hand controls if they exist
     ScenesManager.render(); // Render the scene
   }
