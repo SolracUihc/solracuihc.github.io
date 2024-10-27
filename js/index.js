@@ -92,26 +92,46 @@ export class App {
       geometry,
       new THREE.MeshNormalMaterial({ transparent: true })
     );
-
-    for (let i = 0; i < 5; i++) {
+    
+    // Specify the starting position for the boxes
+    const farZ = -10; // Starting Z position (far away from the camera)
+    const boxCount = 5; // Number of boxes to create
+    
+    for (let i = 0; i < boxCount; i++) {
       const mat = new THREE.MeshNormalMaterial({ transparent: true });
       const _object = object.clone(); // Clone the base object
       _object.material = mat; // Assign new material
-
-      // Randomize position and rotation of the object
-      _object.position.x = Math.random() * 2 - 1;
-      _object.position.y = Math.random() * 0.5 - 0.25;
-      _object.position.z = Math.random() * 2 - 1;
-
-      _object.rotation.x = Math.random() * 2 * Math.PI;
-      _object.rotation.y = Math.random() * 2 * Math.PI;
-      _object.rotation.z = Math.random() * 2 * Math.PI;
-
+    
+      // Randomize position for x and y, but set z to start at farZ
+      _object.position.x = Math.random() * 2 - 1; // Random x between -1 and 1
+      _object.position.y = Math.random() * 0.5 - 0.25; // Random y between -0.25 and 0.25
+      _object.position.z = farZ; // Set z to start at farZ
+    
+      _object.rotation.x = Math.random() * 2 * Math.PI; // Random rotation
+      _object.rotation.y = Math.random() * 2 * Math.PI; // Random rotation
+      _object.rotation.z = Math.random() * 2 * Math.PI; // Random rotation
+    
       _object.castShadow = true; // Enable shadow casting
       _object.receiveShadow = true; // Enable shadow reception
-
+    
       ScenesManager.scene.add(_object); // Add object to the scene
       objects.push(_object); // Store reference to the object
+    }
+    
+    // Function to update the positions of the boxes
+    function updateBoxes() {
+      for (let i = objects.length - 1; i >= 0; i--) {
+        const box = objects[i];
+    
+        // Move the box towards the camera
+        box.position.z += 0.1; // Adjust the speed as needed
+    
+        // Remove the box if it is too close to the camera
+        if (box.position.z > ScenesManager.camera.position.z) {
+          ScenesManager.scene.remove(box); // Remove from the scene
+          objects.splice(i, 1); // Remove from the objects array
+        }
+      }
     }
 
     // Create a cursor for hand control feedback
@@ -182,6 +202,8 @@ export class App {
    * Animate the scene and update hand controls.
    */
   animate() {
+    // Animate moving box
+    updateBoxes();
     this.handControls?.animate(); // Animate hand controls if they exist
     ScenesManager.render(); // Render the scene
   }
