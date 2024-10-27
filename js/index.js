@@ -173,7 +173,7 @@ export class App {
   }
 
   // Function to update the positions of the boxes
-  function updateBoxes() {
+  updateBoxes() {
     for (let i = 0; i < objects.length; i++) {
       box = objects[i];
     
