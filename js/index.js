@@ -136,7 +136,7 @@ export class App {
       ScenesManager.renderer,
       ScenesManager.camera,
       ScenesManager.scene,
-      true // Set draggable to true
+      false // Set draggable to false // true // Set draggable to true
     );
 
     // Set up GUI parameters for toggling landmark visibility and cursor visibility
@@ -166,10 +166,7 @@ export class App {
 
     // Adjust cursor opacity based on collision
     this.handControls.addEventListener("collision", (event) => {
-      // cursorMat.opacity = event.state === "on" ? 0.4 : 1; // Adjust cursor opacity based on collision
-      if (event.state === "on" || cursorMat.opacity == 0.4) {
-        cursorMat.opacity = 0.4; // Maintain box opacity after collision
-      }
+      cursorMat.opacity = event.state === "on" ? 0.4 : 1; // Adjust cursor opacity based on collision
     });
 
     // Set up resize event listener for responsive design
