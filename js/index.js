@@ -172,6 +172,21 @@ export class App {
 
   }
 
+  // Function to update the positions of the boxes
+  function updateBoxes() {
+    for (let i = 0; i < objects.length; i++) {
+      box = objects[i];
+    
+      // Move the box towards the camera
+      box.position.z += 0.1; // Adjust the speed as needed
+    
+      // Reset the box position if it is too close to the camera
+      if (box.position.z > 1) {
+        box.position.z = farZ; // Move the box back to the starting position
+      }
+    }
+  }
+
   /**
    * Handle window resize events to adjust camera and renderer.
    */
@@ -186,7 +201,7 @@ export class App {
    * Animate the scene and update hand controls.
    */
   animate() {
-    // updateBoxes(); // Animate moving box
+    updateBoxes(); // Animate moving box
     this.handControls?.animate(); // Animate hand controls if they exist
     ScenesManager.render(); // Render the scene
   }
