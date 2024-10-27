@@ -127,7 +127,7 @@ export class App {
         box.position.z += 0.1; // Adjust the speed as needed
     
         // Reset the box position if it is too close to the camera
-        if (box.position.z > ScenesManager.camera.position.z) {
+        if (box.position.z > 1) {
           box.position.z = farZ; // Move the box back to the starting position
         }
       }
