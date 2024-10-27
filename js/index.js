@@ -121,7 +121,7 @@ export class App {
     // Function to update the positions of the boxes
     function updateBoxes() {
       for (let i = 0; i < objects.length; i++) {
-        const box = objects[i];
+        box = objects[i];
     
         // Move the box towards the camera
         box.position.z += 0.1; // Adjust the speed as needed
