@@ -202,8 +202,7 @@ export class App {
    * Animate the scene and update hand controls.
    */
   animate() {
-    // Animate moving box
-    updateBoxes();
+    updateBoxes(); // Animate moving box
     this.handControls?.animate(); // Animate hand controls if they exist
     ScenesManager.render(); // Render the scene
   }
