@@ -1,6 +1,5 @@
 import * as THREE from "https://esm.sh/three";
 import { Pane } from "https://esm.sh/tweakpane";
-import { HandControls } from "./HandControls.js";
 import { MediaPipeHands } from "./MediaPipeHands.js";
 import { ScenesManager } from "./ScenesManager.js";
 
@@ -136,7 +135,7 @@ export class App {
       ScenesManager.renderer,
       ScenesManager.camera,
       ScenesManager.scene,
-      true // Set draggable to true
+      false // Set draggable to false
     );
 
     // Set up GUI parameters for toggling landmark visibility and cursor visibility
@@ -155,16 +154,16 @@ export class App {
       cursor.visible = ev.value; // Update cursor visibility based on GUI toggle
     });
 
-    // Add event listeners for hand control interactions
-    this.handControls.addEventListener("drag_start", (event) => {
-      event.object.material.opacity = 0.4; // Change opacity on drag start
-    });
-    this.handControls.addEventListener("drag_end", (event) => {
-      if (event.object) event.object.material.opacity = 1; // Reset opacity on drag end
-      event.callback(); // Execute callback after drag ends
-    });
+    // Remove dragging feature
+    // this.handControls.addEventListener("drag_start", (event) => { ... });
+    // this.handControls.addEventListener("drag_end", (event) => { ... });
+
+    // Adjust cursor opacity based on collision
     this.handControls.addEventListener("collision", (event) => {
       cursorMat.opacity = event.state === "on" ? 0.4 : 1; // Adjust cursor opacity based on collision
+      if (event.state === "on") {
+        event.object.material.opacity = 0.4; // Maintain box opacity after collision
+      }
     });
 
     // Set up resize event listener for responsive design
@@ -187,6 +186,7 @@ export class App {
         box.position.z = -10; // Reset to far Z
         box.position.x = Math.random() * 2 - 1; // Randomize X position
         box.position.y = Math.random() * 0.5 - 0.25; // Randomize Y position
+        box.material.opacity = 1; // Reset opacity when moved back to far Z
       }
     });
 
