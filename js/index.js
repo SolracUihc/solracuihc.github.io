@@ -163,10 +163,12 @@ export class App {
     //   if (event.object) event.object.material.opacity = 1; // Reset opacity on drag end
     //   event.callback(); // Execute callback after drag ends
     // });
+
+    // Adjust cursor opacity based on collision
     this.handControls.addEventListener("collision", (event) => {
-      cursorMat.opacity = event.state === "on" ? 0.4 : 1; // Adjust cursor opacity based on collision
-      if (event.state === "on") {
-        event.object.material.opacity = 0.4; // Maintain box opacity after collision
+      // cursorMat.opacity = event.state === "on" ? 0.4 : 1; // Adjust cursor opacity based on collision
+      if (event.state === "on" || cursorMat.opacity == 0.4) {
+        cursorMat.opacity = 0.4; // Maintain box opacity after collision
       }
     });
 
