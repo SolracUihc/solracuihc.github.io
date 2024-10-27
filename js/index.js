@@ -124,7 +124,7 @@ export class App {
       cursorMat
     );
     ScenesManager.scene.add(cursor); // Add cursor to the scene
-
+    
     // Initialize hand controls with the cursor and objects
     this.handControls = new HandControls(
       cursor,
@@ -134,15 +134,23 @@ export class App {
       ScenesManager.scene,
       true // Set draggable to true
     );
-
-    // Set up GUI parameters for toggling landmark visibility
+    
+    // Set up GUI parameters for toggling landmark visibility and cursor visibility
     const PARAMS = {
       showLandmark: false,
+      showCursor: true, // New parameter to control cursor visibility
     };
+    
+    // Binding for toggling landmark visibility
     this.pane.addBinding(PARAMS, "showLandmark").on("change", (ev) => {
       this.handControls.show3DLandmark(ev.value); // Update landmark visibility
     });
-
+    
+    // Binding for toggling cursor visibility
+    this.pane.addBinding(PARAMS, "showCursor").on("change", (ev) => {
+      cursor.visible = ev.value; // Update cursor visibility based on GUI toggle
+    });
+    
     // Add event listeners for hand control interactions
     this.handControls.addEventListener("drag_start", (event) => {
       event.object.material.opacity = 0.4; // Change opacity on drag start
@@ -154,9 +162,10 @@ export class App {
     this.handControls.addEventListener("collision", (event) => {
       cursorMat.opacity = event.state === "on" ? 0.4 : 1; // Adjust cursor opacity based on collision
     });
-
+    
     // Set up resize event listener for responsive design
     window.addEventListener("resize", this.onWindowResize.bind(this), false);
+
   }
 
   /**
