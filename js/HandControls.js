@@ -115,6 +115,8 @@ export class HandControls extends THREE.EventDispatcher {
   update(landmarks) {
     if (landmarks.multiHandLandmarks.length === 1) {
       if (this.handsObj) {
+        const scaleFactor = this.calculateScaleFactor(this.gestureCompute.depthFrom.z); // Adjust based on Z depth
+
         // Update hand landmark positions based on detected coordinates
         for (let l = 0; l < 21; l++) {
           this.handsObj.children[l].position.x =
@@ -123,6 +125,9 @@ export class HandControls extends THREE.EventDispatcher {
             -landmarks.multiHandLandmarks[0][l].y + 0.5;
           this.handsObj.children[l].position.z =
             landmarks.multiHandLandmarks[0][l].z;
+
+          // Apply scaling based on distance
+          this.handsObj.children[l].scale.set(scaleFactor, scaleFactor, scaleFactor);
           this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
         }
       }
@@ -140,6 +145,12 @@ export class HandControls extends THREE.EventDispatcher {
       // Dispatch events based on gesture state
       this.handleGestureEvents();
     }
+  }
+
+  // Function to calculate scale factor based on depth
+  calculateScaleFactor(depth) {
+      // Invert the depth for scaling
+      return THREE.MathUtils.clamp(1 / (depth + 1), 0.1, 1); // Example scaling; adjust as needed
   }
 
   /**
@@ -189,7 +200,7 @@ export class HandControls extends THREE.EventDispatcher {
     // Calculate distance for depth movement
     const depthDistance = this.depthPointA.distanceTo(this.depthPointB);
     this.depthZ = THREE.MathUtils.clamp(
-      THREE.MathUtils.mapLinear(depthDistance, 0, 1000, -3, 5),
+      THREE.MathUtils.mapLinear(depthDistance, 0, 1000, 5, -3),
       -2,
       4
     );
@@ -198,8 +209,8 @@ export class HandControls extends THREE.EventDispatcher {
     this.target.position.set(
       this.gestureCompute.from.x,
       this.gestureCompute.from.y,
-      -this.depthZ
-      // this.depthZ
+      // -this.depthZ
+      this.depthZ
     );
   }
 
