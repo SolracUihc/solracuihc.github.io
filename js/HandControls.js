@@ -198,7 +198,8 @@ export class HandControls extends THREE.EventDispatcher {
     this.target.position.set(
       this.gestureCompute.from.x,
       this.gestureCompute.from.y,
-      -this.depthZ
+      // -this.depthZ
+      this.depthZ
     );
   }
 
