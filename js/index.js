@@ -97,6 +97,11 @@ export class App {
     const farZ = -10; // Starting Z position (far away from the camera)
     const boxCount = 5; // Number of boxes to create
 
+    /**
+     * ===========================================================
+     * ONLY FOR PRINTING CUBES, ETC (ENVIRONMENT)
+     * ===========================================================
+     */
     for (let i = 0; i < boxCount; i++) {
       const mat = new THREE.MeshNormalMaterial({ transparent: true });
       const _object = object.clone(); // Clone the base object

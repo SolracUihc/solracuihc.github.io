@@ -91,7 +91,7 @@ export class HandControls extends THREE.EventDispatcher {
    */
   createHand() {
     // Create a material for hand spheres
-    this.sphereMat = new THREE.MeshNormalMaterial({
+    this.sphereMat = new THREE.MeshBasicMaterial({
       transparent: true,
       opacity: this.showLandmark ? 1 : 0,
     });
@@ -116,23 +116,84 @@ export class HandControls extends THREE.EventDispatcher {
     if (landmarks.multiHandLandmarks.length === 1) {
       if (this.handsObj) {
         // Update hand landmark positions based on detected coordinates
+        /***
+         * =========================================
+         * The z axis is only for reference for now
+         * Goal: Adjust the z axis (and scale x, y) 
+         * according to the calculated estimated 
+         * distance of hand to camera
+         * =========================================
+         */
+        const isMobile = window.innerWidth < window.innerHeight;
+        let clip_dist = isMobile ? 4 : 2; // THIS PART RELATES TO ScenesManager.js
+        // The clip distance of the camera.
+        // let wrist_depth = 1;//Math.abs(landmarks.multiHandLandmarks[0][0].z);
+        // wrist_depth: closer to screen -> larger value (1e-6 ~ 1e-7)
+        // div 1E-6 -> 1 ~ 0
+
+        /**
+         * ======================
+         *   DEPTH OF THE HAND
+         * ======================
+         */
+        // Calculate distances for wrist depth
+        const wrist = landmarks.multiHandLandmarks[0][0]; // Wrist (node 0)
+        const pointsToCheck = [5, 9, 3, 17]; // Nodes to compare with
+        const thumbIndex = 2; // Node 2 (thumb)
+        
+        let distances = pointsToCheck.map(index => {
+          const point = landmarks.multiHandLandmarks[0][index];
+          return Math.sqrt(Math.pow(wrist.x - point.x, 2) + Math.pow(wrist.y - point.y, 2) + Math.pow(wrist.z - point.z, 2));
+        });
+
+        // Calculate distance between landmark 2 (thumb) and 17
+        const thumbToPoint17 = Math.sqrt(Math.pow(wrist.x - landmarks.multiHandLandmarks[0][thumbIndex].x, 2) + 
+                                          Math.pow(wrist.y - landmarks.multiHandLandmarks[0][thumbIndex].y, 2) + 
+                                          Math.pow(wrist.z - landmarks.multiHandLandmarks[0][thumbIndex].z, 2));
+
+        // distances.push(thumbToPoint17); // Add the thumb to point 17 distance
+
+        // Calculate the mean distance
+        let palm_size_2d = distances.reduce((acc, val) => acc + val, 0) / distances.length;
+        // console.log(palm_size_2d, thumbToPoint17, Math.max(palm_size_2d, thumbToPoint17*2));
+        palm_size_2d = Math.max(palm_size_2d, thumbToPoint17*2);
+
+        /**
+         * ===============================
+         *   POSITION AND COLOR OF HAND 
+         * ===============================
+         */
+
         for (let l = 0; l < 21; l++) {
-          this.handsObj.children[l].position.x =
-            -landmarks.multiHandLandmarks[0][l].x + 0.5;
-          this.handsObj.children[l].position.y =
-            -landmarks.multiHandLandmarks[0][l].y + 0.5;
-          this.handsObj.children[l].position.z =
-            -landmarks.multiHandLandmarks[0][l].z;
+          let xpos = -landmarks.multiHandLandmarks[0][l].x + 0.5;
+          let ypos = -landmarks.multiHandLandmarks[0][l].y + 0.5;
+          let depth = landmarks.multiHandLandmarks[0][l].z;
+          
+          // console.log(palm_size_2d);
+          // normalizes the hand size (visually)
+          // palm_size: small -> far away from camera, large -> close to camera
+          // always positive.
+
+          let depth2 = this.palmSizeToDepth(palm_size_2d);
+
+          this.handsObj.children[l].position.x = xpos/depth2//(wrist_depth/1E-6)*.2;
+          this.handsObj.children[l].position.y = ypos/depth2//(wrist_depth/1E-6)*.2;
+          this.handsObj.children[l].position.z = depth-(depth2-clip_dist)/2;
           this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
+          console.log(this.handsObj.children[l].position.z);
+          // Set color based on depth
+          // -10 ~ 1
+          this.handsObj.children[l].material.color.set(this.depthToColor(this.handsObj.children[l].position.z));
         }
       }
 
-      // Calculate gesture points
+      // // Calculate gesture points
       this.calculateGestures(landmarks.multiHandLandmarks[0]);
 
       // Check for closed fist gesture
       const pointsDist = this.gestureCompute.from.distanceTo(this.gestureCompute.to);
       this.closedFist = pointsDist < 0.35; // Threshold for closed fist
+      // console.log(this.closedFist);
 
       // Update target position based on gesture
       this.updateTargetPosition();
@@ -140,6 +201,23 @@ export class HandControls extends THREE.EventDispatcher {
       // Dispatch events based on gesture state
       this.handleGestureEvents();
     }
+  }
+
+  /**
+   * Calculate the color corresponding to the depth
+   */
+  depthToColor(depth) {
+    const normalizedDepth = THREE.MathUtils.clamp((depth+12)/16, 0, 1); // Adjust this based on your scene scale
+    const color = new THREE.Color();
+    color.setRGB(1 - normalizedDepth, 0, normalizedDepth); // Blue to red gradient
+    return color;
+  }
+
+  /**
+   * Calibration function
+   */
+  palmSizeToDepth(palm_size_2d) {
+    return palm_size_2d*10;
   }
 
   /**
@@ -175,6 +253,7 @@ export class HandControls extends THREE.EventDispatcher {
 
   /**
    * Update the target position based on gesture calculations.
+   * [THE BALL / SPHERE]
    */
   updateTargetPosition() {
     // Convert landmark positions to screen depth
