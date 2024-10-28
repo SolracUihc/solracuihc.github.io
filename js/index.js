@@ -86,32 +86,36 @@ export class App {
     ScenesManager.scene.add(helper); // Add grid helper to the scene
 
     // Create and position random objects in the scene
-    const objects = [];
+    this.objects = []; // Store references to the boxes
     const geometry = new THREE.BoxGeometry(0.15, 0.15, 0.15); // Box geometry for objects
     const object = new THREE.Mesh(
       geometry,
       new THREE.MeshNormalMaterial({ transparent: true })
     );
 
-    for (let i = 0; i < 5; i++) {
+    // Specify the starting position for the boxes
+    const farZ = -10; // Starting Z position (far away from the camera)
+    const boxCount = 5; // Number of boxes to create
+
+    for (let i = 0; i < boxCount; i++) {
       const mat = new THREE.MeshNormalMaterial({ transparent: true });
       const _object = object.clone(); // Clone the base object
       _object.material = mat; // Assign new material
 
-      // Randomize position and rotation of the object
-      _object.position.x = Math.random() * 2 - 1;
-      _object.position.y = Math.random() * 0.5 - 0.25;
-      _object.position.z = Math.random() * 2 - 1;
+      // Randomize position for x and y, set z to start at farZ
+      _object.position.x = Math.random() * 2 - 1; // Random x between -1 and 1
+      _object.position.y = Math.random() * 0.5 - 0.25; // Random y between -0.25 and 0.25
+      _object.position.z = farZ; // Set z to start at farZ
 
-      _object.rotation.x = Math.random() * 2 * Math.PI;
-      _object.rotation.y = Math.random() * 2 * Math.PI;
-      _object.rotation.z = Math.random() * 2 * Math.PI;
+      _object.rotation.x = Math.random() * 2 * Math.PI; // Random rotation
+      _object.rotation.y = Math.random() * 2 * Math.PI; // Random rotation
+      _object.rotation.z = Math.random() * 2 * Math.PI; // Random rotation
 
       _object.castShadow = true; // Enable shadow casting
       _object.receiveShadow = true; // Enable shadow reception
 
       ScenesManager.scene.add(_object); // Add object to the scene
-      objects.push(_object); // Store reference to the object
+      this.objects.push(_object); // Store reference to the object
     }
 
     // Create a cursor for hand control feedback
@@ -124,48 +128,72 @@ export class App {
       cursorMat
     );
     ScenesManager.scene.add(cursor); // Add cursor to the scene
-    
+
     // Initialize hand controls with the cursor and objects
     this.handControls = new HandControls(
       cursor,
-      objects,
+      this.objects,
       ScenesManager.renderer,
       ScenesManager.camera,
       ScenesManager.scene,
-      true // Set draggable to true
+      false // true // Set draggable to true
     );
-    
+
     // Set up GUI parameters for toggling landmark visibility and cursor visibility
     const PARAMS = {
       showLandmark: false,
       showCursor: true, // New parameter to control cursor visibility
     };
-    
+
     // Binding for toggling landmark visibility
     this.pane.addBinding(PARAMS, "showLandmark").on("change", (ev) => {
       this.handControls.show3DLandmark(ev.value); // Update landmark visibility
     });
-    
+
     // Binding for toggling cursor visibility
     this.pane.addBinding(PARAMS, "showCursor").on("change", (ev) => {
       cursor.visible = ev.value; // Update cursor visibility based on GUI toggle
     });
-    
+
     // Add event listeners for hand control interactions
-    this.handControls.addEventListener("drag_start", (event) => {
-      event.object.material.opacity = 0.4; // Change opacity on drag start
-    });
-    this.handControls.addEventListener("drag_end", (event) => {
-      if (event.object) event.object.material.opacity = 1; // Reset opacity on drag end
-      event.callback(); // Execute callback after drag ends
-    });
+    //this.handControls.addEventListener("drag_start", (event) => {
+      //event.object.material.opacity = 0.4; // Change opacity on drag start 
+    //});
+    //this.handControls.addEventListener("drag_end", (event) => {
+      //if (event.object) event.object.material.opacity = 1; // Reset opacity on drag end
+      //event.callback(); // Execute callback after drag ends
+    //});
+
+    // Adjust cursor opacity based on collision
     this.handControls.addEventListener("collision", (event) => {
       cursorMat.opacity = event.state === "on" ? 0.4 : 1; // Adjust cursor opacity based on collision
     });
-    
+
     // Set up resize event listener for responsive design
     window.addEventListener("resize", this.onWindowResize.bind(this), false);
+  }
 
+  /**
+   * Animate the scene and update hand controls.
+   */
+  animate() {
+    this.handControls?.animate(); // Animate hand controls if they exist
+
+    // Move boxes towards the camera
+    this.objects.forEach((box) => {
+      box.position.z += 0.05; // Move box towards the camera
+
+      // Check if the box has passed the camera
+      if (box.position.z > 2.5) {
+        // Reset the box to a far Z position with random X and Y
+        box.position.z = -10; // Reset to far Z
+        box.position.x = Math.random() * 2 - 1; // Randomize X position
+        box.position.y = Math.random() * 0.5 - 0.25; // Randomize Y position
+        box.material.opacity = 1; // Reset opacity when moved back to far Z
+      }
+    });
+
+    ScenesManager.render(); // Render the scene
   }
 
   /**
@@ -176,14 +204,6 @@ export class App {
     ScenesManager.camera.updateProjectionMatrix(); // Update projection matrix
 
     ScenesManager.renderer.setSize(window.innerWidth, window.innerHeight); // Resize renderer
-  }
-
-  /**
-   * Animate the scene and update hand controls.
-   */
-  animate() {
-    this.handControls?.animate(); // Animate hand controls if they exist
-    ScenesManager.render(); // Render the scene
   }
 }
 
