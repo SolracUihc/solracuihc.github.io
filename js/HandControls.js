@@ -122,7 +122,7 @@ export class HandControls extends THREE.EventDispatcher {
           this.handsObj.children[l].position.y =
             -landmarks.multiHandLandmarks[0][l].y + 0.5;
           this.handsObj.children[l].position.z =
-            -landmarks.multiHandLandmarks[0][l].z;
+            landmarks.multiHandLandmarks[0][l].z;
           this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
         }
       }
@@ -151,25 +151,25 @@ export class HandControls extends THREE.EventDispatcher {
     this.gestureCompute.depthFrom.set(
       -landmarks[0].x + 0.5,
       -landmarks[0].y + 0.5,
-      -landmarks[0].z
+      landmarks[0].z
     ).multiplyScalar(4);
 
     this.gestureCompute.depthTo.set(
       -landmarks[10].x + 0.5,
       -landmarks[10].y + 0.5,
-      -landmarks[10].z
+      landmarks[10].z
     ).multiplyScalar(4);
 
     this.gestureCompute.from.set(
       -landmarks[9].x + 0.5,
       -landmarks[9].y + 0.5,
-      -landmarks[9].z
+      landmarks[9].z
     ).multiplyScalar(4);
 
     this.gestureCompute.to.set(
       -landmarks[12].x + 0.5,
       -landmarks[12].y + 0.5,
-      -landmarks[12].z
+      landmarks[12].z
     ).multiplyScalar(4);
   }
 
