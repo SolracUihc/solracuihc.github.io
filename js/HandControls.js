@@ -119,11 +119,11 @@ export class HandControls extends THREE.EventDispatcher {
         // Update hand landmark positions based on detected coordinates
         for (let l = 0; l < 21; l++) {
           this.handsObj.children[l].position.x =
-            - landmarks.multiHandLandmarks[0][l].x + 0.5;
+            - 1/landmarks.multiHandLandmarks[0][l].x + 0.5;
           this.handsObj.children[l].position.y =
-            - landmarks.multiHandLandmarks[0][l].y + 0.5;
+            - 1/landmarks.multiHandLandmarks[0][l].y + 0.5;
           this.handsObj.children[l].position.z =
-            landmarks.multiHandLandmarks[0][l].z;
+            1/landmarks.multiHandLandmarks[0][l].z;
 
           // Apply scaling based on distance
           this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
@@ -153,27 +153,27 @@ export class HandControls extends THREE.EventDispatcher {
   calculateGestures(landmarks) {
     // Calculate positions for gesture control
     this.gestureCompute.depthFrom.set(
-      -landmarks[0].x + 0.5,
-      -landmarks[0].y + 0.5,
-      landmarks[0].z
+      -1/landmarks[0].x + 0.5,
+      -1/landmarks[0].y + 0.5,
+      1/landmarks[0].z
     ).multiplyScalar(4);
 
     this.gestureCompute.depthTo.set(
-      -landmarks[10].x + 0.5,
-      -landmarks[10].y + 0.5,
-      landmarks[10].z
+      -1/landmarks[10].x + 0.5,
+      -1/landmarks[10].y + 0.5,
+      1/landmarks[10].z
     ).multiplyScalar(4);
 
     this.gestureCompute.from.set(
-      -landmarks[9].x + 0.5,
-      -landmarks[9].y + 0.5,
-      landmarks[9].z
+      -1/landmarks[9].x + 0.5,
+      -1/landmarks[9].y + 0.5,
+      1/landmarks[9].z
     ).multiplyScalar(4);
 
     this.gestureCompute.to.set(
-      -landmarks[12].x + 0.5,
-      -landmarks[12].y + 0.5,
-      landmarks[12].z
+      -1/landmarks[12].x + 0.5,
+      -1/landmarks[12].y + 0.5,
+      1/landmarks[12].z
     ).multiplyScalar(4);
   }
 
