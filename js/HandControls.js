@@ -138,7 +138,7 @@ update(landmarks) {
       varianceX /= numLandmarks;
       varianceY /= numLandmarks;
       varianceZ /= numLandmarks;
-      varianceMean = (varianceX+varianceY+varianceZ) * 10
+      varianceMean = (varianceX+varianceY+varianceZ) * 32
 
       // Update hand landmark positions based on detected coordinates
       for (let l = 0; l < numLandmarks; l++) {
