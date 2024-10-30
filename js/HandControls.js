@@ -147,7 +147,7 @@ update(landmarks) {
         this.handsObj.children[l].position.y =
           (-landmarks.multiHandLandmarks[0][l].y + 0.5) / varianceMean;
         this.handsObj.children[l].position.z =
-          landmarks.multiHandLandmarks[0][l].z / varianceZ / 64; // Assuming you want to apply variance to z as well
+          landmarks.multiHandLandmarks[0][l].z; // Assuming you want to apply variance to z as well
         // Apply scaling based on distance
         this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
       }
