@@ -129,7 +129,7 @@ update(landmarks) {
       meanZ /= numLandmarks;
 
       // Calculate the variance of the coordinates
-      let varianceX = 0, varianceY = 0, varianceZ = 0;
+      let varianceX = 0, varianceY = 0, varianceZ = 0, varianceMean = 0;
       for (let l = 0; l < numLandmarks; l++) {
         varianceX += Math.pow(landmarks.multiHandLandmarks[0][l].x - meanX, 2);
         varianceY += Math.pow(landmarks.multiHandLandmarks[0][l].y - meanY, 2);
@@ -138,15 +138,16 @@ update(landmarks) {
       varianceX /= numLandmarks;
       varianceY /= numLandmarks;
       varianceZ /= numLandmarks;
+      varianceMean = (varianceX+varianceY+varianceZ) * 10
 
       // Update hand landmark positions based on detected coordinates
       for (let l = 0; l < numLandmarks; l++) {
         this.handsObj.children[l].position.x =
-          (-landmarks.multiHandLandmarks[0][l].x + 0.5) / varianceX;
+          (-landmarks.multiHandLandmarks[0][l].x + 0.5) / varianceMean;
         this.handsObj.children[l].position.y =
-          (-landmarks.multiHandLandmarks[0][l].y + 0.5) / varianceY;
+          (-landmarks.multiHandLandmarks[0][l].y + 0.5) / varianceMean;
         this.handsObj.children[l].position.z =
-          landmarks.multiHandLandmarks[0][l].z / varianceZ; // Assuming you want to apply variance to z as well
+          landmarks.multiHandLandmarks[0][l].z / varianceMean; // Assuming you want to apply variance to z as well
         // Apply scaling based on distance
         this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
       }
