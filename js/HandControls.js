@@ -108,40 +108,64 @@ export class HandControls extends THREE.EventDispatcher {
     }
   }
 
-  /**
-   * Update the hand positions based on detected landmarks.
-   * @param {Object} landmarks - The detected hand landmarks.
-   */
-  update(landmarks) {
-    if (landmarks.multiHandLandmarks.length === 1) {
-      if (this.handsObj) {
-        // Update hand landmark positions based on detected coordinates
-        for (let l = 0; l < 21; l++) {
-          this.handsObj.children[l].position.x =
-            -landmarks.multiHandLandmarks[0][l].x + 0.5;
-          this.handsObj.children[l].position.y =
-            -landmarks.multiHandLandmarks[0][l].y + 0.5;
-          this.handsObj.children[l].position.z =
-            landmarks.multiHandLandmarks[0][l].z;
-          // Apply scaling based on distance
-          this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
-        }
+/**
+ * Update the hand positions based on detected landmarks.
+ * @param {Object} landmarks - The detected hand landmarks.
+ */
+update(landmarks) {
+  if (landmarks.multiHandLandmarks.length === 1) {
+    if (this.handsObj) {
+      const numLandmarks = 21;
+      let meanX = 0, meanY = 0, meanZ = 0;
+
+      // Calculate the mean of the coordinates
+      for (let l = 0; l < numLandmarks; l++) {
+        meanX += landmarks.multiHandLandmarks[0][l].x;
+        meanY += landmarks.multiHandLandmarks[0][l].y;
+        meanZ += landmarks.multiHandLandmarks[0][l].z;
       }
+      meanX /= numLandmarks;
+      meanY /= numLandmarks;
+      meanZ /= numLandmarks;
 
-      // Calculate gesture points
-      this.calculateGestures(landmarks.multiHandLandmarks[0]);
+      // Calculate the variance of the coordinates
+      let varianceX = 0, varianceY = 0, varianceZ = 0;
+      for (let l = 0; l < numLandmarks; l++) {
+        varianceX += Math.pow(landmarks.multiHandLandmarks[0][l].x - meanX, 2);
+        varianceY += Math.pow(landmarks.multiHandLandmarks[0][l].y - meanY, 2);
+        varianceZ += Math.pow(landmarks.multiHandLandmarks[0][l].z - meanZ, 2);
+      }
+      varianceX /= numLandmarks;
+      varianceY /= numLandmarks;
+      varianceZ /= numLandmarks;
 
-      // Check for closed fist gesture
-      const pointsDist = this.gestureCompute.from.distanceTo(this.gestureCompute.to);
-      this.closedFist = pointsDist < 0.35; // Threshold for closed fist
-
-      // Update target position based on gesture
-      this.updateTargetPosition();
-
-      // Dispatch events based on gesture state
-      this.handleGestureEvents();
+      // Update hand landmark positions based on detected coordinates
+      for (let l = 0; l < numLandmarks; l++) {
+        this.handsObj.children[l].position.x =
+          (-landmarks.multiHandLandmarks[0][l].x + 0.5) / varianceX;
+        this.handsObj.children[l].position.y =
+          (-landmarks.multiHandLandmarks[0][l].y + 0.5) / varianceY;
+        this.handsObj.children[l].position.z =
+          landmarks.multiHandLandmarks[0][l].z / varianceZ; // Assuming you want to apply variance to z as well
+        // Apply scaling based on distance
+        this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
+      }
     }
+
+    // Calculate gesture points
+    this.calculateGestures(landmarks.multiHandLandmarks[0]);
+
+    // Check for closed fist gesture
+    const pointsDist = this.gestureCompute.from.distanceTo(this.gestureCompute.to);
+    this.closedFist = pointsDist < 0.35; // Threshold for closed fist
+
+    // Update target position based on gesture
+    this.updateTargetPosition();
+
+    // Dispatch events based on gesture state
+    this.handleGestureEvents();
   }
+}
 
 
   /**
