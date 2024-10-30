@@ -116,7 +116,7 @@ update(landmarks) {
   if (landmarks.multiHandLandmarks.length === 1) {
     if (this.handsObj) {
       const numLandmarks = 21;
-      let meanX = 0, meanY = 0, meanZ = 0;
+      let meanX = 0, meanY = 0, meanZ = 0, XYZMean = 0;
 
       // Calculate the mean of the coordinates
       for (let l = 0; l < numLandmarks; l++) {
