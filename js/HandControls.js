@@ -116,7 +116,7 @@ update(landmarks) {
   if (landmarks.multiHandLandmarks.length === 1) {
     if (this.handsObj) {
       const numLandmarks = 21;
-      let meanX = 0, meanY = 0, meanZ = 0, XYZMean = 0;
+      let meanX = 0, meanY = 0, meanZ = 0, meanXYZ = 0;
 
       // Calculate the mean of the coordinates
       for (let l = 0; l < numLandmarks; l++) {
@@ -127,7 +127,7 @@ update(landmarks) {
       meanX /= numLandmarks;
       meanY /= numLandmarks;
       meanZ /= numLandmarks;
-      XYZMean = (meanX+meanY+meanZ) * 64
+      meanXYZ = (meanX+meanY+meanZ) * 64
 
       // Calculate the variance of the coordinates
       let varianceX = 0, varianceY = 0, varianceZ = 0, varianceMean = 0;
@@ -144,11 +144,11 @@ update(landmarks) {
       // Update hand landmark positions based on detected coordinates
       for (let l = 0; l < numLandmarks; l++) {
         this.handsObj.children[l].position.x =
-          (-landmarks.multiHandLandmarks[0][l].x + 0.5) / XYZMean;
+          (-landmarks.multiHandLandmarks[0][l].x + 0.5) / meanXYZ;
         this.handsObj.children[l].position.y =
-          (-landmarks.multiHandLandmarks[0][l].y + 0.5) / XYZMean;
+          (-landmarks.multiHandLandmarks[0][l].y + 0.5) / meanXYZ;
         this.handsObj.children[l].position.z =
-          landmarks.multiHandLandmarks[0][l].z / XYZMean; // Assuming you want to apply variance to z as well
+          landmarks.multiHandLandmarks[0][l].z / meanXYZ; // Assuming you want to apply variance to z as well
         // Apply scaling based on distance
         this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
       }
