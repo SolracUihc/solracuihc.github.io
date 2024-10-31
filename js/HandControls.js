@@ -108,68 +108,68 @@ export class HandControls extends THREE.EventDispatcher {
     }
   }
 
-/**
- * Update the hand positions based on detected landmarks.
- * @param {Object} landmarks - The detected hand landmarks.
- */
-update(landmarks) {
-  if (landmarks.multiHandLandmarks.length === 1) {
-    if (this.handsObj) {
-      const numLandmarks = 21;
-      let maxDistance = 0;
-
-      // Calculate the maximum distance between specified pairs of landmarks
-      const pairs = [[0, 2], [0, 5], [0, 9], [0, 13], [0, 17]];
-      for (const [index1, index2] of pairs) {
-        const x1 = landmarks.multiHandLandmarks[0][index1].x;
-        const y1 = landmarks.multiHandLandmarks[0][index1].y;
-        const z1 = landmarks.multiHandLandmarks[0][index1].z;
-        const x2 = landmarks.multiHandLandmarks[0][index2].x;
-        const y2 = landmarks.multiHandLandmarks[0][index2].y;
-        const z2 = landmarks.multiHandLandmarks[0][index2].z;
-
-        // Calculate the distance between the two landmarks
-        const distance = Math.sqrt(
-          Math.pow(x2 - x1, 2) +
-          Math.pow(y2 - y1, 2) +
-          Math.pow(z2 - z1, 2)
-        );
-
-        // Update maxDistance if the current distance is greater
-        maxDistance = Math.max(maxDistance, distance);
-      }
-
-      // Use maxDistance as the palm size for position updates
-      const palmSize = maxDistance*16 || 0.1; // Fallback to a default value if no distance is calculated
-
-      // Update hand landmark positions based on detected coordinates
-      for (let l = 0; l < numLandmarks; l++) {
-        this.handsObj.children[l].position.x =
-          (-landmarks.multiHandLandmarks[0][l].x + 0.5) / palmSize;
-        this.handsObj.children[l].position.y =
-          (-landmarks.multiHandLandmarks[0][l].y + 0.5) / palmSize;
-        this.handsObj.children[l].position.z =
-          landmarks.multiHandLandmarks[0][l].z * palmSize; // Scale z based on palm size
-        // Apply scaling based on distance
-        this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
+    /**
+     * Update the hand positions based on detected landmarks.
+     * @param {Object} landmarks - The detected hand landmarks.
+     */
+    update(landmarks) {
+      if (landmarks.multiHandLandmarks.length === 1) {
+        if (this.handsObj) {
+          const numLandmarks = 21;
+          let maxDistance = 0;
+    
+          // Calculate the maximum distance between specified pairs of landmarks
+          const pairs = [[0, 2], [0, 5], [0, 9], [0, 13], [0, 17]];
+          for (const [index1, index2] of pairs) {
+            const x1 = landmarks.multiHandLandmarks[0][index1].x;
+            const y1 = landmarks.multiHandLandmarks[0][index1].y;
+            const z1 = landmarks.multiHandLandmarks[0][index1].z;
+            const x2 = landmarks.multiHandLandmarks[0][index2].x;
+            const y2 = landmarks.multiHandLandmarks[0][index2].y;
+            const z2 = landmarks.multiHandLandmarks[0][index2].z;
+    
+            // Calculate the distance between the two landmarks
+            const distance = Math.sqrt(
+              Math.pow(x2 - x1, 2) +
+              Math.pow(y2 - y1, 2) +
+              Math.pow(z2 - z1, 2)
+            );
+    
+            // Update maxDistance if the current distance is greater
+            maxDistance = Math.max(maxDistance, distance);
+          }
+    
+          // Use maxDistance as the palm size for position updates
+          const palmSize = maxDistance*16 || 0.1; // Fallback to a default value if no distance is calculated
+    
+          // Update hand landmark positions based on detected coordinates
+          for (let l = 0; l < numLandmarks; l++) {
+            this.handsObj.children[l].position.x =
+              (-landmarks.multiHandLandmarks[0][l].x + 0.5) / palmSize;
+            this.handsObj.children[l].position.y =
+              (-landmarks.multiHandLandmarks[0][l].y + 0.5) / palmSize;
+            this.handsObj.children[l].position.z =
+              landmarks.multiHandLandmarks[0][l].z * palmSize; // Scale z based on palm size
+            // Apply scaling based on distance
+            this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
+          }
+        }
+    
+        // Calculate gesture points
+        this.calculateGestures(landmarks.multiHandLandmarks[0]);
+    
+        // Check for closed fist gesture
+        const pointsDist = this.gestureCompute.from.distanceTo(this.gestureCompute.to);
+        this.closedFist = pointsDist < 0.35; // Threshold for closed fist
+    
+        // Update target position based on gesture
+        this.updateTargetPosition();
+    
+        // Dispatch events based on gesture state
+        this.handleGestureEvents();
       }
     }
-
-    // Calculate gesture points
-    this.calculateGestures(landmarks.multiHandLandmarks[0]);
-
-    // Check for closed fist gesture
-    const pointsDist = this.gestureCompute.from.distanceTo(this.gestureCompute.to);
-    this.closedFist = pointsDist < 0.35; // Threshold for closed fist
-
-    // Update target position based on gesture
-    this.updateTargetPosition();
-
-    // Dispatch events based on gesture state
-    this.handleGestureEvents();
-  }
-}
-
+    
 
   /**
    * Calculate gesture positions based on landmarks.
