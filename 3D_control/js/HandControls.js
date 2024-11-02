@@ -118,9 +118,9 @@ export class HandControls extends THREE.EventDispatcher {
         // Update hand landmark positions based on detected coordinates
         for (let l = 0; l < 21; l++) {
           this.handsObj.children[l].position.x =
-            -landmarks.multiHandLandmarks[0][l].x + 0.5;
+            landmarks.multiHandLandmarks[0][l].x + 0.5;
           this.handsObj.children[l].position.y =
-            -landmarks.multiHandLandmarks[0][l].y + 0.5;
+            landmarks.multiHandLandmarks[0][l].y + 0.5;
           this.handsObj.children[l].position.z =
             landmarks.multiHandLandmarks[0][l].z;
           this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
