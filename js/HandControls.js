@@ -8,6 +8,9 @@ export class HandControls extends THREE.EventDispatcher {
   constructor(target, objects, renderer, camera, scene, isDraggable = false) {
     super();
 
+    this.landmarkVisible = true;
+    this.landmarkTheoreticallyVisible = true;
+
     // Initial setup
     this.target = target; // The cursor represented as an Object3D
     this.objects = objects; // Array of objects that can be dragged
@@ -48,6 +51,11 @@ export class HandControls extends THREE.EventDispatcher {
    * @param {boolean} value - If true, make the landmark visible.
    */
   show3DLandmark(value) {
+    this.landmarkVisible = value;
+    this.show3DLandmark_(value);
+  }
+
+  show3DLandmark_(value) {
     if (!this.handsObj) {
       this.handsObj = new THREE.Object3D(); // Create a new 3D object for hands
       this.scene.add(this.handsObj); // Add it to the scene
@@ -55,7 +63,9 @@ export class HandControls extends THREE.EventDispatcher {
     }
 
     // Set the opacity of the hand landmark
+    this.landmarkTheoreticallyVisible = value;
     this.sphereMat.opacity = value ? 1 : 0;
+    this.target.visible = value;
   }
 
   /**
@@ -113,7 +123,21 @@ export class HandControls extends THREE.EventDispatcher {
    * @param {Object} landmarks - The detected hand landmarks.
    */
   update(landmarks) {
-    if (landmarks.multiHandLandmarks.length === 1) {
+    var visibility = landmarks.multiHandLandmarks.length >= 1;
+    if (this.landmarkTheoreticallyVisible) {
+      this.handDisappearTime = Date.now();
+      this.landmarkTheoreticallyVisible = false;
+    }
+    if (visibility)
+      this.show3DLandmark_(visibility);
+    else if (Date.now()-this.handDisappearTime > 200)
+      this.show3DLandmark_(visibility);
+
+    const isMobile = window.innerWidth < window.innerHeight;
+    this.clip_dist = isMobile ? 4 : 2; // THIS PART RELATES TO ScenesManager.js
+    // The clip distance of the camera.
+
+    if (landmarks.multiHandLandmarks.length >= 1) {
       if (this.handsObj) {
         // Update hand landmark positions based on detected coordinates
         /***
@@ -124,9 +148,7 @@ export class HandControls extends THREE.EventDispatcher {
          * distance of hand to camera
          * =========================================
          */
-        const isMobile = window.innerWidth < window.innerHeight;
-        let clip_dist = isMobile ? 4 : 2; // THIS PART RELATES TO ScenesManager.js
-        // The clip distance of the camera.
+
         // let wrist_depth = 1;//Math.abs(landmarks.multiHandLandmarks[0][0].z);
         // wrist_depth: closer to screen -> larger value (1e-6 ~ 1e-7)
         // div 1E-6 -> 1 ~ 0
@@ -178,7 +200,7 @@ export class HandControls extends THREE.EventDispatcher {
 
           this.handsObj.children[l].position.x = xpos/depth2//(wrist_depth/1E-6)*.2;
           this.handsObj.children[l].position.y = ypos/depth2//(wrist_depth/1E-6)*.2;
-          this.handsObj.children[l].position.z = depth-(depth2-clip_dist)/2;
+          this.handsObj.children[l].position.z = depth-(depth2)/2;
           this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
           // console.log(this.handsObj.children[l].position.z);
           // Set color based on depth
@@ -257,27 +279,18 @@ export class HandControls extends THREE.EventDispatcher {
    */
   updateTargetPosition() {
     // Convert landmark positions to screen depth
-    this.refObjFrom.position.copy(this.gestureCompute.depthFrom);
-    const depthA = this.to2D(this.refObjFrom);
-    this.depthPointA.set(depthA.x, depthA.y);
-
-    this.refObjTo.position.copy(this.gestureCompute.depthTo);
-    const depthB = this.to2D(this.refObjTo);
-    this.depthPointB.set(depthB.x, depthB.y);
-
-    // Calculate distance for depth movement
-    const depthDistance = this.depthPointA.distanceTo(this.depthPointB);
-    this.depthZ = THREE.MathUtils.clamp(
-      THREE.MathUtils.mapLinear(depthDistance, 0, 1000, -3, 5),
-      -2,
-      4
-    );
-
-    // Set target position based on gestures
+    const indices = [0, 5, 9, 3, 17, 2]; // Indices of points to consider
+    let sumX = 0, sumY = 0, sumZ = 0;
+    indices.forEach(index => {
+      sumX += this.handsObj.children[index].position.x;
+      sumY += this.handsObj.children[index].position.y;
+      sumZ += this.handsObj.children[index].position.z;
+    });
+    const numPoints = indices.length;
     this.target.position.set(
-      this.gestureCompute.from.x,
-      this.gestureCompute.from.y,
-      -this.depthZ
+      sumX / numPoints,
+      sumY / numPoints,
+      sumZ / numPoints
     );
   }
 

@@ -1,6 +1,4 @@
-import * as THREE from "https://esm.sh/three";
-import { Pane } from "https://esm.sh/tweakpane";
-import { HandControls } from "./HandControls.js";
+
 import { MediaPipeHands } from "./MediaPipeHands.js";
 import { ScenesManager } from "./ScenesManager.js";
 import { GameController } from "./GameController.js";

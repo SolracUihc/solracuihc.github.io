@@ -98,19 +98,16 @@ export class GameController {
 
     async setup_cursor_feedbacks() {
         // Create a cursor for hand control feedback
-        this.cursorMat = new THREE.MeshNormalMaterial({
-            depthTest: false,
-            depthWrite: false,
-        });
-        const cursor = new THREE.Mesh(
+        this.cursorMat = new THREE.MeshNormalMaterial();
+        this.cursor = new THREE.Mesh(
             new THREE.SphereGeometry(0.1, 32, 16), // Sphere geometry for cursor
             this.cursorMat
         );
-        ScenesManager.scene.add(cursor); // Add cursor to the scene
+        ScenesManager.scene.add(this.cursor); // Add cursor to the scene
 
         // Initialize hand controls with the cursor and objects
         this.handControls = new HandControls(
-            cursor,
+            this.cursor,
             this.objects,
             ScenesManager.renderer,
             ScenesManager.camera,
@@ -129,7 +126,7 @@ export class GameController {
         const PARAMS = {
             showLandmark: true,
             showCursor: true, // New parameter to control cursor visibility
-            gameStart: false,
+            gameStart: false
         };
 
         // Binding for toggling landmark visibility
@@ -140,13 +137,23 @@ export class GameController {
 
         // Binding for toggling cursor visibility
         this.pane.addBinding(PARAMS, "showCursor").on("change", (ev) => {
-            cursor.visible = ev.value; // Update cursor visibility based on GUI toggle
+            this.cursor.visible = ev.value; // Update cursor visibility based on GUI toggle
         });
 
         // Binding for toggling game start/stop
         this.pane.addBinding(PARAMS, "gameStart").on("change", (ev) => {
             this.game_start = ev.value;
         });
+
+        // Add a bar to display the target position Z value with annotation on the GUI
+        this.pane.addBinding(this.handControls.target.position, 'z', {
+            readonly: true,
+            view: 'graph',
+            min: -20,
+            max: 0,
+        });
+        
+        // addInput(this.handControls.target.position, 'z', { label: 'Target Z Position', min: -10, max: 10 });
     }
     
     async setup_collision_detection() {
