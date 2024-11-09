@@ -1,4 +1,3 @@
-
 import { MediaPipeHands } from "./MediaPipeHands.js";
 import { ScenesManager } from "./ScenesManager.js";
 import { GameController } from "./GameController.js";
@@ -42,6 +41,7 @@ export class App {
         );
         this.mediaPipeHands.start(); // Start the hand tracking
         enableWebcamButton.remove(); // Remove the button after enabling the camera
+        this.gameController.playIntro(); // Make the welcome screen visible
       });
     } else {
       console.warn("getUserMedia() is not supported by your browser");

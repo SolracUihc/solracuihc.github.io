@@ -13,7 +13,6 @@ export class HandControls extends THREE.EventDispatcher {
 
     // Initial setup
     this.target = target; // The cursor represented as an Object3D
-    this.objects = objects; // Array of objects that can be dragged
     this.isDraggable = isDraggable; // Determines if objects can be dragged
     this.renderer = renderer; // The WebGL renderer
     this.camera = camera; // The camera used to view the scene
@@ -25,15 +24,14 @@ export class HandControls extends THREE.EventDispatcher {
     this.targetBox3 = new THREE.Box3();
     this.depthPointA = new THREE.Vector3();
     this.depthPointB = new THREE.Vector3();
-    
+
     // Reference objects to calculate depth
     this.refObjFrom = new THREE.Object3D();
     this.scene.add(this.refObjFrom);
     this.refObjTo = new THREE.Object3D();
     this.scene.add(this.refObjTo);
 
-    // Initialize object collision status
-    this.objects.forEach((obj) => (obj.userData.hasCollision = false));
+    this.initializeObjects(objects);
 
     // Variables for hand gesture calculations
     this.pointsDist = 0;
@@ -44,6 +42,13 @@ export class HandControls extends THREE.EventDispatcher {
       from: new THREE.Vector3(),
       to: new THREE.Vector3(),
     };
+  }
+
+  initializeObjects(objects) {
+    this.objects = objects; // Array of objects that can be dragged
+
+    // Initialize object collision status
+    this.objects.forEach((obj) => (obj.userData.hasCollision = false));
   }
 
   /**
@@ -130,7 +135,7 @@ export class HandControls extends THREE.EventDispatcher {
     }
     if (visibility)
       this.show3DLandmark_(visibility);
-    else if (Date.now()-this.handDisappearTime > 200)
+    else if (Date.now() - this.handDisappearTime > 200)
       this.show3DLandmark_(visibility);
 
     const isMobile = window.innerWidth < window.innerHeight;
@@ -162,23 +167,29 @@ export class HandControls extends THREE.EventDispatcher {
         const wrist = landmarks.multiHandLandmarks[0][0]; // Wrist (node 0)
         const pointsToCheck = [5, 9, 3, 17]; // Nodes to compare with
         const thumbIndex = 2; // Node 2 (thumb)
-        
+
         let distances = pointsToCheck.map(index => {
           const point = landmarks.multiHandLandmarks[0][index];
           return Math.sqrt(Math.pow(wrist.x - point.x, 2) + Math.pow(wrist.y - point.y, 2) + Math.pow(wrist.z - point.z, 2));
         });
 
         // Calculate distance between landmark 2 (thumb) and 17
-        const thumbToPoint17 = Math.sqrt(Math.pow(wrist.x - landmarks.multiHandLandmarks[0][thumbIndex].x, 2) + 
-                                          Math.pow(wrist.y - landmarks.multiHandLandmarks[0][thumbIndex].y, 2) + 
-                                          Math.pow(wrist.z - landmarks.multiHandLandmarks[0][thumbIndex].z, 2));
+        const thumbToPoint17 = Math.sqrt(Math.pow(wrist.x - landmarks.multiHandLandmarks[0][thumbIndex].x, 2) +
+          Math.pow(wrist.y - landmarks.multiHandLandmarks[0][thumbIndex].y, 2) +
+          Math.pow(wrist.z - landmarks.multiHandLandmarks[0][thumbIndex].z, 2));
 
         // distances.push(thumbToPoint17); // Add the thumb to point 17 distance
 
         // Calculate the mean distance
         let palm_size_2d = distances.reduce((acc, val) => acc + val, 0) / distances.length;
         // console.log(palm_size_2d, thumbToPoint17, Math.max(palm_size_2d, thumbToPoint17*2));
-        palm_size_2d = Math.max(palm_size_2d, thumbToPoint17*2);
+        palm_size_2d = Math.max(palm_size_2d, thumbToPoint17 * 2);
+
+        // console.log(palm_size_2d);
+        // normalizes the hand size (visually)
+        // palm_size: small -> far away from camera, large -> close to camera
+        // always positive.
+        let depth2 = this.palmSizeToDepth(palm_size_2d);
 
         /**
          * ===============================
@@ -190,38 +201,35 @@ export class HandControls extends THREE.EventDispatcher {
           let xpos = -landmarks.multiHandLandmarks[0][l].x + 0.5;
           let ypos = -landmarks.multiHandLandmarks[0][l].y + 0.5;
           let depth = landmarks.multiHandLandmarks[0][l].z;
-          
-          // console.log(palm_size_2d);
-          // normalizes the hand size (visually)
-          // palm_size: small -> far away from camera, large -> close to camera
-          // always positive.
 
-          let depth2 = this.palmSizeToDepth(palm_size_2d);
-
-          this.handsObj.children[l].position.x = xpos/depth2//(wrist_depth/1E-6)*.2;
-          this.handsObj.children[l].position.y = ypos/depth2//(wrist_depth/1E-6)*.2;
-          this.handsObj.children[l].position.z = depth-(depth2)/2;
+          this.handsObj.children[l].position.x = xpos / depth2//(wrist_depth/1E-6)*.2;
+          this.handsObj.children[l].position.y = ypos / depth2//(wrist_depth/1E-6)*.2;
+          this.handsObj.children[l].position.z = depth - (depth2) / 2;
           this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
           // console.log(this.handsObj.children[l].position.z);
           // Set color based on depth
           // -10 ~ 1
           this.handsObj.children[l].material.color.set(this.depthToColor(this.handsObj.children[l].position.z));
         }
+
+        // // Calculate gesture points
+        this.calculateGestures(this.handsObj);
+
+        // Check for closed fist gesture
+        const node0Pos = this.handsObj.children[0].position;
+        const node9Pos = this.handsObj.children[9].position;
+        const node12Pos = this.handsObj.children[12].position;
+        const palmFingerRatio = node12Pos.clone().sub(node0Pos).length() / node9Pos.clone().sub(node0Pos).length();
+        console.log(palmFingerRatio);
+        this.closedFist = palmFingerRatio < 1.3; // Threshold for closed fist
+        // console.log(this.closedFist);
+
+        // Update target position based on gesture
+        this.updateTargetPosition();
+
+        // Dispatch events based on gesture state
+        this.handleGestureEvents();
       }
-
-      // // Calculate gesture points
-      this.calculateGestures(landmarks.multiHandLandmarks[0]);
-
-      // Check for closed fist gesture
-      const pointsDist = this.gestureCompute.from.distanceTo(this.gestureCompute.to);
-      this.closedFist = pointsDist < 0.35; // Threshold for closed fist
-      // console.log(this.closedFist);
-
-      // Update target position based on gesture
-      this.updateTargetPosition();
-
-      // Dispatch events based on gesture state
-      this.handleGestureEvents();
     }
   }
 
@@ -229,7 +237,7 @@ export class HandControls extends THREE.EventDispatcher {
    * Calculate the color corresponding to the depth
    */
   depthToColor(depth) {
-    const normalizedDepth = THREE.MathUtils.clamp((depth+12)/16, 0, 1); // Adjust this based on your scene scale
+    const normalizedDepth = THREE.MathUtils.clamp((depth + 12) / 16, 0, 1); // Adjust this based on your scene scale
     const color = new THREE.Color();
     color.setRGB(1 - normalizedDepth, 0, normalizedDepth); // Blue to red gradient
     return color;
@@ -239,7 +247,7 @@ export class HandControls extends THREE.EventDispatcher {
    * Calibration function
    */
   palmSizeToDepth(palm_size_2d) {
-    return palm_size_2d*10;
+    return palm_size_2d * 10;
   }
 
   /**
@@ -249,27 +257,27 @@ export class HandControls extends THREE.EventDispatcher {
   calculateGestures(landmarks) {
     // Calculate positions for gesture control
     this.gestureCompute.depthFrom.set(
-      -landmarks[0].x + 0.5,
-      -landmarks[0].y + 0.5,
-      -landmarks[0].z
+      -landmarks.children[0].position.x,
+      -landmarks.children[0].position.y,
+      -landmarks.children[0].position.z
     ).multiplyScalar(4);
 
     this.gestureCompute.depthTo.set(
-      -landmarks[10].x + 0.5,
-      -landmarks[10].y + 0.5,
-      -landmarks[10].z
+      -landmarks.children[10].position.x,
+      -landmarks.children[10].position.y,
+      -landmarks.children[10].position.z
     ).multiplyScalar(4);
 
     this.gestureCompute.from.set(
-      -landmarks[9].x + 0.5,
-      -landmarks[9].y + 0.5,
-      -landmarks[9].z
+      -landmarks.children[9].position.x,
+      -landmarks.children[9].position.y,
+      -landmarks.children[9].position.z
     ).multiplyScalar(4);
 
     this.gestureCompute.to.set(
-      -landmarks[12].x + 0.5,
-      -landmarks[12].y + 0.5,
-      -landmarks[12].z
+      -landmarks.children[12].position.x,
+      -landmarks.children[12].position.y,
+      -landmarks.children[12].position.z
     ).multiplyScalar(4);
   }
 
@@ -298,7 +306,7 @@ export class HandControls extends THREE.EventDispatcher {
    * Handle events based on the state of the hand gestures.
    */
   handleGestureEvents() {
-    if (!this.closedFist) {
+    if (this.closedFist) {
       this.dispatchEvent({ type: "closed_fist" });
       this.dispatchEvent({
         type: "drag_end",
@@ -324,7 +332,7 @@ export class HandControls extends THREE.EventDispatcher {
     this.objects.forEach((obj) => {
       this.objectBox3.setFromObject(obj);
       const targetCollision = this.targetBox3.intersectsBox(this.objectBox3);
-      
+
       if (targetCollision) {
         obj.userData.hasCollision = true; // Mark as collided
         if (this.closedFist && !this.selected && this.isDraggable) {
