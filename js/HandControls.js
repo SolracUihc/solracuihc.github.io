@@ -180,7 +180,7 @@ export class HandControls extends THREE.EventDispatcher {
           this.handsObj.children[l].position.y = ypos/depth2//(wrist_depth/1E-6)*.2;
           this.handsObj.children[l].position.z = depth-(depth2-clip_dist)/2;
           this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
-          console.log(this.handsObj.children[l].position.z);
+          // console.log(this.handsObj.children[l].position.z);
           // Set color based on depth
           // -10 ~ 1
           this.handsObj.children[l].material.color.set(this.depthToColor(this.handsObj.children[l].position.z));
