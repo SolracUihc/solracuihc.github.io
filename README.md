@@ -47,3 +47,12 @@
 * You can also read the rotation of the palm.
 
 ![alt text](readme-src/image.png)
+
+## Innovation Ideas
+
+* https://www.notion.so/AI-Music-Course-1393e2057e258093a9f7f0fb55184f7f?pvs=4
+    * Gesture control of 3d scene
+
+### Problems RN
+
+* No constant speed between frames

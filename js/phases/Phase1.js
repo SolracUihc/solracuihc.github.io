@@ -52,7 +52,7 @@ export class Phase1 {
     animate() {
         // Move boxes towards the camera
         this.gameController.objects.forEach((box) => {
-            box.position.z += 0.05; // Move box towards the camera
+            box.position.z += 30 * this.gameController.frameTime; // Move box towards the camera
 
             // Check if the box has passed the camera
             if (box.position.z > 2.5) {
@@ -66,7 +66,7 @@ export class Phase1 {
     }
 
     cleanUp() {
-        
+
     }
 
     handleGesture(command, handIndex) {

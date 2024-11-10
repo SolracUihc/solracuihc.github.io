@@ -16,6 +16,8 @@ export class GameController {
         this.gameStart = false;
         this.phase = 0;
         this.gameHandler = null;
+
+        this.prevUpdate = Date.now() * 0.0001;
     }
 
     /**
@@ -175,6 +177,9 @@ export class GameController {
      * Animate the scene and update hand controls.
      */
     animate() {
+        this.currUpdate = Date.now() * 0.0001;
+        this.frameTime = this.currUpdate - this.prevUpdate;
+        
         this.handControls?.animate(); // Animate hand controls if they exist
 
         if (this.gameStart && this.gameHandler) {
@@ -182,6 +187,7 @@ export class GameController {
         }
 
         ScenesManager.render(); // Render the scene
+        this.prevUpdate = this.currUpdate;
     }
 
     clearScreen() {
@@ -215,7 +221,7 @@ export class GameController {
         this.phase = phase;
         if (this.gameHandler)
             this.gameHandler.cleanUp();
-        
+
         switch (phase) {
             case -1:
                 this.gameHandler = new TestPhase(this);
