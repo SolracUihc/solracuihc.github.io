@@ -26,7 +26,7 @@ export class GameController {
         this.build_environment();
 
         // Setup the cursor feedbacks
-        this.setup_cursor_feedbacks();
+        this.setup_hand_controls();
 
         // Bind the GUI with options provided
         this.bind_gui();
@@ -64,22 +64,9 @@ export class GameController {
         this.objects = []; // Store references to the boxes
     }
 
-    async setup_cursor_feedbacks() {
-        // Create a cursor for hand control feedback
-        this.cursorMat = new THREE.MeshNormalMaterial({
-            transparent: true,
-            opacity: 1
-          });
-      
-        this.cursor = new THREE.Mesh(
-            new THREE.SphereGeometry(0.1, 32, 16), // Sphere geometry for cursor
-            this.cursorMat
-        );
-        ScenesManager.scene.add(this.cursor); // Add cursor to the scene
-
+    async setup_hand_controls() {
         // Initialize hand controls with the cursor and objects
         this.handControls = new HandControls(
-            this.cursor,
             this.objects,
             ScenesManager.renderer,
             ScenesManager.camera,
@@ -113,7 +100,9 @@ export class GameController {
 
         // Binding for toggling cursor visibility
         this.pane.addBinding(PARAMS, "showCursor").on("change", (ev) => {
-            this.cursor.visible = ev.value; // Update cursor visibility based on GUI toggle
+            this.handControls.target.forEach(target => {
+                target.visible = ev.value; // Update cursor visibility based on GUI toggle
+            });
         });
 
         // Binding for toggling game start/stop
@@ -123,7 +112,11 @@ export class GameController {
         });
 
         // Add a bar to display the target position Z value with annotation on the GUI
-        this.pane.addBinding(this.handControls.target.position, 'z', {
+        this.pane.addBinding({
+            get z() {
+                return this.handControls?.target?.[0]?.position?.z || 0;
+            }
+        }, 'z', {
             readonly: true,
             view: 'graph',
             min: -20,
@@ -145,7 +138,7 @@ export class GameController {
 
         // Adjust cursor opacity based on collision
         this.handControls.addEventListener("collision", (event) => {
-            this.cursorMat.opacity = event.state === "on" ? 0.4 : 1; // Adjust cursor opacity based on collision
+            this.handControls.target[event.handIndex].material.opacity = event.state === "on" ? 0.4 : 1; // Adjust cursor opacity based on collision
         });
     }
 
@@ -160,14 +153,14 @@ export class GameController {
     }
 
     setupGestureListeners() {
-        this.handControls.addEventListener("closed_fist", () => {
-            console.log('Closed Fist');
-            this.cursor.material.opacity = .4;
+        this.handControls.addEventListener("closed_fist", (ev) => {
+            console.log('Closed Fist', ev.handIndex);
+            this.handControls.target[ev.handIndex].material.opacity = .4;
         });
 
-        this.handControls.addEventListener("opened_fist", () => {
-            console.log('Opened Fist');
-            this.cursor.material.opacity = 1;
+        this.handControls.addEventListener("opened_fist", (ev) => {
+            console.log('Opened Fist', ev.handIndex);
+            this.handControls.target[ev.handIndex].material.opacity = 1;
         });
     }
 

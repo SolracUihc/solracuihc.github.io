@@ -14,7 +14,7 @@ export class MediaPipeHands {
 
     // Set options for the hand tracking model
     hands.setOptions({
-      maxNumHands: 1, // Maximum number of hands to track
+      maxNumHands: 2, // Maximum number of hands to track
       modelComplexity: 1, // Complexity of the model (1 = high accuracy)
       minDetectionConfidence: 0.5, // Minimum confidence for detection
       minTrackingConfidence: 0.5, // Minimum confidence for tracking

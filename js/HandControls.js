@@ -1,18 +1,19 @@
 import * as THREE from "three";
+import { ScenesManager } from "./ScenesManager.js";
 
 /**
  * HandControls class manages 3D hand gestures and interactions with objects.
  * It allows the user to control and manipulate objects in a 3D scene using hand movements.
  */
 export class HandControls extends THREE.EventDispatcher {
-  constructor(target, objects, renderer, camera, scene, isDraggable = false) {
+  constructor(objects, renderer, camera, scene, isDraggable = false) {
     super();
 
     this.landmarkVisible = true;
     this.landmarkTheoreticallyVisible = true;
 
     // Initial setup
-    this.target = target; // The cursor represented as an Object3D
+    this.target = []; // The cursor represented as an Object3D
     this.isDraggable = isDraggable; // Determines if objects can be dragged
     this.renderer = renderer; // The WebGL renderer
     this.camera = camera; // The camera used to view the scene
@@ -21,7 +22,7 @@ export class HandControls extends THREE.EventDispatcher {
     // Set up matrices and vectors for calculations
     this.viewProjectionMatrix = new THREE.Matrix4();
     this.objectBox3 = new THREE.Box3();
-    this.targetBox3 = new THREE.Box3();
+    this.targetBox3 = [new THREE.Box3()]; // Make targetBox3 a list
     this.depthPointA = new THREE.Vector3();
     this.depthPointB = new THREE.Vector3();
 
@@ -42,6 +43,11 @@ export class HandControls extends THREE.EventDispatcher {
       from: new THREE.Vector3(),
       to: new THREE.Vector3(),
     };
+
+    // Array to store hand objects
+    this.handsObjs = [];
+    this.closedFist = []; // Initialize closedFist as array
+    this.selected = []; // Initialize selected as array
   }
 
   initializeObjects(objects) {
@@ -61,16 +67,17 @@ export class HandControls extends THREE.EventDispatcher {
   }
 
   show3DLandmark_(value) {
-    if (!this.handsObj) {
-      this.handsObj = new THREE.Object3D(); // Create a new 3D object for hands
-      this.scene.add(this.handsObj); // Add it to the scene
-      this.createHand(); // Create hand visuals
+    // Create material if it doesn't exist
+    if (!this.sphereMat) {
+      this.sphereMat = new THREE.MeshBasicMaterial({
+        transparent: true,
+        opacity: value ? 1 : 0,
+      });
     }
 
-    // Set the opacity of the hand landmark
     this.landmarkTheoreticallyVisible = value;
     this.sphereMat.opacity = value ? 1 : 0;
-    this.target.visible = value;
+    this.target.forEach(t => t.opacity = value);
   }
 
   /**
@@ -102,25 +109,38 @@ export class HandControls extends THREE.EventDispatcher {
   }
 
   /**
-   * Create visual representations of the hand using spheres.
+   * Create visual representations of a single hand using spheres.
    */
   createHand() {
-    // Create a material for hand spheres
-    this.sphereMat = new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: this.showLandmark ? 1 : 0,
-    });
+    const handObj = new THREE.Object3D();
+    this.scene.add(handObj);
 
     // Geometry for hand representation
     const sphereGeo = new THREE.SphereGeometry(0.025, 8, 4);
-    const sphereMesh = new THREE.Mesh(sphereGeo, this.sphereMat);
 
-    // Clone spheres to represent different hand landmarks
+    // Create 21 spheres for each hand landmark
     for (let i = 0; i < 21; i++) {
-      const sphereMeshClone = sphereMesh.clone();
-      sphereMeshClone.renderOrder = 2; // Ensure correct rendering order
-      this.handsObj.add(sphereMeshClone); // Add the sphere to the hand object
+      const sphereMesh = new THREE.Mesh(sphereGeo, this.sphereMat);
+      sphereMesh.renderOrder = 2; // Ensure correct rendering order
+      handObj.add(sphereMesh);
     }
+    return handObj;
+  }
+
+  createTarget() {
+    // Create a cursor for hand control feedback
+    const cursorMat = new THREE.MeshNormalMaterial({
+      transparent: true,
+      opacity: 1
+    });
+
+    const cursor = new THREE.Mesh(
+        new THREE.SphereGeometry(0.1, 32, 16), // Sphere geometry for cursor
+        cursorMat
+    );
+    ScenesManager.scene.add(cursor); // Add cursor to the scene
+
+    return cursor;
   }
 
   /**
@@ -128,7 +148,9 @@ export class HandControls extends THREE.EventDispatcher {
    * @param {Object} landmarks - The detected hand landmarks.
    */
   update(landmarks) {
-    var visibility = landmarks.multiHandLandmarks.length >= 1;
+    const numHands = landmarks.multiHandLandmarks.length;
+    var visibility = numHands >= 1;
+    
     if (this.landmarkTheoreticallyVisible) {
       this.handDisappearTime = Date.now();
       this.landmarkTheoreticallyVisible = false;
@@ -138,98 +160,75 @@ export class HandControls extends THREE.EventDispatcher {
     else if (Date.now() - this.handDisappearTime > 200)
       this.show3DLandmark_(visibility);
 
+    // Adjust number of hand objects based on detected hands
+    while (this.handsObjs.length < numHands) {
+      this.handsObjs.push(this.createHand());
+      this.target.push(this.createTarget());
+      this.targetBox3.push(new THREE.Box3());
+      this.closedFist.push(false);
+      this.selected.push(null);
+    }
+    while (this.handsObjs.length > numHands) {
+      const handObj = this.handsObjs.pop();
+      this.scene.remove(handObj);
+      this.scene.remove(this.target.pop());
+      this.targetBox3.pop();
+      this.closedFist.pop();
+      this.selected.pop();
+    }
+
     const isMobile = window.innerWidth < window.innerHeight;
-    this.clip_dist = isMobile ? 4 : 2; // THIS PART RELATES TO ScenesManager.js
-    // The clip distance of the camera.
+    this.clip_dist = isMobile ? 4 : 2;
 
-    if (landmarks.multiHandLandmarks.length >= 1) {
-      if (this.handsObj) {
-        // Update hand landmark positions based on detected coordinates
-        /***
-         * =========================================
-         * The z axis is only for reference for now
-         * Goal: Adjust the z axis (and scale x, y) 
-         * according to the calculated estimated 
-         * distance of hand to camera
-         * =========================================
-         */
+    if (numHands >= 1) {
+      // console.log(numHands);
+      landmarks.multiHandLandmarks.forEach((handLandmarks, handIndex) => {
+        const handObj = this.handsObjs[handIndex];
 
-        // let wrist_depth = 1;//Math.abs(landmarks.multiHandLandmarks[0][0].z);
-        // wrist_depth: closer to screen -> larger value (1e-6 ~ 1e-7)
-        // div 1E-6 -> 1 ~ 0
-
-        /**
-         * ======================
-         *   DEPTH OF THE HAND
-         * ======================
-         */
-        // Calculate distances for wrist depth
-        const wrist = landmarks.multiHandLandmarks[0][0]; // Wrist (node 0)
-        const pointsToCheck = [5, 9, 3, 17]; // Nodes to compare with
-        const thumbIndex = 2; // Node 2 (thumb)
+        // Calculate palm size and depth for this hand
+        const wrist = handLandmarks[0];
+        const pointsToCheck = [5, 9, 3, 17];
+        const thumbIndex = 2;
 
         let distances = pointsToCheck.map(index => {
-          const point = landmarks.multiHandLandmarks[0][index];
+          const point = handLandmarks[index];
           return Math.sqrt(Math.pow(wrist.x - point.x, 2) + Math.pow(wrist.y - point.y, 2) + Math.pow(wrist.z - point.z, 2));
         });
 
-        // Calculate distance between landmark 2 (thumb) and 17
-        const thumbToPoint17 = Math.sqrt(Math.pow(wrist.x - landmarks.multiHandLandmarks[0][thumbIndex].x, 2) +
-          Math.pow(wrist.y - landmarks.multiHandLandmarks[0][thumbIndex].y, 2) +
-          Math.pow(wrist.z - landmarks.multiHandLandmarks[0][thumbIndex].z, 2));
+        const thumbToPoint17 = Math.sqrt(Math.pow(wrist.x - handLandmarks[thumbIndex].x, 2) +
+          Math.pow(wrist.y - handLandmarks[thumbIndex].y, 2) +
+          Math.pow(wrist.z - handLandmarks[thumbIndex].z, 2));
 
-        // distances.push(thumbToPoint17); // Add the thumb to point 17 distance
-
-        // Calculate the mean distance
         let palm_size_2d = distances.reduce((acc, val) => acc + val, 0) / distances.length;
-        // console.log(palm_size_2d, thumbToPoint17, Math.max(palm_size_2d, thumbToPoint17*2));
         palm_size_2d = Math.max(palm_size_2d, thumbToPoint17 * 2);
 
-        // console.log(palm_size_2d);
-        // normalizes the hand size (visually)
-        // palm_size: small -> far away from camera, large -> close to camera
-        // always positive.
         let depth2 = this.palmSizeToDepth(palm_size_2d);
 
-        /**
-         * ===============================
-         *   POSITION AND COLOR OF HAND 
-         * ===============================
-         */
-
+        // Update landmark positions for this hand
         for (let l = 0; l < 21; l++) {
-          let xpos = -landmarks.multiHandLandmarks[0][l].x + 0.5;
-          let ypos = -landmarks.multiHandLandmarks[0][l].y + 0.5;
-          let depth = landmarks.multiHandLandmarks[0][l].z;
+          let xpos = -handLandmarks[l].x + 0.5;
+          let ypos = -handLandmarks[l].y + 0.5;
+          let depth = handLandmarks[l].z;
 
-          this.handsObj.children[l].position.x = xpos / depth2//(wrist_depth/1E-6)*.2;
-          this.handsObj.children[l].position.y = ypos / depth2//(wrist_depth/1E-6)*.2;
-          this.handsObj.children[l].position.z = depth - (depth2) / 2;
-          this.handsObj.children[l].position.multiplyScalar(4); // Scale positions
-          // console.log(this.handsObj.children[l].position.z);
-          // Set color based on depth
-          // -10 ~ 1
-          this.handsObj.children[l].material.color.set(this.depthToColor(this.handsObj.children[l].position.z));
+          handObj.children[l].position.x = xpos / depth2;
+          handObj.children[l].position.y = ypos / depth2;
+          handObj.children[l].position.z = depth - (depth2) / 2;
+          handObj.children[l].position.multiplyScalar(4);
+          handObj.children[l].material.color.set(this.depthToColor(handObj.children[l].position.z));
         }
 
-        // // Calculate gesture points
-        this.calculateGestures(this.handsObj);
+        // Gestures and target updates
+        this.calculateGestures(handObj);
 
-        // Check for closed fist gesture
-        const node0Pos = this.handsObj.children[0].position;
-        const node9Pos = this.handsObj.children[9].position;
-        const node12Pos = this.handsObj.children[12].position;
+        const node0Pos = handObj.children[0].position;
+        const node9Pos = handObj.children[9].position;
+        const node12Pos = handObj.children[12].position;
         const palmFingerRatio = node12Pos.clone().sub(node0Pos).length() / node9Pos.clone().sub(node0Pos).length();
-        console.log(palmFingerRatio);
-        this.closedFist = palmFingerRatio < 1.3; // Threshold for closed fist
-        // console.log(this.closedFist);
+        this.closedFist[handIndex] = palmFingerRatio < 1.3;
 
-        // Update target position based on gesture
-        this.updateTargetPosition();
-
-        // Dispatch events based on gesture state
-        this.handleGestureEvents();
-      }
+        this.updateTargetPosition(handObj, handIndex);
+        this.handleGestureEvents(handIndex);
+      });
     }
   }
 
@@ -237,9 +236,9 @@ export class HandControls extends THREE.EventDispatcher {
    * Calculate the color corresponding to the depth
    */
   depthToColor(depth) {
-    const normalizedDepth = THREE.MathUtils.clamp((depth + 12) / 16, 0, 1); // Adjust this based on your scene scale
+    const normalizedDepth = THREE.MathUtils.clamp((depth + 12) / 16, 0, 1);
     const color = new THREE.Color();
-    color.setRGB(1 - normalizedDepth, 0, normalizedDepth); // Blue to red gradient
+    color.setRGB(1 - normalizedDepth, 0, normalizedDepth);
     return color;
   }
 
@@ -247,37 +246,36 @@ export class HandControls extends THREE.EventDispatcher {
    * Calibration function
    */
   palmSizeToDepth(palm_size_2d) {
-    return palm_size_2d * 10;
+    return palm_size_2d * 10 + .5;
   }
 
   /**
    * Calculate gesture positions based on landmarks.
-   * @param {Array} landmarks - The array of landmark positions.
+   * @param {Object} handObj - The hand object containing landmarks.
    */
-  calculateGestures(landmarks) {
-    // Calculate positions for gesture control
+  calculateGestures(handObj) {
     this.gestureCompute.depthFrom.set(
-      -landmarks.children[0].position.x,
-      -landmarks.children[0].position.y,
-      -landmarks.children[0].position.z
+      -handObj.children[0].position.x,
+      -handObj.children[0].position.y,
+      -handObj.children[0].position.z
     ).multiplyScalar(4);
 
     this.gestureCompute.depthTo.set(
-      -landmarks.children[10].position.x,
-      -landmarks.children[10].position.y,
-      -landmarks.children[10].position.z
+      -handObj.children[10].position.x,
+      -handObj.children[10].position.y,
+      -handObj.children[10].position.z
     ).multiplyScalar(4);
 
     this.gestureCompute.from.set(
-      -landmarks.children[9].position.x,
-      -landmarks.children[9].position.y,
-      -landmarks.children[9].position.z
+      -handObj.children[9].position.x,
+      -handObj.children[9].position.y,
+      -handObj.children[9].position.z
     ).multiplyScalar(4);
 
     this.gestureCompute.to.set(
-      -landmarks.children[12].position.x,
-      -landmarks.children[12].position.y,
-      -landmarks.children[12].position.z
+      -handObj.children[12].position.x,
+      -handObj.children[12].position.y,
+      -handObj.children[12].position.z
     ).multiplyScalar(4);
   }
 
@@ -285,17 +283,16 @@ export class HandControls extends THREE.EventDispatcher {
    * Update the target position based on gesture calculations.
    * [THE BALL / SPHERE]
    */
-  updateTargetPosition() {
-    // Convert landmark positions to screen depth
-    const indices = [0, 5, 9, 3, 17, 2]; // Indices of points to consider
+  updateTargetPosition(handObj, handIndex) {
+    const indices = [0, 5, 9, 3, 17, 2];
     let sumX = 0, sumY = 0, sumZ = 0;
     indices.forEach(index => {
-      sumX += this.handsObj.children[index].position.x;
-      sumY += this.handsObj.children[index].position.y;
-      sumZ += this.handsObj.children[index].position.z;
+      sumX += handObj.children[index].position.x;
+      sumY += handObj.children[index].position.y;
+      sumZ += handObj.children[index].position.z;
     });
     const numPoints = indices.length;
-    this.target.position.set(
+    this.target[handIndex].position.set(
       sumX / numPoints,
       sumY / numPoints,
       sumZ / numPoints
@@ -305,19 +302,19 @@ export class HandControls extends THREE.EventDispatcher {
   /**
    * Handle events based on the state of the hand gestures.
    */
-  handleGestureEvents() {
-    if (this.closedFist) {
-      this.dispatchEvent({ type: "closed_fist" });
+  handleGestureEvents(handIndex) {
+    if (this.closedFist[handIndex]) {
+      this.dispatchEvent({ type: "closed_fist", handIndex: handIndex });
       this.dispatchEvent({
         type: "drag_end",
-        object: this.selected,
+        object: this.selected[handIndex],
         callback: () => {
-          this.selected = null; // Reset selected object
+          this.selected[handIndex] = null;
         },
       });
     } else {
-      this.selected = null; // No object selected
-      this.dispatchEvent({ type: "opened_fist" });
+      this.selected[handIndex] = null;
+      this.dispatchEvent({ type: "opened_fist", handIndex: handIndex });
     }
   }
 
@@ -325,33 +322,39 @@ export class HandControls extends THREE.EventDispatcher {
    * Animate the objects based on hand gestures and collisions.
    */
   animate() {
-    if (!this.target) return; // Exit if no target
+    if (!this.target) return;
+
+    // reset status
+    this.objects.forEach((obj) => {
+      obj.material.opacity = 1;
+    })
 
     // Check collisions with objects
-    this.targetBox3.setFromObject(this.target);
-    this.objects.forEach((obj) => {
-      this.objectBox3.setFromObject(obj);
-      const targetCollision = this.targetBox3.intersectsBox(this.objectBox3);
+    this.target.forEach((target, handIndex) => {
+      this.targetBox3[handIndex].setFromObject(target);
+      this.objects.forEach((obj) => {
+        this.objectBox3.setFromObject(obj);
+        const targetCollision = this.targetBox3[handIndex].intersectsBox(this.objectBox3);
 
-      if (targetCollision) {
-        obj.userData.hasCollision = true; // Mark as collided
-        if (this.closedFist && !this.selected && this.isDraggable) {
-          this.selected = obj; // Select object for dragging
-          this.dispatchEvent({ type: "drag_start", object: obj });
+        if (targetCollision) {
+          obj.userData.hasCollision = true;
+          if (this.closedFist[handIndex] && !this.selected[handIndex] && this.isDraggable) {
+            this.selected[handIndex] = obj;
+            this.dispatchEvent({ type: "drag_start", object: obj, handIndex: handIndex });
+          }
+          this.dispatchEvent({ type: "collision", state: "on", object: obj, handIndex: handIndex });
+          obj.material.opacity = 0.4;
+        } else {
+          if (!this.selected.some(s => s !== null)) {
+            this.dispatchEvent({ type: "collision", state: "off", object: null, handIndex: handIndex });
+          }
         }
-        this.dispatchEvent({ type: "collision", state: "on", object: obj });
-        obj.material.opacity = 0.4; // Change opacity on collision
-      } else {
-        obj.material.opacity = 1; // Reset opacity if no collision
-        if (!this.selected) {
-          this.dispatchEvent({ type: "collision", state: "off", object: null });
-        }
+      });
+
+      // Move the selected object if the fist is closed
+      if (this.selected[handIndex] && this.closedFist[handIndex] && this.isDraggable) {
+        this.selected[handIndex].position.lerp(target.position, 0.3);
       }
     });
-
-    // Move the selected object if the fist is closed
-    if (this.selected && this.closedFist && this.isDraggable) {
-      this.selected.position.lerp(this.target.position, 0.3); // Smoothly move the object
-    }
   }
 }
