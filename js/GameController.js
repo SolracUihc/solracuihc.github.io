@@ -7,6 +7,7 @@ import { HandControls } from "./HandControls.js";
 import { ScenesManager } from "./ScenesManager.js";
 import { SelectionMenu } from "./phases/SelectionMenu.js";
 import { Phase1 } from "./phases/Phase1.js"; 
+import { TestPhase } from "./phases/TestPhase.js";
 
 export class GameController {
     constructor() {
@@ -108,10 +109,9 @@ export class GameController {
         });
 
         // Binding for toggling game start/stop
-        this.pane.addBinding(PARAMS, "enterPhase1").on("change", (ev) => {
-            this.enterPhase1 = ev.value;
-            this.updateGamePhase(ev.value ? 1 : 0);
-        });
+        this.pane.addButton({
+            title: "Back to Menu"
+        }).on("click", () => {this.updateGamePhase(0)});
 
         // Binding for close mode control
         this.handControls.handOffsetZDistance = -1.5;
@@ -151,10 +151,6 @@ export class GameController {
         });
     }
 
-    /**
-     * Handle results from MediaPipeHands tracking.
-     * @param {Object} landmarks - The detected hand landmarks.
-     */
     onMediaPipeHandsResults(landmarks) {
         if (this.handControls) {
             this.handControls.update(landmarks); // Update hand controls with landmarks
@@ -217,7 +213,13 @@ export class GameController {
 
     updateGamePhase(phase) {
         this.phase = phase;
+        if (this.gameHandler)
+            this.gameHandler.cleanUp();
+        
         switch (phase) {
+            case -1:
+                this.gameHandler = new TestPhase(this);
+                break;
             case 0: 
                 this.gameHandler = new SelectionMenu(this);
                 break;

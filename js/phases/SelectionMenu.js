@@ -9,7 +9,7 @@ export class SelectionMenu {
         this.prevCollisions = {};
         this.prevFistState = {};
 
-        this.optionTexts = ["Game Phase 1", "Placeholder 1", "Placeholder 2", "Placeholder 3", "Placeholder 4"];
+        this.optionTexts = ["Test Phase", "Game Phase 1", "Placeholder 1", "Placeholder 2", "Placeholder 3", "Placeholder 4"];
         this.optionObjects = [];
         this.optionLabelObjects = [];
         this.selectedTextObject = null;
@@ -17,6 +17,8 @@ export class SelectionMenu {
         this.objectLabelYOffset = 0.2;
 
         this.initialize();
+
+        this.showSelectionText("Select an option by closing the fingers.");
     }
 
     initialize() {
@@ -166,6 +168,10 @@ export class SelectionMenu {
         box.position.z = z; // Set z to 0 to rotate in the x-y plane
     }
 
+    cleanUp() {
+        
+    }
+
     handleGesture(command, handIndex) {
         // Handle gestures for selection
         switch (command) {
@@ -210,11 +216,12 @@ export class SelectionMenu {
             // console.log(`Hand ${handIndex} collides with new Object ID: ${newCollidedIds.join(', ')}`);
             if (fistState == "closed_fist") { // ie: the fist is just closed.
                 newCollidedIds.forEach(id => {
-                    if (isUnderStateChange) {
+                    if (id == undefined)
+                        return;
+                    // if (isUnderStateChange) {
                         this.handleSelection(id, handIndex);
-                        // Show selection text in the middle
-                        this.showSelectionText(id);
-                    }
+                        this.showSelectionText(this.optionTexts[id]);
+                    // }
                     switch (id) {
                         default:
                             console.log(`${isUnderStateChange ? "Selected" : "Punched"}: ${id} with hand ${handIndex}`);
@@ -234,7 +241,10 @@ export class SelectionMenu {
     handleSelection(objectId, handId) {
         console.log(`SELECTED ${objectId} with hand ${handId}`);
         switch (objectId) {
-            case 0: 
+            case 0:
+                this.gameController.updateGamePhase(-1);
+                break;
+            case 1: 
                 this.gameController.updateGamePhase(1);
                 break;
         }
@@ -242,28 +252,28 @@ export class SelectionMenu {
 
     /**
      * Show selection text in the middle of the screen
-     * @param {number} objectId - The ID of the selected object
+     * @param {number} objectText just the text.
      */
-    showSelectionText(objectId) {
+    showSelectionText(objectText) {
         if (this.gameController.phase != 0)
             return;
-        
-        console.log(this.selectedTextObject, this.selectedTextObject !== null);
+
+        // console.log(this.selectedTextObject, this.selectedTextObject !== null);
         if (this.selectedTextObject !== null) {
             ScenesManager.scene.remove(this.selectedTextObject);
             this.gameController.objects = this.gameController.objects.filter(obj => obj !== this.selectedTextObject);
         }
 
-        const selectedText = this.optionTexts[objectId];
+        const selectedText = objectText;
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         canvas.width = 512; // Width for the selection text
-        canvas.height = 256; // Height for the selection text
+        canvas.height = 512; // Height for the selection text
 
         // Clear canvas with transparent background
         context.clearRect(0, 0, canvas.width, canvas.height);
 
-        context.font = 'Bold 48px Arial'; // Font for the selection text
+        context.font = 'Bold 24px Arial'; // Font for the selection text
         context.fillStyle = 'black'; // Color for the selection text
         context.textAlign = 'center'; // Align text to the center
         context.textBaseline = 'middle'; // Align text to the middle

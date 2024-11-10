@@ -65,11 +65,15 @@ export class Phase1 {
         });
     }
 
+    cleanUp() {
+        
+    }
+
     handleGesture(command, handIndex) {
 
     }
 
     handleCollision(command, event) {
-        
+
     }
 }

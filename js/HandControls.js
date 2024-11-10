@@ -295,7 +295,7 @@ export class HandControls extends THREE.EventDispatcher {
    * [THE BALL / SPHERE]
    */
   updateTargetPosition(handObj, handIndex) {
-    const indices = [0, 5, 9, 3, 17, 2];
+    const indices = [0, 5, 9, 3, 17, 2, 0, 17, 0, 0, 0, 17];
     let sumX = 0, sumY = 0, sumZ = 0;
     indices.forEach(index => {
       sumX += handObj.children[index].position.x;
