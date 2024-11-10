@@ -48,6 +48,10 @@ export class HandControls extends THREE.EventDispatcher {
     this.handsObjs = [];
     this.closedFist = []; // Initialize closedFist as array
     this.selected = []; // Initialize selected as array
+
+    this.distScale = 3;
+    this.handScale = .8;
+    this.handOffsetZDistance = 0;
   }
 
   initializeObjects(objects) {
@@ -138,6 +142,7 @@ export class HandControls extends THREE.EventDispatcher {
         new THREE.SphereGeometry(0.1, 32, 16), // Sphere geometry for cursor
         cursorMat
     );
+    cursor.castShadow = true;
     ScenesManager.scene.add(cursor); // Add cursor to the scene
 
     return cursor;
@@ -181,7 +186,6 @@ export class HandControls extends THREE.EventDispatcher {
     this.clip_dist = isMobile ? 4 : 2;
 
     if (numHands >= 1) {
-      // console.log(numHands);
       landmarks.multiHandLandmarks.forEach((handLandmarks, handIndex) => {
         const handObj = this.handsObjs[handIndex];
 
@@ -202,17 +206,22 @@ export class HandControls extends THREE.EventDispatcher {
         let palm_size_2d = distances.reduce((acc, val) => acc + val, 0) / distances.length;
         palm_size_2d = Math.max(palm_size_2d, thumbToPoint17 * 2);
 
-        let depth2 = this.palmSizeToDepth(palm_size_2d);
+        let [depth2, depth2Offset] = this.palmSizeToDepth(palm_size_2d);
 
         // Update landmark positions for this hand
+        const wristPos = new THREE.Vector3(
+          (-handLandmarks[0].x + 0.5) / depth2,
+          (-handLandmarks[0].y + 0.5) / depth2,
+          handLandmarks[0].z - depth2Offset / 2
+        )
         for (let l = 0; l < 21; l++) {
           let xpos = -handLandmarks[l].x + 0.5;
           let ypos = -handLandmarks[l].y + 0.5;
           let depth = handLandmarks[l].z;
 
-          handObj.children[l].position.x = xpos / depth2;
-          handObj.children[l].position.y = ypos / depth2;
-          handObj.children[l].position.z = depth - (depth2) / 2;
+          handObj.children[l].position.x = (xpos / depth2 - wristPos.x)*this.handScale + this.distScale*wristPos.x;
+          handObj.children[l].position.y = (ypos / depth2 - wristPos.y)*this.handScale + this.distScale*wristPos.y;
+          handObj.children[l].position.z = depth - (depth2Offset) / 2;
           handObj.children[l].position.multiplyScalar(4);
           handObj.children[l].material.color.set(this.depthToColor(handObj.children[l].position.z));
         }
@@ -246,7 +255,9 @@ export class HandControls extends THREE.EventDispatcher {
    * Calibration function
    */
   palmSizeToDepth(palm_size_2d) {
-    return palm_size_2d * 10 + .5;
+    const depth2 = palm_size_2d * 10;
+    const depth2Offset = depth2 + this.handOffsetZDistance;
+    return [depth2, depth2Offset];
   }
 
   /**
@@ -332,24 +343,26 @@ export class HandControls extends THREE.EventDispatcher {
     // Check collisions with objects
     this.target.forEach((target, handIndex) => {
       this.targetBox3[handIndex].setFromObject(target);
-      this.objects.forEach((obj) => {
+      const collidingObjects = this.objects.filter(obj => {
         this.objectBox3.setFromObject(obj);
-        const targetCollision = this.targetBox3[handIndex].intersectsBox(this.objectBox3);
+        return this.targetBox3[handIndex].intersectsBox(this.objectBox3);
+      });
 
-        if (targetCollision) {
+      if (collidingObjects.length > 0) {
+        collidingObjects.forEach(obj => {
           obj.userData.hasCollision = true;
           if (this.closedFist[handIndex] && !this.selected[handIndex] && this.isDraggable) {
             this.selected[handIndex] = obj;
             this.dispatchEvent({ type: "drag_start", object: obj, handIndex: handIndex });
           }
-          this.dispatchEvent({ type: "collision", state: "on", object: obj, handIndex: handIndex });
           obj.material.opacity = 0.4;
-        } else {
-          if (!this.selected.some(s => s !== null)) {
-            this.dispatchEvent({ type: "collision", state: "off", object: null, handIndex: handIndex });
-          }
+        });
+        this.dispatchEvent({ type: "collision", state: "on", objects: collidingObjects, handIndex: handIndex });
+      } else {
+        if (!this.selected.some(s => s !== null)) {
+          this.dispatchEvent({ type: "collision", state: "off", objects: null, handIndex: handIndex });
         }
-      });
+      }
 
       // Move the selected object if the fist is closed
       if (this.selected[handIndex] && this.closedFist[handIndex] && this.isDraggable) {

@@ -14,7 +14,7 @@ export class GameController {
         this.pane = new Pane();
         this.gameStart = false;
         this.phase = 0;
-        this.contents = null;
+        this.gameHandler = null;
     }
 
     /**
@@ -85,11 +85,13 @@ export class GameController {
          * GUI Options
          * ===========================================================
          */
-        // Set up GUI parameters for toggling landmark visibility and cursor visibility
+        // Set up GUI parameters for toggling landmark visibility, cursor visibility, close mode, and hand distance
         const PARAMS = {
             showLandmark: true,
             showCursor: true, // New parameter to control cursor visibility
-            enterPhase1: false
+            enterPhase1: false,
+            closeMode: true, // New parameter to control close mode
+            handDistance: 0 // New parameter to control hand distance
         };
 
         // Binding for toggling landmark visibility
@@ -111,17 +113,23 @@ export class GameController {
             this.updateGamePhase(ev.value ? 1 : 0);
         });
 
-        // Add a bar to display the target position Z value with annotation on the GUI
-        this.pane.addBinding({
-            get z() {
-                return this.handControls?.target?.[0]?.position?.z || 0;
-            }
-        }, 'z', {
-            readonly: true,
-            view: 'graph',
-            min: -20,
-            max: 0,
+        // Binding for close mode control
+        this.handControls.handOffsetZDistance = -1.5;
+        this.pane.addBinding(PARAMS, "closeMode").on("change", (ev) => {
+            this.handControls.handOffsetZDistance = ev.value ? -1.5 : 0; // Update hand distance based on close mode
         });
+
+        // Add a bar to display the target position Z value with annotation on the GUI
+        // this.pane.addBinding({
+        //     get z() {
+        //         return this.handControls?.target[0]?.position?.z || 0;
+        //     }
+        // }, 'z', {
+        //     readonly: true,
+        //     view: 'graph',
+        //     min: -20,
+        //     max: 0,
+        // });
         
         // addInput(this.handControls.target.position, 'z', { label: 'Target Z Position', min: -10, max: 10 });
     }
@@ -139,6 +147,7 @@ export class GameController {
         // Adjust cursor opacity based on collision
         this.handControls.addEventListener("collision", (event) => {
             this.handControls.target[event.handIndex].material.opacity = event.state === "on" ? 0.4 : 1; // Adjust cursor opacity based on collision
+            this.gameHandler.handleCollision("collision", event);
         });
     }
 
@@ -154,13 +163,15 @@ export class GameController {
 
     setupGestureListeners() {
         this.handControls.addEventListener("closed_fist", (ev) => {
-            console.log('Closed Fist', ev.handIndex);
+            // console.log('Closed Fist', ev.handIndex);
             this.handControls.target[ev.handIndex].material.opacity = .4;
+            this.gameHandler.handleGesture("closed_fist", ev.handIndex);
         });
 
         this.handControls.addEventListener("opened_fist", (ev) => {
-            console.log('Opened Fist', ev.handIndex);
+            // console.log('Opened Fist', ev.handIndex);
             this.handControls.target[ev.handIndex].material.opacity = 1;
+            this.gameHandler.handleGesture("opened_fist", ev.handIndex);
         });
     }
 
@@ -170,8 +181,8 @@ export class GameController {
     animate() {
         this.handControls?.animate(); // Animate hand controls if they exist
 
-        if (this.gameStart && this.contents) {
-            this.contents.animate();
+        if (this.gameStart && this.gameHandler) {
+            this.gameHandler.animate();
         }
 
         ScenesManager.render(); // Render the scene
@@ -208,13 +219,13 @@ export class GameController {
         this.phase = phase;
         switch (phase) {
             case 0: 
-                this.contents = new SelectionMenu(this);
+                this.gameHandler = new SelectionMenu(this);
                 break;
             case 1:
-                this.contents = new Phase1(this);
+                this.gameHandler = new Phase1(this);
                 break;
             default:
-                this.contents = null;
+                this.gameHandler = null;
                 break;
         }
     }

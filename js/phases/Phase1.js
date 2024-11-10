@@ -64,4 +64,12 @@ export class Phase1 {
             }
         });
     }
+
+    handleGesture(command, handIndex) {
+
+    }
+
+    handleCollision(command, event) {
+        
+    }
 }
