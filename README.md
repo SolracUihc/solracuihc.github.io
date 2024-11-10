@@ -26,6 +26,11 @@
 ### General GUI
 
 * Click "Back to Menu" to exit to the menu.
+* **Close Mode**:
+    * "Close Mode" assumes that you are sitting right in front of the camera.
+    * When the "Close Mode" is off, we assume that you are standing at least 1 meter away from the camera.
+    * Adjust the `this.handControls.handOffsetZDistance` parameter in `GameController.js` for changing the perceived depth of the hand.
+* Maximum number of hands is set programmatically in `MediaPipeHands.js`.
 
 ### Selection Menu
 
