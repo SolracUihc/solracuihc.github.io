@@ -18,6 +18,10 @@ export class GameController {
         this.gameHandler = null;
 
         this.prevUpdate = Date.now() * 0.0001;
+
+        this.textColor = 'white';
+        this.gridColor = 'white';
+        this.shadowColor = 0xcccccc; // requries to be hex
     }
 
     /**
@@ -47,7 +51,7 @@ export class GameController {
         const planeGeometry = new THREE.PlaneGeometry(100, 100);
         planeGeometry.rotateX(-Math.PI / 2); // Rotate plane to be horizontal
         const planeMaterial = new THREE.ShadowMaterial({
-            color: 0x000000,
+            color: this.shadowColor,//0x000000
             opacity: 0.2, // Semi-transparent shadow
         });
 
@@ -59,7 +63,8 @@ export class GameController {
         // Ground Plane: Grid Helper
         const helper = new THREE.GridHelper(20, 10);
         helper.position.y = -0.9; // Position the grid slightly above the plane
-        helper.material.opacity = 0.25; // Make the grid semi-transparent
+        helper.material.color.set(this.gridColor); // Make the grid white
+        helper.material.opacity = 0.6; // Make the grid semi-transparent
         helper.material.transparent = true;
         ScenesManager.scene.add(helper); // Add grid helper to the scene
 

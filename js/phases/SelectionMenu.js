@@ -80,7 +80,7 @@ export class SelectionMenu {
             context.clearRect(0, 0, canvas.width, canvas.height);
             
             context.font = 'Bold 48px Arial'; // Slightly smaller font to fit more text
-            context.fillStyle = 'black';
+            context.fillStyle = this.gameController.textColor;
             context.textAlign = 'center';
             context.textBaseline = 'middle';
             
@@ -274,7 +274,7 @@ export class SelectionMenu {
         context.clearRect(0, 0, canvas.width, canvas.height);
 
         context.font = 'Bold 24px Arial'; // Font for the selection text
-        context.fillStyle = 'black'; // Color for the selection text
+        context.fillStyle = this.gameController.textColor; // Color for the selection text
         context.textAlign = 'center'; // Align text to the center
         context.textBaseline = 'middle'; // Align text to the middle
 

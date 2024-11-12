@@ -77,11 +77,14 @@ export class TestPhase {
                 handOrientationAngle *= -1; // Make the angle negative if the cross product is negative
             }
 
+            const thumbDirectionVector = hand.children[fingers[1]].position.clone().sub(hand.children[fingers[4]].position);
+
             // Prints
             console.log(`Hand Index: ${handIndex}`);
             console.log(`Hand Orientation Angle: ${handOrientationAngle}`);
             console.log(fingerStates); // Log the string representing finger states
             console.log(ratios);
+            console.log(thumbDirectionVector);
 
             _fingerStates[handIndex] = fingerStates;
             _handOrientations[handIndex] = handOrientationAngle;
