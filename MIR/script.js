@@ -14,7 +14,7 @@ async function loadAudioData() {
         // Populate track selector
         const trackSelector = document.getElementById('track-selector');
         let option = document.createElement('option');
-        option.value = feature.file; // Adjust based on your data structure
+        option.value = feature.beats; // Adjust based on your data structure
         option.textContent = feature.name; // Adjust based on your data structure
         trackSelector.appendChild(option);
 
@@ -23,7 +23,7 @@ async function loadAudioData() {
         feature = await response.json();
 
         option = document.createElement('option');
-        option.value = feature.file; // Adjust based on your data structure
+        option.value = feature.beats; // Adjust based on your data structure
         option.textContent = feature.name; // Adjust based on your data structure
         trackSelector.appendChild(option);
 
