@@ -1,5 +1,5 @@
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-const audioInput = document.getElementById('audio-input');
+const audioSelect = document.getElementById('audio-select');
 const spectrogramCanvas = document.getElementById('spectrogram');
 const beatResultsDiv = document.getElementById('beat-results');
 
@@ -13,19 +13,16 @@ let beatResults = [];
 
 // Load audio and process it
 document.getElementById('load-audio').addEventListener('click', () => {
-    // Resume the AudioContext upon user interaction
-    audioContext.resume().then(() => {
-        console.log('Playback resumed successfully');
+    const selectedAudio = audioSelect.value;
+    if (selectedAudio) {
+        // Resume the AudioContext upon user interaction
+        audioContext.resume().then(() => {
+            console.log('Playback resumed successfully');
 
-        // Check if an audio file is selected
-        const files = audioInput.files;
-        if (files.length > 0) {
-            const file = files[0];
-            const reader = new FileReader();
-
-            // Read the selected audio file
-            reader.onload = function(event) {
-                audioContext.decodeAudioData(event.target.result, (buffer) => {
+            // Fetch the audio file
+            fetch(selectedAudio)
+                .then(response => response.arrayBuffer())
+                .then(data => audioContext.decodeAudioData(data, (buffer) => {
                     playAudio(buffer);
                     frequencyData = drawSpectrogram(buffer);
                     beatResults = detectBeats(buffer);
@@ -33,16 +30,16 @@ document.getElementById('load-audio').addEventListener('click', () => {
                     console.log('Beat Results:', beatResults);
                 }, (error) => {
                     console.error('Error decoding audio data:', error);
+                }))
+                .catch(error => {
+                    console.error('Error fetching audio file:', error);
                 });
-            };
-
-            reader.readAsArrayBuffer(file);
-        } else {
-            alert('Please select an audio file.');
-        }
-    }).catch(error => {
-        console.error('Error resuming playback:', error);
-    });
+        }).catch(error => {
+            console.error('Error resuming playback:', error);
+        });
+    } else {
+        alert('Please select an audio file.');
+    }
 });
 
 // Play the loaded audio
