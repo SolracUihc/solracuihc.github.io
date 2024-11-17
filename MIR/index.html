@@ -7,10 +7,15 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <form id="audio-form">
-        <input type="file" id="audio-input" accept="audio/*" multiple>
-        <button type="button" id="load-audio">Load Audio</button>
-    </form>
+    <h1>Select Audio File</h1>
+    <select id="audio-select">
+        <option value="">--Select an audio file--</option>
+        <option value="https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/SolracUihc-patch-1/MIR/audio/audio1.mp3">Audio 1</option>
+        <option value="https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/SolracUihc-patch-1/MIR/audio/audio2.mp3">Audio 2</option>
+        <option value="https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/SolracUihc-patch-1/MIR/audio/audio3.mp3">Audio 3</option>
+    </select>
+    <button id="load-audio">Load Audio</button>
+    
     <canvas id="spectrogram"></canvas>
     <div id="beat-results"></div>
     <script src="script.js"></script>
