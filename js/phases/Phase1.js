@@ -2,9 +2,11 @@ import * as THREE from "https://esm.sh/three";
 import { GameController } from "../GameController.js";
 import { ScenesManager } from "../ScenesManager.js";
 
-export class Phase1 {
+import { Phase } from "./Phase.js";
+
+export class Phase1 extends Phase {
     constructor(gameController) { //:GameController
-        this.gameController = gameController;
+        super(gameController);
         this.initialize();
     }
 

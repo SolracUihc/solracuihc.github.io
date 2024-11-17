@@ -2,9 +2,12 @@ import * as THREE from "https://esm.sh/three";
 import { GameController } from "../GameController.js";
 import { ScenesManager } from "../ScenesManager.js";
 
-export class SelectionMenu {
+import { Phase } from "./Phase.js";
+
+export class SelectionMenu extends Phase {
     constructor(gameController) { //:GameController
-        this.gameController = gameController;
+        super(gameController);
+
         this.collisions = {}; // Initialize a dictionary to keep track of collisions
         this.prevCollisions = {};
         this.prevFistState = {};
@@ -15,7 +18,7 @@ export class SelectionMenu {
         this.selectedTextObject = null;
 
         this.objectLabelYOffset = 0.2;
-
+        
         this.initialize();
 
         this.showSelectionText("Select an option by closing the fingers.");

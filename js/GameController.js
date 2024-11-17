@@ -5,6 +5,8 @@ import * as THREE from "https://esm.sh/three";
 import { Pane } from "https://esm.sh/tweakpane";
 import { HandControls } from "./HandControls.js";
 import { ScenesManager } from "./ScenesManager.js";
+import { GestureDetector } from "./GestureDetector.js";
+
 import { SelectionMenu } from "./phases/SelectionMenu.js";
 import { Phase1 } from "./phases/Phase1.js"; 
 import { TestPhase } from "./phases/TestPhase.js";
@@ -81,6 +83,8 @@ export class GameController {
             ScenesManager.scene,
             false // true // Set draggable to true
         );
+
+        this.gestureDetector = new GestureDetector(this.handControls);
     }
 
     async reset_cursor_feedbacks() {
