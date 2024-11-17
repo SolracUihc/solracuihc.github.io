@@ -78,7 +78,7 @@ function pauseAudio() {
 
 // Start the game
 function startGame() {
-    const selectedTrack = data_dicts[document.getElementById('track-selector').value]; // Assuming data_dicts holds your data
+    const selectedTrack = document.getElementById('track-selector').value; // Assuming data_dicts holds your data
 
     // Set up event listeners correctly
     document.getElementById('play-button').addEventListener('click', () => {
