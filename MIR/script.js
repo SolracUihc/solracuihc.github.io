@@ -42,6 +42,12 @@ async function loadAudioData() {
     } 
 }
 
+// Event listeners
+document.getElementById('start-button').addEventListener('click', () => {
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('gamePhase').style.display = 'block';
+});
+
 // Declare audio-related variables outside the function to maintain scope
 let audioContext = new (window.AudioContext || window.webkitAudioContext)();
 let audioBufferSourceNode;
@@ -76,27 +82,18 @@ function pauseAudio() {
     }
 }
 
+// Set up event listeners correctly
+document.getElementById('play-button').addEventListener('click', () => {
+    const selectedTrack = document.getElementById('track-selector').value;
+    playAudioFromSpectrogram(selectedTrack.spectrogram);
+});
+document.getElementById('pause-button').addEventListener('click', pauseAudio);
+
 // Start the game
 function startGame() {
-    const selectedTrack = document.getElementById('track-selector').value; // Assuming data_dicts holds your data
-
-    // Set up event listeners correctly
-    document.getElementById('play-button').addEventListener('click', () => {
-        playAudioFromSpectrogram(selectedTrack.spectrogram);
-    });
-    document.getElementById('pause-button').addEventListener('click', pauseAudio);
-
     // Initialize 3D boxes based on audio data
     // Additional game logic goes here
 }
-
-
-// Event listeners
-document.getElementById('start-button').addEventListener('click', () => {
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('gamePhase').style.display = 'block';
-    startGame();
-});
 
 // Initialize
 loadAudioData();
