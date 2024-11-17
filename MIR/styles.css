@@ -3,8 +3,12 @@ body {
     padding: 20px;
 }
 
-canvas {
+select {
+    margin-bottom: 20px;
     width: 100%;
-    height: auto;
-    border: 1px solid #ccc;
+}
+
+#audioData {
+    margin-top: 20px;
+    white-space: pre-wrap;
 }
