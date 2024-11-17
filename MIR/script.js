@@ -20,7 +20,7 @@ audioFiles.forEach(file => {
 // Preview Data
 previewBtn.addEventListener('click', () => {
     const selectedFile = audioSelect.value;
-    fetch(`https://raw.githubusercontent.com/yourusername/yourrepo/main/audio/${selectedFile}`)
+    fetch(`https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/SolracUihc-patch-1/MIR/audio/${selectedFile}`)
         .then(response => response.json())
         .then(data => {
             audioDataDiv.textContent = JSON.stringify(data, null, 2);
