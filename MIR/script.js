@@ -79,8 +79,6 @@ function pauseAudio() {
 // Start the game
 function startGame() {
     const selectedTrack = data_dicts[document.getElementById('track-selector').value]; // Assuming data_dicts holds your data
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('gamePhase').style.display = 'block';
 
     // Set up event listeners correctly
     document.getElementById('play-button').addEventListener('click', () => {
@@ -94,7 +92,11 @@ function startGame() {
 
 
 // Event listeners
-document.getElementById('start-button').addEventListener('click', startGame);
+document.getElementById('start-button').addEventListener('click', () => {
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('gamePhase').style.display = 'block';
+    startGame();
+});
 
 // Initialize
 loadAudioData();
