@@ -27,6 +27,6 @@ previewBtn.addEventListener('click', () => {
         })
         .catch(error => {
             console.error('Error fetching the audio data:', error);
-            audioDataDiv.textContent = 'Error loading data.';
+            audioDataDiv.textContent = 'Error loading data:' + error;
         });
 });
