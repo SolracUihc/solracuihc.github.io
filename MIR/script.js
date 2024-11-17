@@ -13,27 +13,36 @@ let beatResults = [];
 
 // Load audio and process it
 document.getElementById('load-audio').addEventListener('click', () => {
-    analyser.resume().then(() => {
+    // Resume the AudioContext upon user interaction
+    audioContext.resume().then(() => {
         console.log('Playback resumed successfully');
-        // Start playback here
+
+        // Check if an audio file is selected
+        const files = audioInput.files;
+        if (files.length > 0) {
+            const file = files[0];
+            const reader = new FileReader();
+
+            // Read the selected audio file
+            reader.onload = function(event) {
+                audioContext.decodeAudioData(event.target.result, (buffer) => {
+                    playAudio(buffer);
+                    frequencyData = drawSpectrogram(buffer);
+                    beatResults = detectBeats(buffer);
+                    console.log('Frequency Data:', frequencyData);
+                    console.log('Beat Results:', beatResults);
+                }, (error) => {
+                    console.error('Error decoding audio data:', error);
+                });
+            };
+
+            reader.readAsArrayBuffer(file);
+        } else {
+            alert('Please select an audio file.');
+        }
+    }).catch(error => {
+        console.error('Error resuming playback:', error);
     });
-    const files = audioInput.files;
-    if (files.length > 0) {
-        const file = files[0];
-        const reader = new FileReader();
-
-        reader.onload = function(event) {
-            audioContext.decodeAudioData(event.target.result, (buffer) => {
-                playAudio(buffer);
-                frequencyData = drawSpectrogram(buffer);
-                beatResults = detectBeats(buffer);
-                console.log('Frequency Data:', frequencyData);
-                console.log('Beat Results:', beatResults);
-            });
-        };
-
-        reader.readAsArrayBuffer(file);
-    }
 });
 
 // Play the loaded audio
