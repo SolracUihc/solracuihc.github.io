@@ -13,6 +13,10 @@ let beatResults = [];
 
 // Load audio and process it
 document.getElementById('load-audio').addEventListener('click', () => {
+    analyser.resume().then(() => {
+        console.log('Playback resumed successfully');
+        // Start playback here
+    });
     const files = audioInput.files;
     if (files.length > 0) {
         const file = files[0];
