@@ -80,47 +80,47 @@ export class Phase1 extends Phase {
     }
 
     animate() {
-        Fetcher.fetchScene().then(data => {
-            if (data.beat_info === undefined)
-                return;
-            // Move boxes towards the camera
-            this.gameController.objects.forEach((box,i) => {
-                if (box.tag != 'box')
-                    return;
-
-                box.position.x = data.beat_info[i].position.x
-                box.position.y = data.beat_info[i].position.y
-                box.position.z = data.beat_info[i].position.z
-                // box.position.z += 30 * this.gameController.frameTime; // Move box towards the camera
-
-                // // Check if the box has passed the camera
-                // if (box.position.z > 2.5) {
-                //     // Reset the box to a far Z position with random X and Y
-                //     box.position.z = -10; // Reset to far Z
-                //     box.position.x = Math.random() * 2 - 1; // Randomize X position
-                //     box.position.y = Math.random() * 0.5 - 0.25; // Randomize Y position
-                    
-                // }
-                box.material.opacity = 1; // Reset opacity when moved back to far Z
-            });
-        }).catch(error => {
-            console.error('Please make sure that your backend service is up.\n\nError occurred:',error);
-        });
-        // Move boxes towards the camera
-        // this.gameController.objects.forEach((box) => {
-        //     if (box.tag != 'box')
+        // Fetcher.fetchScene().then(data => {
+        //     if (data.beat_info === undefined)
         //         return;
-        //     box.position.z += 30 * this.gameController.frameTime; // Move box towards the camera
+            // Move boxes towards the camera
+        //     this.gameController.objects.forEach((box,i) => {
+        //         if (box.tag != 'box')
+        //             return;
 
-        //     // Check if the box has passed the camera
-        //     if (box.position.z > 2.5) {
-        //         // Reset the box to a far Z position with random X and Y
-        //         box.position.z = -10; // Reset to far Z
-        //         box.position.x = Math.random() * 2 - 1; // Randomize X position
-        //         box.position.y = Math.random() * 0.5 - 0.25; // Randomize Y position
+        //         box.position.x = data.beat_info[i].position.x
+        //         box.position.y = data.beat_info[i].position.y
+        //         box.position.z = data.beat_info[i].position.z
+        //         // box.position.z += 30 * this.gameController.frameTime; // Move box towards the camera
+
+        //         // // Check if the box has passed the camera
+        //         // if (box.position.z > 2.5) {
+        //         //     // Reset the box to a far Z position with random X and Y
+        //         //     box.position.z = -10; // Reset to far Z
+        //         //     box.position.x = Math.random() * 2 - 1; // Randomize X position
+        //         //     box.position.y = Math.random() * 0.5 - 0.25; // Randomize Y position
+                    
+        //         // }
         //         box.material.opacity = 1; // Reset opacity when moved back to far Z
-        //     }
+        //     });
+        // }).catch(error => {
+        //     console.error('Please make sure that your backend service is up.\n\nError occurred:',error);
         // });
+        // Move boxes towards the camera
+        this.gameController.objects.forEach((box) => {
+            if (box.tag != 'box')
+                return;
+            box.position.z += 30 * this.gameController.frameTime; // Move box towards the camera
+
+            // Check if the box has passed the camera
+            if (box.position.z > 2.5) {
+                // Reset the box to a far Z position with random X and Y
+                box.position.z = -10; // Reset to far Z
+                box.position.x = Math.random() * 2 - 1; // Randomize X position
+                box.position.y = Math.random() * 0.5 - 0.25; // Randomize Y position
+                box.material.opacity = 1; // Reset opacity when moved back to far Z
+            }
+        });
 
         // these two lines gets the finger status and hand orientations.
         // will add more later
