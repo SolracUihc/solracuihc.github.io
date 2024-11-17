@@ -7,6 +7,8 @@ async function loadAudioData() {
     loadingMessage.textContent = 'Loading audio data...';
 
     try {
+        let data_dict = {};
+        
         // Fetch first audio feature
         let response = await fetch('audio/havana.json');
         let feature = await response.json();
@@ -14,7 +16,9 @@ async function loadAudioData() {
         // Populate track selector
         const trackSelector = document.getElementById('track-selector');
         let option = document.createElement('option');
-        option.value = feature.beats; // Adjust based on your data structure
+        data_dict["beats"] = feature.beats;
+        data_dict["spectrogram"] = feature.spectrogram;
+        option.value = data_dict; // Adjust based on your data structure
         option.textContent = feature.name; // Adjust based on your data structure
         trackSelector.appendChild(option);
 
@@ -23,7 +27,9 @@ async function loadAudioData() {
         feature = await response.json();
 
         option = document.createElement('option');
-        option.value = feature.beats; // Adjust based on your data structure
+        data_dict["beats"] = feature.beats;
+        data_dict["spectrogram"] = feature.spectrogram;
+        option.value = data_dict; // Adjust based on your data structure
         option.textContent = feature.name; // Adjust based on your data structure
         trackSelector.appendChild(option);
 
