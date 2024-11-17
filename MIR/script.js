@@ -2,7 +2,7 @@
 
 // Load audio data
 async function loadAudioData() {
-    const response = await fetch('audio/audios_features.json');
+    const response = await fetch('audios_features.json');
     const beats = await response.json();
     // Populate track selector
     const trackSelector = document.getElementById('track-selector');
