@@ -5,8 +5,8 @@ const audioDataDiv = document.getElementById('audioData');
 // Load audio files list from GitHub
 const audioFiles = [
     // List your audio JSON files here
-    'badguy.wav.json',
-    'havana.wav.json',
+    'badguy.json',
+    'havana.json',
     // Add more as needed
 ];
 
