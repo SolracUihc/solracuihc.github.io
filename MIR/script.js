@@ -93,6 +93,7 @@ function pauseAudio() {
 // Set up event listeners correctly
 document.getElementById('play-button').addEventListener('click', () => {
     const selectedTrack = document.getElementById('track-selector').value;
+    audioContext.resume();
     playAudioFromSpectrogram(selectedTrack.spectrogram);
 });
 document.getElementById('pause-button').addEventListener('click', pauseAudio);
