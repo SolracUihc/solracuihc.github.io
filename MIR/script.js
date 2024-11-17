@@ -2,23 +2,38 @@
 
 // Load audio data
 async function loadAudioData() {
-    const response = await fetch('audio/havana.json');
-    const feature = await response.json();
-    // Populate track selector
-    const trackSelector = document.getElementById('track-selector');
-    
-    const option = document.createElement('option');
-    option.value = feature.file; // Adjust based on your data structure
-    option.textContent = feature.name; // Adjust based on your data structure
-    trackSelector.appendChild(option);
+    // Display loading message
+    const loadingMessage = document.getElementById('loading-message');
+    loadingMessage.textContent = 'Loading audio data...';
 
-    response = await fetch('audio/badguy.json');
-    feature = await response.json();
+    try {
+        // Fetch first audio feature
+        let response = await fetch('audio/havana.json');
+        let feature = await response.json();
 
-    option = document.createElement('option');
-    option.value = feature.file; // Adjust based on your data structure
-    option.textContent = feature.name; // Adjust based on your data structure
-    trackSelector.appendChild(option);
+        // Populate track selector
+        const trackSelector = document.getElementById('track-selector');
+        let option = document.createElement('option');
+        option.value = feature.file; // Adjust based on your data structure
+        option.textContent = feature.name; // Adjust based on your data structure
+        trackSelector.appendChild(option);
+
+        // Fetch second audio feature
+        response = await fetch('audio/badguy.json');
+        feature = await response.json();
+
+        option = document.createElement('option');
+        option.value = feature.file; // Adjust based on your data structure
+        option.textContent = feature.name; // Adjust based on your data structure
+        trackSelector.appendChild(option);
+
+        // Remove loading message
+        loadingMessage.textContent = 'Finished loading audio data.';
+    } catch (error) {
+        // Handle errors gracefully
+        loadingMessage.textContent = 'Error loading audio data.';
+        console.error("Error fetching audio data:", error);
+    } 
 }
 
 // Start the game
