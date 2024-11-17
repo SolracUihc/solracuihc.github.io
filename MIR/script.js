@@ -85,11 +85,11 @@ function startGame() {
     document.getElementById('menu').style.display = 'none';
     document.getElementById('gamePhase').style.display = 'block';
     // Load and play audio here
-    let audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    let audioBufferSourceNode;
-    let isPlaying = false;
-    document.getElementById('play-button').addEventListener('click', playAudioFromSpectrogram(selectedTrack.spectrogram));
-    document.getElementById('pause-button').addEventListener('click', pauseAudio);
+    //let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    //let audioBufferSourceNode;
+    //let isPlaying = false;
+    //document.getElementById('play-button').addEventListener('click', playAudioFromSpectrogram(selectedTrack.spectrogram));
+    //document.getElementById('pause-button').addEventListener('click', pauseAudio);
     // Initialize 3D boxes based on audio data
     // Additional game logic goes here
 }
