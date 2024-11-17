@@ -48,6 +48,7 @@ export class HandControls extends THREE.EventDispatcher {
     this.handsObjs = [];
     this.closedFist = []; // Initialize closedFist as array
     this.selected = []; // Initialize selected as array
+    this.oldHandCenters = {};
 
     this.distScale = 3;
     this.handScale = .8;
@@ -185,7 +186,7 @@ export class HandControls extends THREE.EventDispatcher {
     const isMobile = window.innerWidth < window.innerHeight;
     this.clip_dist = isMobile ? 4 : 2;
 
-    if (numHands >= 1) {
+    if (numHands >= 0) {
       landmarks.multiHandLandmarks.forEach((handLandmarks, handIndex) => {
         const handObj = this.handsObjs[handIndex];
 

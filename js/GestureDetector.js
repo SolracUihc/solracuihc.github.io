@@ -14,6 +14,8 @@ export class GestureDetector {
         this.handControls = handControls;
         this.fingerStates = {};
         this.handOrientations = {};
+
+        this.thumbDirections = {};
     }
 
     /**
@@ -31,6 +33,7 @@ export class GestureDetector {
 
         var _fingerStates = {};
         var _handOrientations = {};
+        var _thumbDirections = {};
 
         function ignoreZAxis(vector) {
             return new THREE.Vector3(vector.x, vector.y, 0);
@@ -91,7 +94,7 @@ export class GestureDetector {
             }
 
             const thumbDirectionVector = hand.children[fingers[1]].position.clone().sub(hand.children[fingers[4]].position);
-
+            _thumbDirections[handIndex] = thumbDirectionVector;
             // Prints
             // console.log(`Hand Index: ${handIndex}`);
             // console.log(`Hand Orientation Angle: ${handOrientationAngle}`);
@@ -101,10 +104,13 @@ export class GestureDetector {
 
             _fingerStates[handIndex] = fingerStates;
             _handOrientations[handIndex] = handOrientationAngle;
+            
         });
 
+        this.palmCenters = palmCenters.map((x) => x.position);
         this.fingerStates = _fingerStates;
         this.handOrientations = _handOrientations;
+        this.thumbDirections = _thumbDirections;
 
         return this;
     }
