@@ -21,11 +21,6 @@ export class SelectionMenu extends Phase {
         this.objectLabelYOffset = 0.2;
         
         this.initialize();
-        Fetcher.fetchHello().then(data => {
-            console.log(data);
-        }).catch(error => {
-            console.error('Please make sure that your backend service is up.\n\nError occurred:',error);
-        });
         this.showSelectionText("Select an option by closing the fingers.");
     }
 

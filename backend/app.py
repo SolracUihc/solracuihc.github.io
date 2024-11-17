@@ -28,9 +28,12 @@ def get_audio(audio_id):
     except Exception as e:
         return jsonify(error=str(e)), 500
 
-@app.route('/api/start_streaming', methods=['GET'])
-def start_streaming():
+@app.route('/api/start_streaming/<scene_id>', methods=['GET'])
+def start_streaming(scene_id):
     try:
+        MUSIC_OBJECT.stop_playing()
+        print('SCENE START', scene_id)
+        SCENE.initialize_scene(scene_id)
         MUSIC_OBJECT.start_playing()
         return jsonify(message='ok'), 200
 
@@ -46,14 +49,14 @@ def stop_streaming():
     except Exception as e:
         return jsonify(error=str(e)), 500
 
-# @app.route('/api/stream', methods=['GET'])
-# def get_stream():
-#     try:
-#         beat_info = MUSIC_OBJECT.get_stream()
-#         return jsonify(beat_info=beat_info), 200
+@app.route('/api/stream', methods=['GET'])
+def get_stream():
+    try:
+        beat_info = SCENE.get_state()
+        return jsonify(beat_info=beat_info), 200
 
-#     except Exception as e:
-#         return jsonify(error=str(e)), 500
+    except Exception as e:
+        return jsonify(error=str(e)), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
