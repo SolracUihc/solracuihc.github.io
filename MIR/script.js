@@ -2,16 +2,23 @@
 
 // Load audio data
 async function loadAudioData() {
-    const response = await fetch('audios_features.json');
-    const beats = await response.json();
+    const response = await fetch('audio/havana.json');
+    const feature = await response.json();
     // Populate track selector
     const trackSelector = document.getElementById('track-selector');
-    beats.forEach(track => {
-        const option = document.createElement('option');
-        option.value = track.file; // Adjust based on your data structure
-        option.textContent = track.name; // Adjust based on your data structure
-        trackSelector.appendChild(option);
-    });
+    
+    const option = document.createElement('option');
+    option.value = feature.file; // Adjust based on your data structure
+    option.textContent = feature.name; // Adjust based on your data structure
+    trackSelector.appendChild(option);
+
+    response = await fetch('audio/badguy.json');
+    feature = await response.json();
+
+    option = document.createElement('option');
+    option.value = feature.file; // Adjust based on your data structure
+    option.textContent = feature.name; // Adjust based on your data structure
+    trackSelector.appendChild(option);
 }
 
 // Start the game
