@@ -20,13 +20,27 @@ audioFiles.forEach(file => {
 // Preview Data
 previewBtn.addEventListener('click', () => {
     const selectedFile = audioSelect.value;
-    fetch(`https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/SolracUihc-patch-1/MIR/audio/${selectedFile}`)
-        .then(response => response.json())
-        .then(data => {
-            audioDataDiv.textContent = JSON.stringify(data, null, 2);
+    const url = `https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/SolracUihc-patch-1/MIR/audio/${selectedFile}`;
+    
+    console.log('Fetching data from:', url); // Log the URL being fetched
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text(); // Get the response as text first
+        })
+        .then(text => {
+            try {
+                const data = JSON.parse(text); // Parse the text as JSON
+                audioDataDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                console.error('Error parsing JSON:', e);
+                audioDataDiv.textContent = 'Error parsing JSON: ' + e.message;
+            }
         })
         .catch(error => {
             console.error('Error fetching the audio data:', error);
-            audioDataDiv.textContent = 'Error loading data:' + error;
+            audioDataDiv.textContent = 'Error loading data: ' + error.message;
         });
 });
