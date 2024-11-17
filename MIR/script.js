@@ -82,6 +82,8 @@ function pauseAudio() {
 // Start the game
 function startGame() {
     const selectedTrack = document.getElementById('track-selector').value;
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('gamePhase').style.display = 'block';
     // Load and play audio here
     let audioContext = new (window.AudioContext || window.webkitAudioContext)();
     let audioBufferSourceNode;
@@ -89,8 +91,6 @@ function startGame() {
     document.getElementById('play-button').addEventListener('click', playAudioFromSpectrogram(selectedTrack.spectrogram));
     document.getElementById('pause-button').addEventListener('click', pauseAudio);
     // Initialize 3D boxes based on audio data
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('gamePhase').style.display = 'block';
     // Additional game logic goes here
 }
 
