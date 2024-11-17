@@ -3,21 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Audio Application</title>
+    <title>Audio Preview App</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Select Audio File</h1>
-    <select id="audio-select">
-        <option value="">--Select an audio file--</option>
-        <option value="https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/SolracUihc-patch-1/MIR/audio/audio1.mp3">Audio 1</option>
-        <option value="https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/SolracUihc-patch-1/MIR/audio/audio2.mp3">Audio 2</option>
-        <option value="https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/SolracUihc-patch-1/MIR/audio/audio3.mp3">Audio 3</option>
-    </select>
-    <button id="load-audio">Load Audio</button>
-    
-    <canvas id="spectrogram"></canvas>
-    <div id="beat-results"></div>
+    <h1>Audio Preview Application</h1>
+    <select id="audioSelect"></select>
+    <button id="previewBtn">Preview Data</button>
+    <div id="audioData"></div>
+
     <script src="script.js"></script>
 </body>
 </html>
