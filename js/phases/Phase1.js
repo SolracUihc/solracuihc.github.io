@@ -118,7 +118,7 @@ export class Phase1 extends Phase {
     }
 
     handleGesture(command, handIndex) {
-
+        
     }
 
     handleCollision(command, event) {
