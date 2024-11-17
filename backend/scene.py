@@ -1,4 +1,4 @@
-from music import MusicStreamer
+from streamer import MusicStreamer
 
 class Scene:
     def __init__(self, music_object:MusicStreamer):

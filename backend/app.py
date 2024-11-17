@@ -1,12 +1,13 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import music
+from streamer import MusicStreamer
 from scene import Scene
 
 app = Flask(__name__)
 CORS(app)
 
-MUSIC_OBJECT = music.MusicStreamer()
+MUSIC_OBJECT = MusicStreamer()
 SCENE = Scene(MUSIC_OBJECT)
 
 @app.route('/api/hello', methods=['GET'])
