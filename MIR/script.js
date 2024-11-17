@@ -1,6 +1,5 @@
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const audioSelect = document.getElementById('audio-select');
-const spectrogramCanvas = document.getElementById('spectrogram');
 const beatResultsDiv = document.getElementById('beat-results');
 
 // Create an analyser node
@@ -24,7 +23,7 @@ document.getElementById('load-audio').addEventListener('click', () => {
                 .then(response => response.arrayBuffer())
                 .then(data => audioContext.decodeAudioData(data, (buffer) => {
                     playAudio(buffer);
-                    frequencyData = drawSpectrogram(buffer);
+                    frequencyData = getFrequencyData(buffer);
                     beatResults = detectBeats(buffer);
                     console.log('Frequency Data:', frequencyData);
                     console.log('Beat Results:', beatResults);
@@ -51,31 +50,10 @@ function playAudio(buffer) {
     source.start();
 }
 
-// Draw the spectrogram
-function drawSpectrogram(buffer) {
-    const canvasContext = spectrogramCanvas.getContext('2d');
+// Get frequency data (without drawing a spectrogram)
+function getFrequencyData(buffer) {
     const frequencyDataArray = new Uint8Array(analyser.frequencyBinCount);
-    
-    function render() {
-        analyser.getByteFrequencyData(frequencyDataArray);
-        
-        canvasContext.fillStyle = 'black';
-        canvasContext.fillRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height);
-        
-        for (let i = 0; i < frequencyDataArray.length; i++) {
-            const value = frequencyDataArray[i];
-            const percent = value / 256; // Normalize to [0, 1]
-            const height = spectrogramCanvas.height * percent;
-            const offset = spectrogramCanvas.height - height - 1;
-            const barWidth = spectrogramCanvas.width / frequencyDataArray.length;
-            canvasContext.fillStyle = 'hsl(' + (i / frequencyDataArray.length * 360) + ', 100%, 50%)';
-            canvasContext.fillRect(i * barWidth, offset, barWidth, height);
-        }
-
-        requestAnimationFrame(render);
-    }
-
-    render();
+    analyser.getByteFrequencyData(frequencyDataArray);
     return frequencyDataArray; // Return frequency data for further use
 }
 
