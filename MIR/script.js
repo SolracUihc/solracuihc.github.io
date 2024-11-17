@@ -48,7 +48,7 @@ function startGame() {
     // Load and play audio here
     // Initialize 3D boxes based on audio data
     document.getElementById('menu').style.display = 'none';
-    document.getElementById('gameCanvas').style.display = 'block';
+    document.getElementById('gamePhase').style.display = 'block';
     // Additional game logic goes here
 }
 
