@@ -57,6 +57,13 @@ let isPlaying = false;
 function playAudioFromSpectrogram(spectrogram) {
     const numSamples = spectrogram[0].length;
     const numChannels = spectrogram.length;
+
+    // Check if numSamples is 0 and alert the user
+    if (numSamples === 0) {
+        alert("Error: No audio samples available to play.");
+        return; // Exit the function if there are no samples
+    }
+
     const audioBuffer = audioContext.createBuffer(numChannels, numSamples, audioContext.sampleRate);
 
     for (let channel = 0; channel < numChannels; channel++) {
@@ -68,11 +75,12 @@ function playAudioFromSpectrogram(spectrogram) {
     audioBufferSourceNode.connect(audioContext.destination);
     audioBufferSourceNode.start(0);
     isPlaying = true;
-    
+
     audioBufferSourceNode.onended = () => {
         isPlaying = false;
     };
 }
+
 
 // Function to pause the audio
 function pauseAudio() {
