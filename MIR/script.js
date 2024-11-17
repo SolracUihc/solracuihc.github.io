@@ -1,46 +1,31 @@
-const audioSelect = document.getElementById('audioSelect');
-const previewBtn = document.getElementById('previewBtn');
-const audioDataDiv = document.getElementById('audioData');
+// script.js
 
-// Load audio files list from GitHub
-const audioFiles = [
-    // List your audio JSON files here
-    'badguy.json',
-    'havana.json',
-    // Add more as needed
-];
+// Load audio data
+async function loadAudioData() {
+    const response = await fetch('audio/beats.json');
+    const beats = await response.json();
+    // Populate track selector
+    const trackSelector = document.getElementById('track-selector');
+    beats.forEach(track => {
+        const option = document.createElement('option');
+        option.value = track.file; // Adjust based on your data structure
+        option.textContent = track.name; // Adjust based on your data structure
+        trackSelector.appendChild(option);
+    });
+}
 
-audioFiles.forEach(file => {
-    const option = document.createElement('option');
-    option.value = file;
-    option.textContent = file;
-    audioSelect.appendChild(option);
-});
+// Start the game
+function startGame() {
+    const selectedTrack = document.getElementById('track-selector').value;
+    // Load and play audio here
+    // Initialize 3D boxes based on audio data
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('gameCanvas').style.display = 'block';
+    // Additional game logic goes here
+}
 
-// Preview Data
-previewBtn.addEventListener('click', () => {
-    const selectedFile = audioSelect.value;
-    const url = `https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/SolracUihc-patch-1/MIR/audio/${selectedFile}`;
-    
-    console.log('Fetching data from:', url); // Log the URL being fetched
-    fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.text(); // Get the response as text first
-        })
-        .then(text => {
-            try {
-                const data = JSON.parse(text); // Parse the text as JSON
-                audioDataDiv.textContent = JSON.stringify(data, null, 2);
-            } catch (e) {
-                console.error('Error parsing JSON:', e);
-                audioDataDiv.textContent = 'Error parsing JSON: ' + e.message;
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching the audio data:', error);
-            audioDataDiv.textContent = 'Error loading data: ' + error.message;
-        });
-});
+// Event listeners
+document.getElementById('start-button').addEventListener('click', startGame);
+
+// Initialize
+loadAudioData();
