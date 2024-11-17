@@ -14,7 +14,16 @@ body {
 
 #gamePhase {
     display: none; /* Hide until game starts */
+}
+
+#gameCanvas {
     width: 100%;
     height: 100%;
     background-color: black;
+}
+
+#buttons {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
 }
