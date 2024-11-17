@@ -42,10 +42,52 @@ async function loadAudioData() {
     } 
 }
 
+// Function to convert spectrogram to audio
+function playAudioFromSpectrogram(spectrogram) {
+    // Create a new AudioBuffer
+    const numSamples = spectrogram[0].length;
+    const numChannels = spectrogram.length;
+    const audioBuffer = audioContext.createBuffer(numChannels, numSamples, audioContext.sampleRate);
+
+    // Fill the audio buffer with the spectrogram data
+    for (let channel = 0; channel < numChannels; channel++) {
+        audioBuffer.copyToChannel(new Float32Array(spectrogram[channel]), channel);
+    }
+
+    // Create a source node from the audio buffer
+    audioBufferSourceNode = audioContext.createBufferSource();
+    audioBufferSourceNode.buffer = audioBuffer;
+
+    // Connect the source to the audio context's destination (speakers)
+    audioBufferSourceNode.connect(audioContext.destination);
+
+    // Start playing the audio
+    audioBufferSourceNode.start(0);
+    isPlaying = true;
+
+    // Set up an event to reset the play state when the audio ends
+    audioBufferSourceNode.onended = () => {
+        isPlaying = false;
+    };
+}
+
+// Function to pause the audio playback
+function pauseAudio() {
+    if (isPlaying) {
+        audioBufferSourceNode.stop(); // Stop the audio
+        isPlaying = false;
+    }
+}
+
 // Start the game
 function startGame() {
     const selectedTrack = document.getElementById('track-selector').value;
     // Load and play audio here
+    let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    let audioBufferSourceNode;
+    let isPlaying = false;
+    document.getElementById('play-button').addEventListener('click', playAudioFromSpectrogram(selectedTrack.spectrogram));
+    document.getElementById('pause-button').addEventListener('click', pauseAudio);
     // Initialize 3D boxes based on audio data
     document.getElementById('menu').style.display = 'none';
     document.getElementById('gamePhase').style.display = 'block';
