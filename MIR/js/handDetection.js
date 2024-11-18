@@ -1,3 +1,7 @@
+// Import the handpose library
+import * as handpose from '@tensorflow-models/handpose'; // Ensure you have this package installed
+import '@tensorflow/tfjs'; // Import TensorFlow.js if not already included
+
 export class HandDetector {
     constructor() {
         this.model = null;
