@@ -4,13 +4,8 @@
 * Built upon the article: https://tympanus.net/codrops/2024/10/24/creating-a-3d-hand-controller-using-a-webcam-with-mediapipe-and-three-js/
 
 ## Things to do
-* [ ] [Fix] Depth of hand (sensitivity):
-    * [ ] Requries calibration of the size of hand and distance to camera @HandControls.js:update(landmarks).
-* [x] Position of target (track ball):
-    * Adjust it so that it follows the palm.
-* [x] [Fix] Beautify the code for the previous fix.
 
-## Setting Up
+## Setting Up Backend
 
 * Enter the subfolder `backend` and create a new virtual environment:
     ```bash
@@ -46,7 +41,7 @@
     * More: read the code or ask Sam.
 * The `target` now tracks the center of the palm.
 
-## Game Phases
+## 3D_control
 
 ### General GUI
 
@@ -73,11 +68,20 @@
 
 ![alt text](readme-src/image.png)
 
+## Backend
+
+Plan: Processing of music info here
+
+## MIR
+
+Plan: Main UI here
+
 ## Innovation Ideas
 
 * https://www.notion.so/AI-Music-Course-1393e2057e258093a9f7f0fb55184f7f?pvs=4
     * Gesture control of 3d scene
 
-### Problems RN
+## Final Notes
 
-* No constant speed between frames
+* Plan to tidy up the commit history at the end or (do not tidy at all)
+* Just view the vs code control graph for more info, or in github, just filter by the author of the commit.
