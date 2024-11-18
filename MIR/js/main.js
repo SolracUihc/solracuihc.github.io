@@ -10,7 +10,7 @@ import { ScoreManager } from './scoreManagement.js';
 class Game {
     constructor() {
         this.webcam = new WebcamHandler();
-        // this.handDetector = new HandDetector();
+        this.handDetector = new HandDetector();
         this.gameAnimator = new GameAnimator();
         this.handAnimator = new HandAnimator(this.gameAnimator.scene);
         this.dataFetcher = new DataFetcher();
@@ -28,7 +28,7 @@ class Game {
             document.getElementById('loading').classList.remove('hidden');
             
             await this.webcam.initialize();
-            // await this.handDetector.initialize();
+            await this.handDetector.initialize();
             await this.dataFetcher.fetchSongList();
 
             this.setupEventListeners();
@@ -62,6 +62,7 @@ class Game {
 
         this.isRunning = true;
         this.nextBeatIndex = 0;
+        document.getElementById('menu-container').classList.add('hidden');
         
         await this.audioPlayer.loadAudio(this.currentSong.audioUrl);
         this.audioPlayer.play();

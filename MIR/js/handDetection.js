@@ -1,16 +1,44 @@
-// Import the handpose library
-import * as handpose from '@tensorflow-models/handpose'; // Ensure you have this package installed
-import '@tensorflow/tfjs'; // Import TensorFlow.js if not already included
+// Import MediaPipe Hands from CDN
+const mpHands = window.Hands;
 
 export class HandDetector {
     constructor() {
-        this.model = null;
+        this.hands = null;
         this.isInitialized = false;
+        this.lastPrediction = null;
     }
 
     async initialize() {
         try {
-            this.model = await handpose.load();
+            this.hands = new mpHands({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                }
+            });
+
+            // Configure the hand detection
+            this.hands.setOptions({
+                maxNumHands: 1,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+            });
+
+            // Set up the results handler
+            this.hands.onResults((results) => {
+                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                    const palm = results.multiHandLandmarks[0][0]; // First landmark is the wrist/palm
+                    this.lastPrediction = {
+                        x: -palm.x,
+                        y: -palm.y,
+                        z: palm.z,
+                        confidence: results.multiHandedness[0].score
+                    };
+                } else {
+                    this.lastPrediction = null;
+                }
+            });
+
             this.isInitialized = true;
             console.log('Hand detection model loaded');
         } catch (error) {
@@ -25,18 +53,8 @@ export class HandDetector {
         }
 
         try {
-            const predictions = await this.model.estimateHands(video);
-            if (predictions.length > 0) {
-                // Get palm position
-                const palm = predictions[0].landmarks[0];
-                return {
-                    x: -palm[0],
-                    y: -palm[1],
-                    z: palm[2],
-                    confidence: predictions[0].score
-                };
-            }
-            return null;
+            await this.hands.send({ image: video });
+            return this.lastPrediction;
         } catch (error) {
             console.error('Error detecting hands:', error);
             return null;
