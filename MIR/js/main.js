@@ -13,6 +13,7 @@ function startGame() {
     isGameActive = true; // Set game to active
 
     // Hide the start button and show the end game button
+    window.location.href = 'game.html'; // Redirect to home page
     document.getElementById('start-button').classList.add('hidden');
     endGameButton.classList.remove('hidden');
 
