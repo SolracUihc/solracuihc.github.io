@@ -4,23 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game - Web Audio 3D Game</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/styles.css"> <!-- Updated path -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script> <!-- TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script> <!-- Handpose model -->
 </head>
 <body>
     <header>
         <h1>3D Game in Progress</h1>
     </header>
     <main>
-        <!-- Scoreboard displayed in the top right corner -->
         <div id="scoreboard" class="scoreboard">
             <h2>Score: <span id="score">0</span></h2>
         </div>
-        <!-- Game area will be rendered here -->
         <div id="game-area">
-            <!-- 3D animations and interactive elements will be placed here -->
+            <video id="webcam-video" autoplay playsinline style="display: none;"></video> <!-- Hidden video element for webcam feed -->
+            <canvas id="animation-canvas"></canvas> <!-- Canvas for hand animations -->
         </div>
         <button id="end-game-button">End Game</button>
     </main>
-    <script src="js/main.js"></script>
+    <script src="js/webcam.js"></script> <!-- Webcam script -->
+    <script src="js/handDetection.js"></script> <!-- Hand detection script -->
+    <script src="js/handAnimation.js"></script> <!-- Hand animation script -->
+    <script src="js/main.js"></script> <!-- Main application logic -->
 </body>
 </html>
