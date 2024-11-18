@@ -3,32 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Audio Game</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>3D Hand Motion Music Game</title>
+    <link rel="stylesheet" href="css/indexStyles.css">
+    <!-- Three.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- MediaPipe library -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 </head>
 <body>
-    <div id="loading" class="hidden">
-        <div class="spinner"></div>
-        <p>Loading...</p>
+    <div id="game-container"></div>
+    
+    <div id="webcam-container">
+        <video id="webcam" playsinline></video>
     </div>
 
-    <div id="home-page">
-        <h1>3D Audio Game</h1>
-        <div class="song-selection">
-            <h2>Select a Song</h2>
-            <select id="song-category">
-                <option value="all">All Categories</option>
-                <option value="pop">Pop</option>
-                <option value="rock">Rock</option>
-                <option value="classical">Classical</option>
-            </select>
-            <div id="song-list"></div>
-        </div>
-        <button id="start-game" class="btn">Start Game</button>
+    <div id="score-container">
+        Score: <span id="score">0</span>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
-    <script src="js/main.js" type="module"></script>
+    <div id="menu-container">
+        <h2>3D Hand Motion Music Game</h2>
+        <select id="song-category">
+            <option value="pop">Pop Music</option>
+            <option value="rock">Rock</option>
+            <option value="electronic">Electronic</option>
+        </select>
+        <div id="song-list"></div>
+        <button id="start-game">Start Game</button>
+        <button id="end-game" class="hidden">End Game</button>
+    </div>
+
+    <div id="loading">
+        <h2>Loading...</h2>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
