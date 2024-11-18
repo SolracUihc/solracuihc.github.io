@@ -55,7 +55,10 @@ class Game {
     }
 
     async startGame() {
-        if (!this.currentSong) return;
+        if (!this.currentSong) {
+            alert('Please Select a Song First.');
+            return;
+        }
 
         this.isRunning = true;
         this.nextBeatIndex = 0;
@@ -111,6 +114,9 @@ class Game {
     }
 
     async updateSongList(category) {
+        this.currentSong = null;
+        document.getElementById('start-game').className = 'disabled';
+
         const songs = await this.dataFetcher.getSongsByCategory(category);
         const songList = document.getElementById('song-list');
         songList.innerHTML = '';
@@ -120,6 +126,7 @@ class Game {
             button.textContent = song.title;
             button.onclick = () => {
                 this.currentSong = song;
+                document.getElementById('start-game').className = '';
             };
             songList.appendChild(button);
         });
