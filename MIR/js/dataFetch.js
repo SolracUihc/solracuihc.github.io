@@ -1,7 +1,7 @@
 export class DataFetcher {
     constructor() {
         this.songData = null;
-        this.baseUrl = 'https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/SolracUihc-patch-1/MIR/exampleSongData.json';
+        this.baseUrl = 'songData.json';
     }
 
     async fetchSongList() {
@@ -20,7 +20,7 @@ export class DataFetcher {
     }
 
     processSongData(data) {
-        return data.map(song => ({
+        return data.songs.map(song => ({
             id: song.id,
             title: song.title,
             category: song.category,

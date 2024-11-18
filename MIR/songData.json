@@ -1,0 +1,107 @@
+{
+  "songs": [
+    {
+      "id": "song1",
+      "title": "Dancing Queen",
+      "category": "pop",
+      "difficulty": "medium",
+      "audioUrl": "https://ia801509.us.archive.org/24/items/fcbqy/Abba%20-%20Dancing%20Queen.mp3",
+      "beatMap": [
+        {
+          "time": 1.2,
+          "x": 0.5,
+          "y": 0.7,
+          "z": 0,
+          "points": 100
+        },
+        {
+          "time": 2.4,
+          "x": 0.3,
+          "y": 0.4,
+          "z": 0,
+          "points": 150
+        }
+      ]
+    },
+    {
+      "id": "song2",
+      "title": "Bohemian Rhapsody",
+      "category": "rock",
+      "difficulty": "hard",
+      "audioUrl": "https://your-audio-storage.com/songs/bohemian-rhapsody.mp3",
+      "beatMap": [
+        {
+          "time": 0.8,
+          "x": 0.2,
+          "y": 0.3,
+          "z": 0,
+          "points": 100
+        },
+        {
+          "time": 1.6,
+          "x": 0.7,
+          "y": 0.8,
+          "z": 0,
+          "points": 200
+        }
+      ]
+    },
+    {
+      "id": "song3",
+      "title": "Sweet Dreams",
+      "category": "electronic",
+      "difficulty": "easy",
+      "audioUrl": "https://your-audio-storage.com/songs/sweet-dreams.mp3",
+      "beatMap": [
+        {
+          "time": 1.0,
+          "x": 0.4,
+          "y": 0.6,
+          "z": 0,
+          "points": 50
+        },
+        {
+          "time": 2.0,
+          "x": 0.6,
+          "y": 0.5,
+          "z": 0,
+          "points": 100
+        }
+      ]
+    }
+  ],
+  "categories": [
+    {
+      "id": "pop",
+      "name": "Pop Music",
+      "description": "Popular contemporary music"
+    },
+    {
+      "id": "rock",
+      "name": "Rock",
+      "description": "Rock music classics"
+    },
+    {
+      "id": "electronic",
+      "name": "Electronic",
+      "description": "Electronic dance music"
+    }
+  ],
+  "difficulties": [
+    {
+      "id": "easy",
+      "name": "Easy",
+      "speedMultiplier": 1.0
+    },
+    {
+      "id": "medium",
+      "name": "Medium",
+      "speedMultiplier": 1.2
+    },
+    {
+      "id": "hard",
+      "name": "Hard",
+      "speedMultiplier": 1.5
+    }
+  ]
+}

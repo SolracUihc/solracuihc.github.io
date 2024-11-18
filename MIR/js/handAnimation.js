@@ -1,64 +1,150 @@
 export class HandAnimator {
     constructor(scene) {
         this.scene = scene;
-        this.particles = [];
-        this.maxParticles = 50;
-        this.particleGeometry = new THREE.SphereGeometry(0.1, 8, 8);
-        this.particleMaterial = new THREE.MeshBasicMaterial({
-            color: 0x00ff00,
-            transparent: true,
-            opacity: 0.6
-        });
+        this.hands = [
+            { meshes: [], lines: [] },
+            { meshes: [], lines: [] }
+        ];
+        this.connections = [
+            [0, 1], [1, 2], [2, 3], [3, 4],           // thumb
+            [0, 5], [5, 6], [6, 7], [7, 8],           // index
+            [0, 9], [9, 10], [10, 11], [11, 12],      // middle
+            [0, 13], [13, 14], [14, 15], [15, 16],    // ring
+            [0, 17], [17, 18], [18, 19], [19, 20],    // pinky
+            [5, 9], [9, 13], [13, 17]                 // palm
+        ];
+
+        // Materials for each hand
+        this.materials = [
+            {
+                joint: new THREE.MeshBasicMaterial({
+                    color: 0x00ff00,
+                    transparent: true,
+                    opacity: 0.8
+                }),
+                line: new THREE.LineBasicMaterial({
+                    color: 0x00ff00,
+                    transparent: true,
+                    opacity: 0.5,
+                    linewidth: 2
+                })
+            },
+            {
+                joint: new THREE.MeshBasicMaterial({
+                    color: 0x00ffff,
+                    transparent: true,
+                    opacity: 0.8
+                }),
+                line: new THREE.LineBasicMaterial({
+                    color: 0x00ffff,
+                    transparent: true,
+                    opacity: 0.5,
+                    linewidth: 2
+                })
+            }
+        ];
+
+        // Geometry for joints
+        this.jointGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+
+        // Scale and offset parameters
+        this.handScale = 4;
+        this.offsetX = 0;
+        this.offsetY = 0;
+        this.offsetZ = -2;
+
+        // Initialize hand meshes
+        this.initializeHandMeshes();
     }
 
-    updateHandPosition(position) {
-        // Convert webcam coordinates to Three.js coordinates
-        const x = (position.x / 640) * 2 - 1;
-        const y = -(position.y / 480) * 2 + 1;
-        const z = position.z / 100;
+    initializeHandMeshes() {
+        // Create meshes for each hand
+        for (let h = 0; h < 2; h++) {
+            // Create 21 joints (landmarks) for each hand
+            for (let i = 0; i < 21; i++) {
+                const joint = new THREE.Mesh(this.jointGeometry, this.materials[h].joint.clone());
+                joint.visible = false;
+                this.scene.add(joint);
+                this.hands[h].meshes.push(joint);
+            }
 
-        // Create new particles
-        this.createParticle(x, y, z);
-        
-        // Update existing particles
-        this.updateParticles();
-    }
-
-    createParticle(x, y, z) {
-        if (this.particles.length >= this.maxParticles) {
-            const oldParticle = this.particles.shift();
-            this.scene.remove(oldParticle.mesh);
-        }
-
-        const mesh = new THREE.Mesh(this.particleGeometry, this.particleMaterial.clone());
-        mesh.position.set(x, y, z);
-
-        this.particles.push({
-            mesh: mesh,
-            life: 1.0
-        });
-
-        this.scene.add(mesh);
-    }
-
-    updateParticles() {
-        for (let i = this.particles.length - 1; i >= 0; i--) {
-            const particle = this.particles[i];
-            particle.life -= 0.02;
-
-            if (particle.life <= 0) {
-                this.scene.remove(particle.mesh);
-                this.particles.splice(i, 1);
-            } else {
-                particle.mesh.material.opacity = particle.life * 0.6;
+            // Create connections between joints for each hand
+            for (const connection of this.connections) {
+                const geometry = new THREE.BufferGeometry();
+                const line = new THREE.Line(geometry, this.materials[h].line.clone());
+                line.visible = false;
+                this.scene.add(line);
+                this.hands[h].lines.push(line);
             }
         }
     }
 
-    clear() {
-        this.particles.forEach(particle => {
-            this.scene.remove(particle.mesh);
+    updateHandPosition(handsData) {
+        // Hide all hands first
+        this.hideAllHands();
+
+        // Update each detected hand
+        handsData.forEach((handData, handIndex) => {
+            if (handIndex >= 2) return; // Only handle up to 2 hands
+
+            const hand = this.hands[handIndex];
+            const landmarks = handData.landmarks;
+
+            // Update joint positions
+            for (let i = 0; i < landmarks.length; i++) {
+                const landmark = landmarks[i];
+                const mesh = hand.meshes[i];
+                
+                // Convert coordinates to Three.js space
+                const x = (landmark.x - 0.5) * this.handScale + this.offsetX;
+                const y = -(landmark.y - 0.5) * this.handScale + this.offsetY;
+                const z = -landmark.z * this.handScale + this.offsetZ;
+
+                mesh.position.set(x, y, z);
+                mesh.visible = true;
+            }
+
+            // Update connections
+            for (let i = 0; i < this.connections.length; i++) {
+                const [startIdx, endIdx] = this.connections[i];
+                const startPos = hand.meshes[startIdx].position;
+                const endPos = hand.meshes[endIdx].position;
+
+                const geometry = new THREE.BufferGeometry().setFromPoints([startPos, endPos]);
+                hand.lines[i].geometry.dispose();
+                hand.lines[i].geometry = geometry;
+                hand.lines[i].visible = true;
+            }
         });
-        this.particles = [];
+    }
+
+    hideAllHands() {
+        this.hands.forEach(hand => {
+            hand.meshes.forEach(mesh => mesh.visible = false);
+            hand.lines.forEach(line => line.visible = false);
+        });
+    }
+
+    dispose() {
+        // Clean up Three.js objects
+        this.jointGeometry.dispose();
+        this.materials.forEach(material => {
+            material.joint.dispose();
+            material.line.dispose();
+        });
+        
+        this.hands.forEach(hand => {
+            hand.meshes.forEach(mesh => {
+                mesh.geometry.dispose();
+                mesh.material.dispose();
+                this.scene.remove(mesh);
+            });
+            
+            hand.lines.forEach(line => {
+                line.geometry.dispose();
+                line.material.dispose();
+                this.scene.remove(line);
+            });
+        });
     }
 }

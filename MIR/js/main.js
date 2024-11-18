@@ -55,10 +55,14 @@ class Game {
     }
 
     async startGame() {
-        if (!this.currentSong) return;
+        if (!this.currentSong) {
+            alert('Please Select a Song First.');
+            return;
+        }
 
         this.isRunning = true;
         this.nextBeatIndex = 0;
+        document.getElementById('menu-container').classList.add('hidden');
         
         await this.audioPlayer.loadAudio(this.currentSong.audioUrl);
         this.audioPlayer.play();
@@ -71,21 +75,21 @@ class Game {
 
         // Detect hands
         const frame = this.webcam.getFrame();
-        const handPosition = await this.handDetector.detectHands(frame);
+        const handsData = await this.handDetector.detectHands(frame);
 
-        if (handPosition) {
-            // Update hand visualization
-            this.handAnimator.updateHandPosition(handPosition);
+        // Update hand visualization with all detected hands
+        this.handAnimator.updateHandPosition(handsData);
 
-            // Check collisions
+        // Check collisions for each hand
+        handsData.forEach(handData => {
             const collisions = this.collisionDetector.checkCollision(
-                handPosition,
+                { x: handData.x, y: handData.y, z: handData.z },
                 this.gameAnimator.boxes
             );
 
             // Update score
             this.scoreManager.updateScore(collisions);
-        }
+        });
 
         // Update game objects
         const currentTime = this.audioPlayer.getCurrentTime();
@@ -111,6 +115,9 @@ class Game {
     }
 
     async updateSongList(category) {
+        this.currentSong = null;
+        document.getElementById('start-game').className = 'disabled';
+
         const songs = await this.dataFetcher.getSongsByCategory(category);
         const songList = document.getElementById('song-list');
         songList.innerHTML = '';
@@ -120,6 +127,7 @@ class Game {
             button.textContent = song.title;
             button.onclick = () => {
                 this.currentSong = song;
+                document.getElementById('start-game').className = '';
             };
             songList.appendChild(button);
         });

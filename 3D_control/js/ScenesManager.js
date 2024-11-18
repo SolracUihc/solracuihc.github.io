@@ -25,7 +25,8 @@ export class ScenesManager {
   static setup() {
     // Initialize the scene with a background color
     ScenesManager.scene = new Scene();
-    ScenesManager.scene.background = new Color(0xcccccc); // Light gray background
+    ScenesManager.scene.background = new Color(0x000000); // Light gray background
+    // ScenesManager.scene.background = new Color(0xcccccc); // Light gray background
 
     // Create a perspective camera
     ScenesManager.camera = new PerspectiveCamera(

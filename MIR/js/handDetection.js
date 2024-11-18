@@ -1,16 +1,62 @@
-// Import the handpose library
-import * as handpose from '@tensorflow-models/handpose'; // Ensure you have this package installed
-import '@tensorflow/tfjs'; // Import TensorFlow.js if not already included
+// Import MediaPipe Hands from CDN
+const mpHands = window.Hands;
 
 export class HandDetector {
     constructor() {
-        this.model = null;
+        this.hands = null;
         this.isInitialized = false;
+        this.lastLandmarks = [];
+        this.handScale = 0.8;
+        this.distScale = 3;
+        this.handOffsetZDistance = 0;
+    }
+
+    calculateHandDepth(landmarks) {
+        const wrist = landmarks[0];
+        const pointsToCheck = [5, 9, 3, 17];
+        
+        // Calculate average palm size
+        let distances = pointsToCheck.map(index => {
+            const point = landmarks[index];
+            return Math.sqrt(
+                Math.pow(wrist.x - point.x, 2) + 
+                Math.pow(wrist.y - point.y, 2) + 
+                Math.pow(wrist.z - point.z, 2)
+            );
+        });
+        
+        const palmSize = Math.max(...distances);
+        
+        // Calculate depth based on palm size
+        const depth = (palmSize * this.distScale + this.handOffsetZDistance) * this.handScale;
+        return depth;
     }
 
     async initialize() {
         try {
-            this.model = await handpose.load();
+            this.hands = new mpHands({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                }
+            });
+
+            // Configure the hand detection
+            this.hands.setOptions({
+                maxNumHands: 2,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+            });
+
+            // Set up the results handler
+            this.hands.onResults((results) => {
+                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                    this.lastLandmarks = results.multiHandLandmarks;
+                } else {
+                    this.lastLandmarks = [];
+                }
+            });
+
             this.isInitialized = true;
             console.log('Hand detection model loaded');
         } catch (error) {
@@ -25,21 +71,28 @@ export class HandDetector {
         }
 
         try {
-            const predictions = await this.model.estimateHands(video);
-            if (predictions.length > 0) {
-                // Get palm position
-                const palm = predictions[0].landmarks[0];
-                return {
-                    x: -palm[0],
-                    y: -palm[1],
-                    z: palm[2],
-                    confidence: predictions[0].score
-                };
+            await this.hands.send({ image: video });
+            
+            // Return array of hand data
+            if (this.lastLandmarks.length > 0) {
+                return this.lastLandmarks.map((landmarks, index) => {
+                    const palm = landmarks[0];
+                    const depth = this.calculateHandDepth(landmarks);
+                    
+                    return {
+                        landmarks: landmarks,
+                        x: palm.x,
+                        y: palm.y,
+                        z: depth,
+                        confidence: 1.0,  // MediaPipe doesn't provide per-landmark confidence
+                        handIndex: index  // Add hand index for identification
+                    };
+                });
             }
-            return null;
+            return [];
         } catch (error) {
             console.error('Error detecting hands:', error);
-            return null;
+            return [];
         }
     }
 }
