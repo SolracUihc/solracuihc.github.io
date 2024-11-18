@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Web Audio 3D Game</title>
     <link rel="stylesheet" href="styles.css">
-    <title>Music Game</title>
 </head>
 <body>
-    <div id="menu">
-        <h1>Select a Track</h1>
-        <p id='loading-message'></p>
-        <select id="track-selector">
-            <!-- Options will be populated with JS -->
-        </select>
+    <header>
+        <h1>Welcome to the Web Audio 3D Game</h1>
+    </header>
+    <main>
+        <section id="song-selection">
+            <h2>Select a Song</h2>
+            <!-- Placeholder for song selection menu, categories/filters can be added here -->
+            <select id="song-list">
+                <option value="badguy">badguy</option>
+                <option value="havana">havana</option>
+            </select>
+        </section>
         <button id="start-button">Start Game</button>
-    </div>
-    <div id="gamePhase">
-        <canvas id="gameCanvas"></canvas>
-        <div id="buttons">
-            <button id="play-button">PLAY</button>
-            <button id="pause-button">PAUSE</button>
-        </div>
-    </div>
-    <script src="script.js"></script>
+    </main>
+    <script src="main.js"></script>
 </body>
 </html>
