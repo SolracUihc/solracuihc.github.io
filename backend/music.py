@@ -3,6 +3,7 @@ from io import BytesIO
 
 import librosa
 import yt_dlp
+import json
 
 
 def hello():
@@ -31,6 +32,34 @@ def extract_music_features(audio_file):
         "chroma_stft": chroma_stft.tolist(), # 2D array
         "rmse": rmse.tolist() # 1D array
     }
+
+def features2Map(audio_file):
+    # Extract music features using the extract_music_features function
+    music_features = extract_music_features(audio_file)
+    
+    # Extract relevant features
+    onset_times = music_features["onset_times"]
+    chroma_stft = music_features["chroma_stft"]
+    
+    # Prepare time, x, y triplets
+    time_values = []
+    x_values = []
+    y_values = []
+    
+    # Combine onset times with chroma_stft data for time, x, y triplets
+    for onset_time, chroma_data in zip(onset_times, chroma_stft):
+        for idx, chroma_value in enumerate(chroma_data):
+            time_values.append(onset_time)
+            x_values.append(idx)  # Assuming index is used as x value
+            y_values.append(chroma_value)
+    
+    # Create a list of dictionaries containing x, y pairs
+    time_xy_pairs = [{"time": t, "x": 0, "y": 1, "z": 0, "points": 100} for t, x, y in zip(time_values, x_values, y_values)]
+    
+    # Convert to JSON format
+    json_data = json.dumps(time_xy_pairs, indent=4)
+    
+    return json_data
     
 def download_youtube_as_mp3(youtube_url):
     try:
