@@ -1,7 +1,7 @@
 export class DataFetcher {
     constructor() {
         this.songData = null;
-        this.baseUrl = 'https://your-api-endpoint.com/songs';
+        this.baseUrl = 'https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/SolracUihc-patch-1/MIR/exampleSongData.json';
     }
 
     async fetchSongList() {
