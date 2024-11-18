@@ -241,6 +241,7 @@ export class HandControls extends THREE.EventDispatcher {
       });
     }
   }
+    
 
   /**
    * Calculate the color corresponding to the depth
