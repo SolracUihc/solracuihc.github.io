@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Audio Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="loading" class="hidden">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <div id="home-page">
+        <h1>3D Audio Game</h1>
+        <div class="song-selection">
+            <h2>Select a Song</h2>
+            <select id="song-category">
+                <option value="all">All Categories</option>
+                <option value="pop">Pop</option>
+                <option value="rock">Rock</option>
+                <option value="classical">Classical</option>
+            </select>
+            <div id="song-list"></div>
+        </div>
+        <button id="start-game" class="btn">Start Game</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
+    <script src="js/main.js" type="module"></script>
+</body>
+</html>
