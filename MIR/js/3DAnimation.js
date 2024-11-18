@@ -14,7 +14,8 @@ export class GameAnimator {
         document.getElementById('game-container').appendChild(this.renderer.domElement);
 
         // Setup camera
-        this.camera.position.z = 5;
+        this.camera.position.set(0, 2, 5);
+        this.camera.lookAt(0, 0, 0);
 
         // Add lights
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -23,6 +24,14 @@ export class GameAnimator {
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
         directionalLight.position.set(0, 1, 2);
         this.scene.add(directionalLight);
+
+        // Add grid
+        const gridHelper = new THREE.GridHelper(10, 20, 0x444444, 0x222222);
+        this.scene.add(gridHelper);
+
+        // // Add coordinate axes
+        // const axesHelper = new THREE.AxesHelper(5);
+        // this.scene.add(axesHelper);
 
         // Handle window resize
         window.addEventListener('resize', () => this.onWindowResize(), false);

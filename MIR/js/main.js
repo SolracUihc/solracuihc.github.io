@@ -75,21 +75,21 @@ class Game {
 
         // Detect hands
         const frame = this.webcam.getFrame();
-        const handPosition = await this.handDetector.detectHands(frame);
+        const handsData = await this.handDetector.detectHands(frame);
 
-        if (handPosition) {
-            // Update hand visualization
-            this.handAnimator.updateHandPosition(handPosition);
+        // Update hand visualization with all detected hands
+        this.handAnimator.updateHandPosition(handsData);
 
-            // Check collisions
+        // Check collisions for each hand
+        handsData.forEach(handData => {
             const collisions = this.collisionDetector.checkCollision(
-                handPosition,
+                { x: handData.x, y: handData.y, z: handData.z },
                 this.gameAnimator.boxes
             );
 
             // Update score
             this.scoreManager.updateScore(collisions);
-        }
+        });
 
         // Update game objects
         const currentTime = this.audioPlayer.getCurrentTime();
