@@ -14,8 +14,8 @@ export class GameAnimator {
         // Setup renderer with shadow support
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setClearColor(0x000000);
-        this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        // this.renderer.shadowMap.enabled = true;
+        // this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.getElementById('game-container').appendChild(this.renderer.domElement);
 
         // Setup camera
@@ -28,17 +28,17 @@ export class GameAnimator {
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(5, 5, 5);
-        directionalLight.castShadow = true;
-        directionalLight.shadow.camera.near = 0.1;
-        directionalLight.shadow.camera.far = 20;
-        directionalLight.shadow.camera.left = -10;
-        directionalLight.shadow.camera.right = 10;
-        directionalLight.shadow.camera.top = 10;
-        directionalLight.shadow.camera.bottom = -10;
-        directionalLight.shadow.mapSize.width = 2048;
-        directionalLight.shadow.mapSize.height = 2048;
+        // directionalLight.castShadow = true;
+        // directionalLight.shadow.camera.near = 0.1;
+        // directionalLight.shadow.camera.far = 20;
+        // directionalLight.shadow.camera.left = -10;
+        // directionalLight.shadow.camera.right = 10;
+        // directionalLight.shadow.camera.top = 10;
+        // directionalLight.shadow.camera.bottom = -10;
+        // directionalLight.shadow.mapSize.width = 2048;
+        // directionalLight.shadow.mapSize.height = 2048;
         // Make shadows white
-        directionalLight.shadow.bias = -0.001;
+        // directionalLight.shadow.bias = -0.001;
         this.scene.add(directionalLight);
 
         // Add ground plane for white shadows
@@ -50,11 +50,11 @@ export class GameAnimator {
             transparent: true,
             opacity: 0.95
         });
-        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-        plane.rotation.x = -Math.PI / 2;
-        plane.position.y = -0.01; // Slightly below 0 to avoid z-fighting
-        plane.receiveShadow = true;
-        this.scene.add(plane);
+        // const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        // plane.rotation.x = -Math.PI / 2;
+        // plane.position.y = -0.01; // Slightly below 0 to avoid z-fighting
+        // // plane.receiveShadow = true;
+        // this.scene.add(plane);
 
         // Add grid
         const gridHelper = new THREE.GridHelper(10, 20, 0x444444, 0x222222);
@@ -81,7 +81,7 @@ export class GameAnimator {
         );
 
         // Enable shadow casting for boxes
-        box.castShadow = true;
+        // box.castShadow = true;
 
         box.userData = {
             points: beatData.points,

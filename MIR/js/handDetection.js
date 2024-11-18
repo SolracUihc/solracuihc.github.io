@@ -8,7 +8,7 @@ export class HandDetector {
         this.lastLandmarks = [];
         this.handScale = 0.8;
         this.distScale = 3;
-        this.handOffsetZDistance = 0;
+        this.handOffsetZDistance = -2;
     }
 
     calculateHandDepth(landmarks) {

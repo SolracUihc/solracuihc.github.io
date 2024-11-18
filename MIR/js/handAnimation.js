@@ -55,6 +55,7 @@ export class HandAnimator extends THREE.EventDispatcher {
         this.jointGeometry = new THREE.SphereGeometry(0.05, 16, 16);
 
         // Scale and offset parameters
+        this.distScale = 3;
         this.handScale = 4;
         this.offsetX = 0;
         this.offsetY = 0;
@@ -191,20 +192,16 @@ export class HandAnimator extends THREE.EventDispatcher {
                 
                 // Convert coordinates to Three.js space
                 // Flip X coordinate to match mirrored webcam view
-                console.log(landmark, depth, wrist, handData);
+                console.log(landmark, depth, wrist, handData, landmark.x/depth-wrist.x);
 
-                let x = (landmark.x/depth-wrist.x)*this.handScale+this.distScale*wrist.x;
-                let y = (landmark.y/depth-wrist.y)*this.handScale+this.distScale*wrist.y;
-                let z = landmark.z-depth2Offset*20;
+                let x = -landmark.x + .75;
+                let y = -landmark.y + .75;
+                let z = landmark.z;
 
-                x = -((x - 0.5) * this.handScale + this.offsetX);
-                y = -(y - 0.5) * this.handScale + this.offsetY;
-                z = -z * this.handScale + this.offsetZ;
-                // x: (palm.x/depth-wrist.x)*this.handScale+this.distScale*wrist.x,
-                // y: (palm.y/depth-wrist.y)*this.handScale+this.distScale*wrist.y,
-                // z: palm.z-depth2Offset*20,
-                console.log(x,y,z);
-                
+                x = (x/depth-wrist.x)*this.handScale+this.distScale*wrist.x;
+                y = (y/depth-wrist.y)*this.handScale+this.distScale*wrist.y;
+                z = z-depth2Offset*2;
+
                 mesh.position.set(x, y, z);
                 mesh.visible = true;
             }
