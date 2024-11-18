@@ -36,7 +36,7 @@ class Game {
             document.getElementById('loading').classList.add('hidden');
         } catch (error) {
             console.error('Initialization error:', error);
-            alert('Failed to initialize game. Please check console for details.');
+            alert('Failed to initialize game. Please check console for details. Error:' + error);
         }
     }
 
