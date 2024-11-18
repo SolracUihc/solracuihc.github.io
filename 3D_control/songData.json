@@ -1,0 +1,28 @@
+{
+    "songs": [
+        {
+            "id": "song1",
+            "title": "Example Pop Song 1",
+            "category": "pop",
+            "url": "path/to/song1.mp3",
+            "duration": 180,
+            "bpm": 120
+        },
+        {
+            "id": "song2",
+            "title": "Example Rock Song 1",
+            "category": "rock",
+            "url": "path/to/song2.mp3",
+            "duration": 240,
+            "bpm": 140
+        },
+        {
+            "id": "song3",
+            "title": "Example Electronic Song 1",
+            "category": "electronic",
+            "url": "path/to/song3.mp3",
+            "duration": 200,
+            "bpm": 128
+        }
+    ]
+}
