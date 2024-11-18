@@ -1,5 +1,6 @@
-export class HandAnimator {
+export class HandAnimator extends THREE.EventDispatcher {
     constructor(scene) {
+        super();
         this.scene = scene;
         this.hands = [
             { meshes: [], lines: [] },
@@ -17,10 +18,13 @@ export class HandAnimator {
         // Materials for each hand
         this.materials = [
             {
-                joint: new THREE.MeshBasicMaterial({
+                joint: new THREE.MeshStandardMaterial({
                     color: 0x00ff00,
                     transparent: true,
-                    opacity: 0.8
+                    opacity: 0.8,
+                    roughness: 0.3,
+                    metalness: 0.2,
+                    shadowSide: THREE.FrontSide
                 }),
                 line: new THREE.LineBasicMaterial({
                     color: 0x00ff00,
@@ -30,10 +34,13 @@ export class HandAnimator {
                 })
             },
             {
-                joint: new THREE.MeshBasicMaterial({
+                joint: new THREE.MeshStandardMaterial({
                     color: 0x00ffff,
                     transparent: true,
-                    opacity: 0.8
+                    opacity: 0.8,
+                    roughness: 0.3,
+                    metalness: 0.2,
+                    shadowSide: THREE.FrontSide
                 }),
                 line: new THREE.LineBasicMaterial({
                     color: 0x00ffff,
@@ -45,7 +52,7 @@ export class HandAnimator {
         ];
 
         // Geometry for joints
-        this.jointGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+        this.jointGeometry = new THREE.SphereGeometry(0.05, 16, 16);
 
         // Scale and offset parameters
         this.handScale = 4;
@@ -53,8 +60,42 @@ export class HandAnimator {
         this.offsetY = 0;
         this.offsetZ = -2;
 
-        // Initialize hand meshes
+        // Gesture detection properties
+        this.targets = [];
+        this.closedFists = [false, false];
+        this.selected = [null, null];
+        this.gestureCompute = {
+            depthFrom: new THREE.Vector3(),
+            depthTo: new THREE.Vector3(),
+            from: new THREE.Vector3(),
+            to: new THREE.Vector3(),
+        };
+        this.distanceToGrab = 0.25;
+
+        // Initialize hand meshes and targets
         this.initializeHandMeshes();
+        this.initializeTargets();
+    }
+
+    initializeTargets() {
+        for (let i = 0; i < 2; i++) {
+            const cursorMat = new THREE.MeshStandardMaterial({
+                color: this.materials[i].joint.color,
+                transparent: true,
+                opacity: 0.8,
+                roughness: 0.3,
+                metalness: 0.2
+            });
+
+            const cursor = new THREE.Mesh(
+                new THREE.SphereGeometry(0.1, 32, 16),
+                cursorMat
+            );
+            cursor.castShadow = true;
+            cursor.visible = false;
+            this.scene.add(cursor);
+            this.targets.push(cursor);
+        }
     }
 
     initializeHandMeshes() {
@@ -64,6 +105,8 @@ export class HandAnimator {
             for (let i = 0; i < 21; i++) {
                 const joint = new THREE.Mesh(this.jointGeometry, this.materials[h].joint.clone());
                 joint.visible = false;
+                joint.castShadow = true;
+                joint.receiveShadow = false;
                 this.scene.add(joint);
                 this.hands[h].meshes.push(joint);
             }
@@ -79,6 +122,54 @@ export class HandAnimator {
         }
     }
 
+    calculateGestures(handIndex, landmarks) {
+        const hand = this.hands[handIndex];
+        
+        // Calculate palm-finger ratio for fist detection
+        const node0Pos = hand.meshes[0].position;
+        const node9Pos = hand.meshes[9].position;
+        const node12Pos = hand.meshes[12].position;
+        const palmFingerRatio = node12Pos.clone().sub(node0Pos).length() / 
+                               node9Pos.clone().sub(node0Pos).length();
+        
+        // Update fist state
+        const wasClosed = this.closedFists[handIndex];
+        this.closedFists[handIndex] = palmFingerRatio < 1.3;
+        
+        // Emit events on state change
+        if (this.closedFists[handIndex] !== wasClosed) {
+            if (this.closedFists[handIndex]) {
+                this.dispatchEvent({ type: "closed_fist", handIndex });
+            } else {
+                this.dispatchEvent({ type: "opened_fist", handIndex });
+                if (this.selected[handIndex]) {
+                    this.dispatchEvent({
+                        type: "drag_end",
+                        object: this.selected[handIndex],
+                        handIndex
+                    });
+                    this.selected[handIndex] = null;
+                }
+            }
+        }
+
+        // Update target position (hand center)
+        const indices = [0, 5, 9, 13, 17];
+        let sumX = 0, sumY = 0, sumZ = 0;
+        indices.forEach(index => {
+            sumX += hand.meshes[index].position.x;
+            sumY += hand.meshes[index].position.y;
+            sumZ += hand.meshes[index].position.z;
+        });
+        const numPoints = indices.length;
+        this.targets[handIndex].position.set(
+            sumX / numPoints,
+            sumY / numPoints,
+            sumZ / numPoints
+        );
+        this.targets[handIndex].visible = true;
+    }
+
     updateHandPosition(handsData) {
         // Hide all hands first
         this.hideAllHands();
@@ -89,6 +180,9 @@ export class HandAnimator {
 
             const hand = this.hands[handIndex];
             const landmarks = handData.landmarks;
+            const depth = handData.depth;
+            const depth2Offset = handData.depth2Offset;
+            const wrist = handData.wrist;
 
             // Update joint positions
             for (let i = 0; i < landmarks.length; i++) {
@@ -96,10 +190,21 @@ export class HandAnimator {
                 const mesh = hand.meshes[i];
                 
                 // Convert coordinates to Three.js space
-                const x = (landmark.x - 0.5) * this.handScale + this.offsetX;
-                const y = -(landmark.y - 0.5) * this.handScale + this.offsetY;
-                const z = -landmark.z * this.handScale + this.offsetZ;
+                // Flip X coordinate to match mirrored webcam view
+                console.log(landmark, depth, wrist, handData);
 
+                let x = (landmark.x/depth-wrist.x)*this.handScale+this.distScale*wrist.x;
+                let y = (landmark.y/depth-wrist.y)*this.handScale+this.distScale*wrist.y;
+                let z = landmark.z-depth2Offset*20;
+
+                x = -((x - 0.5) * this.handScale + this.offsetX);
+                y = -(y - 0.5) * this.handScale + this.offsetY;
+                z = -z * this.handScale + this.offsetZ;
+                // x: (palm.x/depth-wrist.x)*this.handScale+this.distScale*wrist.x,
+                // y: (palm.y/depth-wrist.y)*this.handScale+this.distScale*wrist.y,
+                // z: palm.z-depth2Offset*20,
+                console.log(x,y,z);
+                
                 mesh.position.set(x, y, z);
                 mesh.visible = true;
             }
@@ -115,6 +220,9 @@ export class HandAnimator {
                 hand.lines[i].geometry = geometry;
                 hand.lines[i].visible = true;
             }
+
+            // Calculate gestures
+            this.calculateGestures(handIndex, landmarks);
         });
     }
 
@@ -122,6 +230,65 @@ export class HandAnimator {
         this.hands.forEach(hand => {
             hand.meshes.forEach(mesh => mesh.visible = false);
             hand.lines.forEach(line => line.visible = false);
+        });
+        this.targets.forEach(target => target.visible = false);
+    }
+
+    checkCollisions(objects) {
+        if (!objects || !objects.length) return;
+
+        // Reset object states
+        objects.forEach(obj => {
+            if (obj.material) {
+                obj.material.opacity = 1;
+            }
+            obj.userData.hasCollision = false;
+        });
+
+        // Check collisions for each hand
+        this.targets.forEach((target, handIndex) => {
+            if (!target.visible) return;
+
+            const targetBox = new THREE.Box3().setFromObject(target);
+            const collidingObjects = objects.filter(obj => {
+                const objBox = new THREE.Box3().setFromObject(obj);
+                return targetBox.intersectsBox(objBox);
+            });
+
+            if (collidingObjects.length > 0) {
+                collidingObjects.forEach(obj => {
+                    obj.userData.hasCollision = true;
+                    if (this.closedFists[handIndex] && !this.selected[handIndex]) {
+                        this.selected[handIndex] = obj;
+                        this.dispatchEvent({ 
+                            type: "drag_start", 
+                            object: obj, 
+                            handIndex 
+                        });
+                    }
+                    if (obj.material) {
+                        obj.material.opacity = 0.4;
+                    }
+                });
+                this.dispatchEvent({ 
+                    type: "collision", 
+                    state: "on", 
+                    objects: collidingObjects, 
+                    handIndex 
+                });
+            } else if (!this.selected.some(s => s !== null)) {
+                this.dispatchEvent({ 
+                    type: "collision", 
+                    state: "off", 
+                    objects: null, 
+                    handIndex 
+                });
+            }
+
+            // Update selected object position
+            if (this.selected[handIndex] && this.closedFists[handIndex]) {
+                this.selected[handIndex].position.lerp(target.position, 0.3);
+            }
         });
     }
 
@@ -145,6 +312,12 @@ export class HandAnimator {
                 line.material.dispose();
                 this.scene.remove(line);
             });
+        });
+
+        this.targets.forEach(target => {
+            target.geometry.dispose();
+            target.material.dispose();
+            this.scene.remove(target);
         });
     }
 }

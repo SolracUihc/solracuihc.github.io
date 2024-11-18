@@ -28,8 +28,8 @@ export class HandDetector {
         const palmSize = Math.max(...distances);
         
         // Calculate depth based on palm size
-        const depth = (palmSize * this.distScale + this.handOffsetZDistance) * this.handScale;
-        return depth;
+        const depth = palmSize * 10;
+        return [depth, depth+this.handOffsetZDistance, wrist];
     }
 
     async initialize() {
@@ -77,13 +77,13 @@ export class HandDetector {
             if (this.lastLandmarks.length > 0) {
                 return this.lastLandmarks.map((landmarks, index) => {
                     const palm = landmarks[0];
-                    const depth = this.calculateHandDepth(landmarks);
-                    
+                    let [depth, depth2Offset, wrist] = this.calculateHandDepth(landmarks);
+                    console.log(depth);
                     return {
                         landmarks: landmarks,
-                        x: palm.x,
-                        y: palm.y,
-                        z: depth,
+                        depth: depth,
+                        depth2Offset: depth2Offset,
+                        wrist: wrist,
                         confidence: 1.0,  // MediaPipe doesn't provide per-landmark confidence
                         handIndex: index  // Add hand index for identification
                     };

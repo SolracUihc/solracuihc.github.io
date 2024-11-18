@@ -2,6 +2,9 @@ export class WebcamHandler {
     constructor() {
         this.video = document.querySelector('#webcam');
         this.stream = null;
+        
+        // Apply horizontal flip to video element
+        this.video.style.transform = 'scaleX(-1)';
     }
 
     async initialize() {
