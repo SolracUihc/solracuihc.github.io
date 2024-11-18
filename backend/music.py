@@ -5,10 +5,6 @@ import librosa
 import yt_dlp
 
 
-def hello():
-    message = "Hello from Flask!"
-    return message
-
 def extract_music_features(audio_file):
     # Load audio file
     y, sr = librosa.load(audio_file)
