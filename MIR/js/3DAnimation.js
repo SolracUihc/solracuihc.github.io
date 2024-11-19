@@ -39,16 +39,20 @@ export class GameAnimator {
         this.scene.add(directionalLight);
 
         // Create ground plane
-        this.planeGeometry = new THREE.PlaneGeometry(10, 10, 10, 10);
+        this.planeGeometry = new THREE.PlaneGeometry(10, 10, 20, 20);
         this.planeMaterial = new THREE.MeshStandardMaterial({
             color: 0x000000,
             roughness: 0.4,
             metalness: 0.2,
             transparent: true,
-            opacity: 0.95
+            opacity: 0.5
         });
         this.groundPlane = new THREE.Mesh(this.planeGeometry, this.planeMaterial);
         this.groundPlane.rotation.x = -Math.PI / 2;
+        
+        // Set the y position lower
+        this.groundPlane.position.y = -2; // Adjust this value as needed
+        
         this.scene.add(this.groundPlane);
 
         // Add grid
