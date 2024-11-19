@@ -197,7 +197,7 @@ class Game {
     updateBeats(currentTime) {
         while (
             this.nextBeatIndex < this.currentSong.beatMap.length &&
-            this.currentSong.beatMap[this.nextBeatIndex].time <= currentTime + 2
+            this.currentSong.beatMap[this.nextBeatIndex].time <= currentTime
         ) {
             const beatData = this.currentSong.beatMap[this.nextBeatIndex];
             this.gameAnimator.createBox(beatData);

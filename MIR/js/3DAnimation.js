@@ -96,13 +96,13 @@ export class GameAnimator {
         return box;
     }
 
-    updateBoxes(currentTime, speed = 0.1) {
+    updateBoxes(currentTime, speed = 10) {
         if (this.lastTime === undefined) {
             this.lastTime = currentTime;
             return;
         }
 
-        const timeDiff = (currentTime - this.lastTime)*100;
+        const timeDiff = currentTime - this.lastTime;
         this.lastTime = currentTime;
 
         for (let i = this.boxes.length - 1; i >= 0; i--) {
