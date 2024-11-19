@@ -3,7 +3,7 @@
 ## References
 * Built upon the article: https://tympanus.net/codrops/2024/10/24/creating-a-3d-hand-controller-using-a-webcam-with-mediapipe-and-three-js/
 
-## Things to do
+## Things to Do
 
 > [!WARNING] 
 > Currently the song path CANNOT be youtube video. 
@@ -11,7 +11,16 @@
 >
 > Also, please make sure that the LOCAL backend server is running and they have SAME BACKEND FILES as the frontend.
 
-* Update how the boxes move.
+**Time Accuracy**
+* The boxes should ARRIVE at the player's side ON THE BEAT, instead of being CREATED on the beat.
+* There should be some kind of hint showing WHEN the player should hit the boxes.
+
+**Gameplay**
+* Update how the boxes move. Linear motion is boring.
+* Adjust the shapes and speeds of the boxes.
+
+**Precomputing**
+* Precompute the beatMaps beforehand may allow a smoother experience, but it's also okay to just keep it.
 
 ## Recent Updates
 
