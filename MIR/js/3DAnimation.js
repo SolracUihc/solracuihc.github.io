@@ -47,9 +47,9 @@ export class GameAnimator {
 
         const box = new THREE.Mesh(geometry, material);
         box.position.set(
-            beatData.position.x * 4 - 2, // Scale and center x position
-            beatData.position.y * 4 - 2, // Scale and center y position
-            -20 // Start far away
+            beatData.position.x * 4 - 0.5, // Scale and center x position
+            beatData.position.y * 4 + 1.5, // Scale and center y position
+            -10 // Start far away
         );
 
         box.userData = {
