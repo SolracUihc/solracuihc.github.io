@@ -118,7 +118,7 @@ class Game {
                 console.log('Loaded beatMap from API');
             }
 
-            console.log('BM', this.currentSong.beatMap);
+            // console.log('BM', this.currentSong.beatMap);
 
             await this.audioPlayer.loadAudio(this.currentSong.audioUrl);
             
@@ -126,13 +126,29 @@ class Game {
             document.getElementById('loading').classList.add('hidden');
             
             this.gameAnimator.reset_seed(this.currentSong.audioUrl);
-            this.audioPlayer.play();
-            this.gameLoop();
+
+            // 3 2 1 
+            document.getElementById('countdown').classList.remove('hidden'); 
+            document.getElementById('countdown').querySelector('h1').textContent = 3;
+            this.countdownValue = 3;
+            this.countdownInterval = setInterval(this.countdownStartGame.bind(this), 1000);
         } catch (error) {
             console.log(error.message);
             console.error('Error loading game:', error);
             alert('Failed to load the game. Please try again.');
             this.reloadMenu();
+        }
+    }
+
+    countdownStartGame() {
+        this.countdownValue -= 1;
+        document.getElementById('countdown').querySelector('h1').textContent = this.countdownValue != 0 ? this.countdownValue : "Ready?";
+        console.log('COUNTING', this.countdownValue);
+        if (this.countdownValue < 0) {
+            clearInterval(this.countdownInterval);
+            document.getElementById('countdown').classList.add('hidden');
+            this.audioPlayer.play();
+            this.gameLoop();
         }
     }
 
