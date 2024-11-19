@@ -11,7 +11,6 @@ export class GameAnimator {
         this.boxes = [];
         this.boxScale = 1;
         this.lastTime = undefined;
-        this.backgroundPlane = null;
 
         this.boxMinX = settings?.boxMinX ?? -2;
         this.boxMaxX = settings?.boxMaxX ?? 2;
@@ -34,29 +33,30 @@ export class GameAnimator {
         // Add lights
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         this.scene.add(ambientLight);
+
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(5, 5, 5);
         this.scene.add(directionalLight);
 
-        // Add background plane
-        this.addBackgroundPlane();
+        // Create ground plane
+        this.planeGeometry = new THREE.PlaneGeometry(10, 10, 10, 10);
+        this.planeMaterial = new THREE.MeshStandardMaterial({
+            color: 0x000000,
+            roughness: 0.4,
+            metalness: 0.2,
+            transparent: true,
+            opacity: 0.95
+        });
+        this.groundPlane = new THREE.Mesh(this.planeGeometry, this.planeMaterial);
+        this.groundPlane.rotation.x = -Math.PI / 2;
+        this.scene.add(this.groundPlane);
 
         // Add grid
         const gridHelper = new THREE.GridHelper(10, 20, 0x444444, 0x222222);
-        gridHelper.position.y = 0;
         this.scene.add(gridHelper);
 
         // Handle window resize
         window.addEventListener('resize', () => this.onWindowResize(), false);
-    }
-
-    addBackgroundPlane() {
-        const geometry = new THREE.PlaneGeometry(10, 10);
-        const material = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
-        this.backgroundPlane = new THREE.Mesh(geometry, material);
-        this.backgroundPlane.rotation.x = Math.PI / 2; // Rotate to horizontal
-        this.backgroundPlane.position.y = -0.1; // Position slightly below the grid
-        this.scene.add(this.backgroundPlane);
     }
 
     reset_seed(audio_file) {
@@ -74,9 +74,12 @@ export class GameAnimator {
         let rand = THREE.MathUtils.seededRandom();
         material.color.setHSL(rand, 1, 0.5);
 
+        rand = (rand * 2 - 1) * 2;
+        rand = THREE.MathUtils.clamp(rand, -1.5, 1.5);
+
         const box = new THREE.Mesh(geometry, material);
         box.position.set(
-            (beatData.x * (this.boxMaxX - this.boxMinX) + this.boxMinX) * this.boxScale,
+            rand * (beatData.x * (this.boxMaxX - this.boxMinX) + this.boxMinX) * this.boxScale,
             (beatData.y * (this.boxMaxY - this.boxMinY) + this.boxMinY) * this.boxScale,
             -20
         );
@@ -89,15 +92,24 @@ export class GameAnimator {
 
         this.boxes.push(box);
         this.scene.add(box);
-        this.animateBackground(beatData); // Animate background based on beat
         return box;
     }
 
-    animateBackground(beatData) {
-        // Example: Change background color based on beat intensity
-        const intensity = Math.min(Math.max(beatData.x, 0), 1); // Ensure intensity is between 0 and 1
-        const color = new THREE.Color(intensity, 0, 1 - intensity); // Create a color based on intensity
-        this.backgroundPlane.material.color.lerp(color, 0.1); // Smoothly transition the color
+    updateGround(beatMap) {
+        // Change ground color based on beatMap.x
+        const colorValue = beatMap.x * 10;
+        this.planeMaterial.color.setHSL(colorValue % 1, 1, 0.5); // Normalize to 0-1 range
+
+        // Update ground height based on beatMap.y
+        const height = beatMap.y * 2;
+        for (let i = 0; i <= this.planeGeometry.parameters.widthSegments; i++) {
+            for (let j = 0; j <= this.planeGeometry.parameters.heightSegments; j++) {
+                const vertex = this.planeGeometry.attributes.position.array;
+                const index = (i * (this.planeGeometry.parameters.heightSegments + 1) + j) * 3;
+                vertex[index + 2] = Math.sin(i + vertex[index + 1]) * height; // Adjust height based on landscape wave
+            }
+        }
+        this.planeGeometry.attributes.position.needsUpdate = true;
     }
 
     updateBoxes(currentTime, speed = 10) {
@@ -111,10 +123,15 @@ export class GameAnimator {
 
         for (let i = this.boxes.length - 1; i >= 0; i--) {
             const box = this.boxes[i];
+
+            // Move box towards camera
             box.position.z += speed * timeDiff;
+
+            // Rotate box
             box.rotation.x += 1 * timeDiff;
             box.rotation.y += 1 * timeDiff;
 
+            // Remove box if it's too close or has been hit
             if (box.position.z > 5 || box.userData.isHit) {
                 this.scene.remove(box);
                 this.boxes.splice(i, 1);
