@@ -186,6 +186,7 @@ class Game {
         const currentTime = this.audioPlayer.getCurrentTime();
         this.updateBeats(currentTime);
         this.gameAnimator.updateBoxes(currentTime);
+        
 
         // Render scene
         this.gameAnimator.render();
@@ -201,6 +202,7 @@ class Game {
         ) {
             const beatData = this.currentSong.beatMap[this.nextBeatIndex];
             this.gameAnimator.createBox(beatData);
+            this.gameAnimator.updateGround(beatData);
             this.nextBeatIndex++;
         }
     }
