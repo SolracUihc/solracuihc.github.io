@@ -8,6 +8,7 @@ export class GameAnimator {
         });
         this.boxes = [];
         this.boxScale = 1;
+        this.lastTime = undefined;
         this.initialize();
     }
 
@@ -29,17 +30,7 @@ export class GameAnimator {
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(5, 5, 5);
-        // directionalLight.castShadow = true;
-        // directionalLight.shadow.camera.near = 0.1;
-        // directionalLight.shadow.camera.far = 20;
-        // directionalLight.shadow.camera.left = -10;
-        // directionalLight.shadow.camera.right = 10;
-        // directionalLight.shadow.camera.top = 10;
-        // directionalLight.shadow.camera.bottom = -10;
-        // directionalLight.shadow.mapSize.width = 2048;
-        // directionalLight.shadow.mapSize.height = 2048;
-        // Make shadows white
-        // directionalLight.shadow.bias = -0.001;
+        
         this.scene.add(directionalLight);
 
         // Add ground plane for white shadows
@@ -51,11 +42,6 @@ export class GameAnimator {
             transparent: true,
             opacity: 0.95
         });
-        // const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-        // plane.rotation.x = -Math.PI / 2;
-        // plane.position.y = -0.01; // Slightly below 0 to avoid z-fighting
-        // // plane.receiveShadow = true;
-        // this.scene.add(plane);
 
         // Add grid
         const gridHelper = new THREE.GridHelper(10, 20, 0x444444, 0x222222);
@@ -81,9 +67,6 @@ export class GameAnimator {
             -20
         );
 
-        // Enable shadow casting for boxes
-        // box.castShadow = true;
-
         box.userData = {
             points: beatData.points,
             isHit: false,
@@ -96,15 +79,23 @@ export class GameAnimator {
     }
 
     updateBoxes(currentTime, speed = 0.1) {
+        if (this.lastTime === undefined) {
+            this.lastTime = currentTime;
+            return;
+        }
+
+        const timeDiff = (currentTime - this.lastTime)*100;
+        this.lastTime = currentTime;
+
         for (let i = this.boxes.length - 1; i >= 0; i--) {
             const box = this.boxes[i];
             
             // Move box towards camera
-            box.position.z += speed;
+            box.position.z += speed*timeDiff;
 
             // Rotate box
-            box.rotation.x += 0.01;
-            box.rotation.y += 0.01;
+            box.rotation.x += 0.01*timeDiff;
+            box.rotation.y += 0.01*timeDiff;
 
             // Remove box if it's too close or has been hit
             if (box.position.z > 5 || box.userData.isHit) {

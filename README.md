@@ -7,7 +7,8 @@
 
 > [!WARNING] 
 > Currently the song path CANNOT be youtube video. 
-> It must be predownloaded before usage.
+>   * It must be predownloaded before usage.
+>
 > Also, please make sure that the LOCAL backend server is running and they have SAME BACKEND FILES as the frontend.
 
 * Update how the boxes move.
@@ -16,6 +17,9 @@
 
 **Support of Local Audio Added**
 * Local audio is put within `backend/res/<file_name>.mp3`, which is referred in `MIR/songData.json` as `res/<file_name>.mp3`.
+
+**Consistent Speed of Boxes**
+* In `MIR/js/3DAnimation.js`, every motion change is now updated with a factor of `timeDiff` within `updateBoxes()`, which ensures that the boxes move at the same speed regardless of the frame rate.
 
 ## Setting Up Backend
 
