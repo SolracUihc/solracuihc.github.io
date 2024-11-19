@@ -4,6 +4,8 @@ export class ScoreManager {
         this.combo = 0;
         this.maxCombo = 0;
         this.scoreElement = document.getElementById('score');
+        this.comboElement = document.getElementById('combo');
+        this.maxComboElement = document.getElementById('maxCombo');
         this.accuracyHistory = [];
     }
 
@@ -23,6 +25,7 @@ export class ScoreManager {
             this.accuracyHistory.push(collision.accuracy);
 
             this.displayScore();
+            this.displayCombo();
             this.createScorePopup(points, collision.accuracy);
         });
     }
@@ -30,6 +33,7 @@ export class ScoreManager {
     missedNote() {
         this.combo = 0;
         this.displayScore();
+        this.displayCombo();
     }
 
     createScorePopup(points, accuracy) {
@@ -48,6 +52,15 @@ export class ScoreManager {
     displayScore() {
         if (this.scoreElement) {
             this.scoreElement.textContent = this.score;
+        }
+    }
+
+    displayCombo() {
+        if (this.comboElement) {
+            this.comboElement.textContent = this.combo;
+        }
+        if (this.maxComboElement) {
+            this.maxComboElement.textContent = this.maxCombo;
         }
     }
 
@@ -70,5 +83,6 @@ export class ScoreManager {
         this.maxCombo = 0;
         this.accuracyHistory = [];
         this.displayScore();
+        this.displayCombo();
     }
 }

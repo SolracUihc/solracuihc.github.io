@@ -97,9 +97,10 @@ export class GameAnimator {
     }
 
     updateBoxes(currentTime, speed = 10) {
+        let boxRemoved = false;
         if (this.lastTime === undefined) {
             this.lastTime = currentTime;
-            return;
+            return boxRemoved;
         }
 
         const timeDiff = currentTime - this.lastTime;
@@ -116,11 +117,16 @@ export class GameAnimator {
             box.rotation.y += 1*timeDiff;
 
             // Remove box if it's too close or has been hit
-            if (box.position.z > 5 || box.userData.isHit) {
+            if (box.position.z > 5) {
+                this.scene.remove(box);
+                this.boxes.splice(i, 1);
+                boxRemoved = true;
+            } else if (box.userData.isHit) {
                 this.scene.remove(box);
                 this.boxes.splice(i, 1);
             }
         }
+        return boxRemoved;
     }
 
     onWindowResize() {

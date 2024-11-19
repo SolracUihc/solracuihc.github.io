@@ -48,6 +48,22 @@ body {
     z-index: 3;
 }
 
+#combo-container {
+    position: fixed;
+    top: 50px;
+    left: 20px;
+    font-size: 24px;
+    z-index: 3;
+}
+
+#maxCombo-container {
+    position: fixed;
+    top: 80px;
+    left: 20px;
+    font-size: 24px;
+    z-index: 3;
+}
+
 #menu-container {
     position: fixed;
     top: 50%;

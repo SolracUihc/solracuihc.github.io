@@ -182,10 +182,13 @@ class Game {
             this.scoreManager.updateScore(collisions);
         });
 
-        // Update game objects
+        // Update game beat
         const currentTime = this.audioPlayer.getCurrentTime();
         this.updateBeats(currentTime);
-        this.gameAnimator.updateBoxes(currentTime);
+        // Update targets and check combo
+        if (this.gameAnimator.updateBoxes(currentTime)) {
+            this.scoreManager.missedNote();
+        }
 
         // Render scene
         this.gameAnimator.render();
