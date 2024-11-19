@@ -125,6 +125,7 @@ class Game {
             // Hide loading screen before starting the game
             document.getElementById('loading').classList.add('hidden');
             
+            this.gameAnimator.reset_seed(this.currentSong.audioUrl);
             this.audioPlayer.play();
             this.gameLoop();
         } catch (error) {

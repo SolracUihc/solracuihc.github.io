@@ -1,3 +1,5 @@
+import { hash } from "./mathUtils.js";
+
 export class GameAnimator {
     constructor(settings) {
         this.scene = new THREE.Scene();
@@ -58,6 +60,10 @@ export class GameAnimator {
         window.addEventListener('resize', () => this.onWindowResize(), false);
     }
 
+    reset_seed(audio_file) {
+        THREE.MathUtils.seededRandom(hash(audio_file));
+    }
+
     createBox(beatData) {
         const geometry = new THREE.BoxGeometry(0.4, 0.4, 0.4);
         const material = new THREE.MeshPhongMaterial({
@@ -66,10 +72,11 @@ export class GameAnimator {
             opacity: 0.8
         });
 
-        let rand = Math.random();
+        let rand = THREE.MathUtils.seededRandom();
         material.color.setHSL(rand, 1, 0.5);
 
         rand = (rand * 2 - 1) * 2;
+        rand = THREE.MathUtils.clamp(rand, -1.5, 1.5);
 
         const box = new THREE.Mesh(geometry, material);
         box.position.set(
