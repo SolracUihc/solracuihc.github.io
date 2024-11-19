@@ -39,7 +39,7 @@ export class GameAnimator {
         this.scene.add(directionalLight);
 
         // Create ground plane
-        this.planeGeometry = new THREE.PlaneGeometry(10, 10, 80, 80);
+        this.planeGeometry = new THREE.PlaneGeometry(20, 20, 20, 20);
         this.planeMaterial = new THREE.MeshStandardMaterial({
             color: 0x000000,
             roughness: 0.2,
@@ -51,7 +51,7 @@ export class GameAnimator {
         this.groundPlane.rotation.x = -Math.PI / 2;
         
         // Set the y position lower
-        this.groundPlane.position.y = 0; // Adjust this value as needed
+        this.groundPlane.position.y = -1; // Adjust this value as needed
         
         this.scene.add(this.groundPlane);
 
