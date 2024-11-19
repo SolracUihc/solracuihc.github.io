@@ -20,14 +20,7 @@ export class DataFetcher {
     }
 
     processSongData(data) {
-        return data.songs.map(song => ({
-            id: song.id,
-            title: song.title,
-            category: song.category,
-            difficulty: song.difficulty,
-            audioUrl: song.audioUrl,
-            // beatMap: this.processBeatMap(song.beatMap)
-        }));
+        return data.songs;
     }
 
     processBeatMap(beatMap) {

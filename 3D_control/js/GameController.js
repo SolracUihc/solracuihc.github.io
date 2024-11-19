@@ -198,7 +198,7 @@ export class GameController {
         
         this.handControls?.animate(); // Animate hand controls if they exist
 
-        if (this.gameStart && this.gameHandler) {
+        if (this.gameHandler) {
             this.gameHandler.animate();
         }
 

@@ -1,5 +1,5 @@
 export class GameAnimator {
-    constructor() {
+    constructor(settings) {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer({ 
@@ -9,11 +9,17 @@ export class GameAnimator {
         this.boxes = [];
         this.boxScale = 1;
         this.lastTime = undefined;
+
+        this.boxMinX = settings?.boxMinX ?? -2;
+        this.boxMaxX = settings?.boxMaxX ?? 2;
+        this.boxMinY = settings?.boxMinY ?? 0;
+        this.boxMaxY = settings?.boxMaxY ?? 3;
+
         this.initialize();
     }
 
     initialize() {
-        // Setup renderer with shadow support
+        // Setup renderer
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setClearColor(0x000000);
         // this.renderer.shadowMap.enabled = true;
@@ -60,10 +66,15 @@ export class GameAnimator {
             opacity: 0.8
         });
 
+        let rand = Math.random();
+        material.color.setHSL(rand, 1, 0.5);
+
+        rand = (rand * 2 - 1) * 2;
+
         const box = new THREE.Mesh(geometry, material);
         box.position.set(
-            (beatData.x * 2 - 1) * this.boxScale,
-            (beatData.y * 2) * this.boxScale,
+            rand * (beatData.x * (this.boxMaxX-this.boxMinX) + this.boxMinX) * this.boxScale,
+            (beatData.y * (this.boxMaxY-this.boxMinY) + this.boxMinY) * this.boxScale,
             -20
         );
 

@@ -1,7 +1,14 @@
 export class HandAnimator extends THREE.EventDispatcher {
-    constructor(scene) {
+    constructor(scene, settings) {
         super();
         this.scene = scene;
+
+        // Scale and offset parameters
+        this.distScale = settings?.distScale ?? 6;
+        this.handScale = settings?.handScale ?? 6;
+        this.depthScale = settings?.depthScale ?? 1;
+
+        // Hands
         this.hands = [
             { meshes: [], lines: [] },
             { meshes: [], lines: [] }
@@ -52,14 +59,7 @@ export class HandAnimator extends THREE.EventDispatcher {
         ];
 
         // Geometry for joints
-        this.jointGeometry = new THREE.SphereGeometry(0.05, 16, 16);
-
-        // Scale and offset parameters
-        this.distScale = 3;
-        this.handScale = 4;
-        this.offsetX = 0;
-        this.offsetY = 0;
-        this.offsetZ = -2;
+        this.jointGeometry = new THREE.SphereGeometry(0.012*this.handScale, 16, 16);
 
         // Gesture detection properties
         this.targets = [];
@@ -89,7 +89,7 @@ export class HandAnimator extends THREE.EventDispatcher {
             });
 
             const cursor = new THREE.Mesh(
-                new THREE.SphereGeometry(0.1, 32, 16),
+                new THREE.SphereGeometry(0.03*this.handScale, 32, 16),
                 cursorMat
             );
             cursor.castShadow = true;
@@ -155,7 +155,7 @@ export class HandAnimator extends THREE.EventDispatcher {
         }
 
         // Update target position (hand center)
-        const indices = [0, 5, 9, 13, 17];
+        const indices = [0, 0, 0, 5, 9, 13, 17];
         let sumX = 0, sumY = 0, sumZ = 0;
         indices.forEach(index => {
             sumX += hand.meshes[index].position.x;
@@ -194,13 +194,18 @@ export class HandAnimator extends THREE.EventDispatcher {
                 // Flip X coordinate to match mirrored webcam view
                 // console.log(landmark, depth, wrist, handData, landmark.x/depth-wrist.x);
 
-                let x = -landmark.x + .75;
-                let y = -landmark.y + .75;
+                let x = -landmark.x + .5;
+                let y = -landmark.y + .5;
                 let z = landmark.z;
 
-                x = (x/depth-wrist.x)*this.handScale+this.distScale*wrist.x;
-                y = (y/depth-wrist.y)*this.handScale+this.distScale*wrist.y;
-                z = z-depth2Offset*2;
+                let wristX = -wrist.x + .5;
+                let wristY = -wrist.y + .5;
+
+                // console.log(landmark.x);
+
+                x = (x-wristX)/depth*this.handScale+this.distScale*wristX;
+                y = (y-wristY)/depth*this.handScale+this.distScale*wristY;
+                z = z-depth2Offset*this.depthScale;
 
                 mesh.position.set(x, y, z);
                 mesh.visible = true;

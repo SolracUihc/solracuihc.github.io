@@ -44,25 +44,25 @@ def get_stream():
     except Exception as e:
         return jsonify(error=str(e)), 500
     
-@app.route('/api/extract', methods=['GET'])
-def feature():
-    try:
-        url = request.args.get('url')
-        if not url:
-            return jsonify(error="URL parameter is missing"), 400
+# @app.route('/api/extract', methods=['GET'])
+# def feature():
+#     try:
+#         url = request.args.get('url')
+#         if not url:
+#             return jsonify(error="URL parameter is missing"), 400
         
-        audio_data = music.load_audio_data_from_url(url)
-        if audio_data is None:
-            return jsonify(error="Failed to download or convert YouTube audio"), 500
+#         audio_data = music.load_audio_data_from_url(url)
+#         if audio_data is None:
+#             return jsonify(error="Failed to download or convert YouTube audio"), 500
         
-        features = music.extract_music_features(audio_data)
-        # audio_base64 = base64.b64encode(audio_data.getvalue()).decode('utf-8')
+#         features = music.extract_music_features(audio_data)
+#         # audio_base64 = base64.b64encode(audio_data.getvalue()).decode('utf-8')
         
-        # features["audio_data"] = audio_base64
-        return jsonify(features), 200
+#         # features["audio_data"] = audio_base64
+#         return jsonify(features), 200
     
-    except Exception as e:
-        return jsonify(error=str(e)), 500
+#     except Exception as e:
+#         return jsonify(error=str(e)), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -5,15 +5,25 @@
       "title": "Dancing Queen",
       "category": "pop",
       "difficulty": "medium",
-      "audioUrl": "https://ia801509.us.archive.org/24/items/fcbqy/Abba%20-%20Dancing%20Queen.mp3",
+      "audioUrl": "res/audio/abba_dancing_queen.mp3",
+      "beatMapUrl": "res/beatmaps/abba_dancing_queen.json",
+      "beatMap": []
+    },
+    {
+      "id": "song22",
+      "title": "Idol (Stored)",
+      "category": "pop",
+      "difficulty": "medium",
+      "audioUrl": "res/audio/yoasobi_idol.mp3",
+      "beatMapUrl": "res/beatmaps/yoasobi_idol.json",
       "beatMap": []
     },
     {
       "id": "song23",
-      "title": "Idol2",
+      "title": "Idol (Backend)",
       "category": "pop",
       "difficulty": "medium",
-      "audioUrl": "res/yoasobi_idol.mp3",
+      "audioUrl": "res/audio/yoasobi_idol.mp3",
       "beatMap": []
     },
     {

@@ -2,13 +2,12 @@
 const mpHands = window.Hands;
 
 export class HandDetector {
-    constructor() {
+    constructor(settings) {
         this.hands = null;
         this.isInitialized = false;
         this.lastLandmarks = [];
-        this.handScale = 0.8;
-        this.distScale = 3;
-        this.handOffsetZDistance = -2;
+        
+        this.handOffsetZDistance = settings?.handOffsetZDistance ?? -2;
     }
 
     calculateHandDepth(landmarks) {

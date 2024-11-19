@@ -19,19 +19,23 @@
 * Update how the boxes move. Linear motion is boring.
 * Adjust the shapes and speeds of the boxes.
 
-**Precomputing**
-* Precompute the beatMaps beforehand may allow a smoother experience, but it's also okay to just keep it.
-
 **Instructions**
 * Provide clearer instructions to the user.
+* E.g. counting down so that the user can prepare.
 
 ## Recent Updates
 
 **Support of Local Audio Added**
-* Local audio is put within `backend/res/<file_name>.mp3`, which is referred in `MIR/songData.json` as `res/<file_name>.mp3`.
+* Local audio is put within `backend/res/audio/<file_name>.mp3`, which is referred in `MIR/songData.json` as `res/audio/<file_name>.mp3`.
 
 **Consistent Speed of Boxes**
 * In `MIR/js/3DAnimation.js`, every motion change is now updated with a factor of `timeDiff` within `updateBoxes()`, which ensures that the boxes move at the same speed regardless of the frame rate.
+
+**Precomputing**
+* Audios are stored in `backend/res/audio/<file_name>.mp3`.
+* In `backend/`, execute `batch_process.py`.
+* This will generate `backend/res/beatmaps/<file_name>.json` as the json files for every audio in `backend/res/audio/`.
+* You STILL NEED TO MANUALLY CHANGE the `songData.json` by specifying the `beatMapUrl` of the song. If this field is missing or the file it is pointing to is missing, API call to backend will be used instead to load the audio.
 
 ## Setting Up Backend
 
