@@ -97,19 +97,26 @@ export class GameAnimator {
 
     updateGround(beatMap) {
         // Change ground color based on beatMap.x
-        const colorValue = beatMap.x * 10;
+        const colorValue = beatMap.x * 2;
         this.planeMaterial.color.setHSL(colorValue % 1, 1, 0.5); // Normalize to 0-1 range
-
+    
         // Update ground height based on beatMap.y
-        const height = beatMap.y * 2;
-        for (let i = 0; i <= this.planeGeometry.parameters.widthSegments; i++) {
-            for (let j = 0; j <= this.planeGeometry.parameters.heightSegments; j++) {
-                const vertex = this.planeGeometry.attributes.position.array;
-                const index = (i * (this.planeGeometry.parameters.heightSegments + 1) + j) * 3;
-                vertex[index + 2] = Math.sin(i + vertex[index + 1]) * height; // Adjust height based on landscape wave
+        const widthSegments = this.planeGeometry.parameters.widthSegments;
+        const heightSegments = this.planeGeometry.parameters.heightSegments;
+        
+        const vertexArray = this.planeGeometry.attributes.position.array;
+    
+        for (let i = 0; i <= widthSegments; i++) {
+            for (let j = 0; j <= heightSegments; j++) {
+                const index = (i * (heightSegments + 1) + j) * 3;
+    
+                // Create wave-like motion using sine function
+                const waveHeight = Math.sin((i + beatMap.y) * 0.5) * 1.5 + Math.cos((j + beatMap.y) * 0.5) * 1.5; // Adjust amplitude of waves
+                vertexArray[index + 2] = waveHeight; // Set the height for the vertex
             }
         }
-        this.planeGeometry.attributes.position.needsUpdate = true;
+    
+        this.planeGeometry.attributes.position.needsUpdate = true; // Notify Three.js that the position has changed
     }
 
     updateBoxes(currentTime, speed = 10) {
