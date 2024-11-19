@@ -51,7 +51,7 @@ export class GameAnimator {
         this.groundPlane.rotation.x = -Math.PI / 2;
         
         // Set the y position lower
-        this.groundPlane.position.y = -2; // Adjust this value as needed
+        this.groundPlane.position.y = 0; // Adjust this value as needed
         
         this.scene.add(this.groundPlane);
 
