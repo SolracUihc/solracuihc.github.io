@@ -111,7 +111,7 @@ export class GameAnimator {
                 const index = (i * (heightSegments + 1) + j) * 3;
     
                 // Create wave-like motion using sine function
-                const waveHeight = Math.sin((i + beatMap.x*10)) * 1.5 + Math.cos((j + beatMap.x*10)) * 1.5; // Adjust amplitude of waves
+                const waveHeight = Math.sin((i + beatMap.x*10)*3) * 1.5 + Math.cos((j + beatMap.y*10)*3) * 1.5; // Adjust amplitude of waves
                 vertexArray[index + 2] = waveHeight/2; // Set the height for the vertex
             }
         }
