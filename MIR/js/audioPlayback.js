@@ -8,13 +8,25 @@ export class AudioPlayer {
     }
 
     async loadAudio(url) {
-        try {
-            const response = await fetch(url);
-            const arrayBuffer = await response.arrayBuffer();
-            this.buffer = await this.context.decodeAudioData(arrayBuffer);
-        } catch (error) {
-            console.error('Error loading audio:', error);
-            throw error;
+        console.log('Loading audio:', url);
+        if (url.startsWith('res/')) {
+            try {
+                const response = await fetch(`../backend/${url}`);
+                const arrayBuffer = await response.arrayBuffer();
+                this.buffer = await this.context.decodeAudioData(arrayBuffer);
+            } catch (error) {
+                console.error('Error loading audio:', error);
+                throw error;
+            }
+        } else {
+            try {
+                const response = await fetch(url);
+                const arrayBuffer = await response.arrayBuffer();
+                this.buffer = await this.context.decodeAudioData(arrayBuffer);
+            } catch (error) {
+                console.error('Error loading audio:', error);
+                throw error;
+            }
         }
     }
 

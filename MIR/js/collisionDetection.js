@@ -3,25 +3,29 @@ export class CollisionDetector {
         this.collisionThreshold = 0.5;
     }
 
-    checkCollision(handPosition, boxes) {
+    checkCollision(keypoints, boxes) {
         const collisions = [];
 
         boxes.forEach(box => {
-            if (!box.userData.isHit) {
-                const distance = this.calculateDistance(
-                    handPosition,
-                    box.position
-                );
-
-                if (distance < this.collisionThreshold) {
-                    box.userData.isHit = true;
-                    collisions.push({
-                        box: box,
-                        points: box.userData.points,
-                        accuracy: this.calculateAccuracy(distance)
-                    });
+            keypoints.forEach(
+                kpt => {
+                    if (!box.userData.isHit) {
+                        const distance = this.calculateDistance(
+                            kpt.position,
+                            box.position
+                        );
+        
+                        if (distance < this.collisionThreshold) {
+                            box.userData.isHit = true;
+                            collisions.push({
+                                box: box,
+                                points: box.userData.points,
+                                accuracy: this.calculateAccuracy(distance)
+                            });
+                        }
+                    }
                 }
-            }
+            )
         });
 
         return collisions;

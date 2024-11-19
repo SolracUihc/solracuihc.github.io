@@ -3,10 +3,43 @@
 ## References
 * Built upon the article: https://tympanus.net/codrops/2024/10/24/creating-a-3d-hand-controller-using-a-webcam-with-mediapipe-and-three-js/
 
-## Things to do
+## Things to Do
+
+> [!WARNING] 
+> Currently the song path CANNOT be youtube video. 
+>   * It must be predownloaded before usage.
+>
+> Also, please make sure that the LOCAL backend server is running and they have SAME BACKEND FILES as the frontend.
+
+**Time Accuracy**
+* The boxes should ARRIVE at the player's side ON THE BEAT, instead of being CREATED on the beat.
+* There should be some kind of hint showing WHEN the player should hit the boxes.
+
+**Gameplay**
+* Update how the boxes move. Linear motion is boring.
+* Adjust the shapes and speeds of the boxes.
+
+**Instructions**
+* Provide clearer instructions to the user.
+* E.g. counting down so that the user can prepare.
+
+## Recent Updates
+
+**Support of Local Audio Added**
+* Local audio is put within `backend/res/audio/<file_name>.mp3`, which is referred in `MIR/songData.json` as `res/audio/<file_name>.mp3`.
+
+**Consistent Speed of Boxes**
+* In `MIR/js/3DAnimation.js`, every motion change is now updated with a factor of `timeDiff` within `updateBoxes()`, which ensures that the boxes move at the same speed regardless of the frame rate.
+
+**Precomputing**
+* Audios are stored in `backend/res/audio/<file_name>.mp3`.
+* In `backend/`, execute `batch_process.py`.
+* This will generate `backend/res/beatmaps/<file_name>.json` as the json files for every audio in `backend/res/audio/`.
+* You STILL NEED TO MANUALLY CHANGE the `songData.json` by specifying the `beatMapUrl` of the song. If this field is missing or the file it is pointing to is missing, API call to backend will be used instead to load the audio.
 
 ## Setting Up Backend
 
+* Install ffmpeg properly and check with `ffmpeg` on cmd.
 * Enter the subfolder `backend` and create a new virtual environment:
     ```bash
     python -m venv venv
@@ -70,11 +103,12 @@
 
 ## Backend
 
-Plan: Processing of music info here
+Processing of music info here
+* Local audio is put within `backend/res/<file_name>.mp3`, which is referred in `MIR/songData.json` as `res/<file_name>.mp3`.
 
 ## MIR
 
-Plan: Main UI here
+Main UI here
 
 ## Innovation Ideas
 

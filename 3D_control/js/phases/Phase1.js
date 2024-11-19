@@ -16,10 +16,6 @@ export class Phase1 extends Phase {
         
         this.gameController.clearScreen();
 
-        Fetcher.startStreaming(1).catch(error => {
-            console.error('Please make sure that your backend service is up.\n\nError occurred:',error);
-        });
-
         const boxSize = 0.2 // 0.15
         var geometry = new THREE.BoxGeometry(boxSize, boxSize, boxSize); // Box geometry for objects
         const object = new THREE.Mesh(
@@ -145,10 +141,7 @@ export class Phase1 extends Phase {
 
     cleanUp() {
         // Make sure that the saber is removed from the scene properly.
-        // this.gameController.objects.push(this.saber);
-        Fetcher.stopStreaming().catch(error => {
-            console.error('Please make sure that your backend service is up.\n\nError occurred:',error);
-        });
+        this.gameController.objects.push(this.saber);
     }
 
     handleGesture(command, handIndex) {

@@ -9,10 +9,25 @@ import { ScoreManager } from './scoreManagement.js';
 
 class Game {
     constructor() {
+        const settings = {
+            // **Scaling of Hand**
+            // handDetector
+            'handOffsetZDistance': -2, // Depth offset
+            // handAnimator
+            'distScale': 6, // Scaling of the position of hand
+            'handScale': 6, // Scaling of the size of the hand
+            'depthScale': 1, // Scaling of the depth of the hand
+            // **Game Animator**
+            'boxMinX': -2,
+            'boxMaxX': 2,
+            'boxMinY': .5,
+            'boxMaxY': 2 
+        };
+
         this.webcam = new WebcamHandler();
-        this.handDetector = new HandDetector();
-        this.gameAnimator = new GameAnimator();
-        this.handAnimator = new HandAnimator(this.gameAnimator.scene);
+        this.handDetector = new HandDetector(settings);
+        this.gameAnimator = new GameAnimator(settings);
+        this.handAnimator = new HandAnimator(this.gameAnimator.scene, settings);
         this.dataFetcher = new DataFetcher();
         this.audioPlayer = new AudioPlayer();
         this.collisionDetector = new CollisionDetector();
@@ -64,10 +79,85 @@ class Game {
         this.nextBeatIndex = 0;
         document.getElementById('menu-container').classList.add('hidden');
         
-        await this.audioPlayer.loadAudio(this.currentSong.audioUrl);
-        this.audioPlayer.play();
+        // Show loading screen
+        document.getElementById('loading').classList.remove('hidden');
+        
+        try {
+            // First try to load from beatMapUrl if it exists
+            console.log('BMF', this.currentSong);
+            if (this.currentSong.beatMapUrl) {
+                try {
+                    console.log('Loading beatMap from file:', this.currentSong.beatMapUrl);
+                    const response = await fetch(`../backend/${this.currentSong.beatMapUrl}`);
+                    if (response.ok) {
+                        this.currentSong.beatMap = await response.json();
+                        console.log('Loaded beatMap from file:', this.currentSong.beatMapUrl);
+                    } else {
+                        throw new Error('Failed to load beatMap file');
+                    }
+                } catch (error) {
+                    console.log('Failed to load beatMap from file, falling back to API');
+                }
+            }
 
-        this.gameLoop();
+            // If beatMap is still empty, load from API
+            if (!this.currentSong.beatMap || this.currentSong.beatMap.length === 0) {
+                const url = encodeURIComponent(this.currentSong.audioUrl);
+                const response = await fetch(`http://127.0.0.1:5000/api/stream?url=${url}`, {
+                    method: 'GET',
+                }).catch((error) => {
+                    console.error('Error loading game:', error);
+                    alert('The backend is not set up properly. Please make sure the backend server is running.');
+                    this.reloadMenu();
+                });
+                
+                if (!response) return;
+                
+                const data = await response.json();
+                this.currentSong.beatMap = data;
+                console.log('Loaded beatMap from API');
+            }
+
+            // console.log('BM', this.currentSong.beatMap);
+
+            await this.audioPlayer.loadAudio(this.currentSong.audioUrl);
+            
+            // Hide loading screen before starting the game
+            document.getElementById('loading').classList.add('hidden');
+            
+            this.gameAnimator.reset_seed(this.currentSong.audioUrl);
+
+            // 3 2 1 
+            document.getElementById('countdown').classList.remove('hidden'); 
+            document.getElementById('countdown').querySelector('h1').textContent = 3;
+            this.countdownValue = 3;
+            this.countdownInterval = setInterval(this.countdownStartGame.bind(this), 1000);
+        } catch (error) {
+            console.log(error.message);
+            console.error('Error loading game:', error);
+            alert('Failed to load the game. Please try again.');
+            this.reloadMenu();
+        }
+    }
+
+    countdownStartGame() {
+        this.countdownValue -= 1;
+        document.getElementById('countdown').querySelector('h1').textContent = this.countdownValue != 0 ? this.countdownValue : "Ready?";
+        console.log('COUNTING', this.countdownValue);
+        if (this.countdownValue < 0) {
+            clearInterval(this.countdownInterval);
+            document.getElementById('countdown').classList.add('hidden');
+            this.audioPlayer.play();
+            this.gameLoop();
+        }
+    }
+
+    async reloadMenu() {
+        this.isRunning = false;
+        this.currentSong = null;
+        document.getElementById('start-game').classList.add('disabled');
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('menu-container').classList.remove('hidden');
     }
 
     async gameLoop() {
@@ -79,11 +169,12 @@ class Game {
 
         // Update hand visualization with all detected hands
         this.handAnimator.updateHandPosition(handsData);
-
+        
         // Check collisions for each hand
-        handsData.forEach(handData => {
+        this.handAnimator.targets.forEach((target, index) => {
+            // console.log('HND', this.handAnimator.hands[index].meshes);
             const collisions = this.collisionDetector.checkCollision(
-                { x: handData.x, y: handData.y, z: handData.z },
+                [target, ...this.handAnimator.hands[index].meshes],
                 this.gameAnimator.boxes
             );
 
@@ -116,7 +207,7 @@ class Game {
 
     async updateSongList(category) {
         this.currentSong = null;
-        document.getElementById('start-game').className = 'disabled';
+        document.getElementById('start-game').classList.add('disabled');
 
         const songs = await this.dataFetcher.getSongsByCategory(category);
         const songList = document.getElementById('song-list');
@@ -127,7 +218,7 @@ class Game {
             button.textContent = song.title;
             button.onclick = () => {
                 this.currentSong = song;
-                document.getElementById('start-game').className = '';
+                document.getElementById('start-game').classList.remove('disabled');
             };
             songList.appendChild(button);
         });

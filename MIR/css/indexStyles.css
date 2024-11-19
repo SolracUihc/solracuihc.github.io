@@ -1,4 +1,3 @@
-
 body {
     margin: 0;
     overflow: hidden;
@@ -70,6 +69,7 @@ button {
     margin: 5px;
     font-size: 16px;
     cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
     background: #4CAF50;
     color: white;
     border: none;
@@ -94,7 +94,17 @@ select {
     font-size: 16px;
 }
 
-#loading {
+h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(to right, #A0A0A0, #E0E0E0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#loading, #countdown {
     position: fixed;
     top: 0;
     left: 0;
@@ -107,12 +117,36 @@ select {
     z-index: 5;
 }
 
+#countdown h1 {
+    font-size: 5rem !important;
+}
+
 .score-popup {
     position: fixed;
     color: #fff;
     font-size: 20px;
     pointer-events: none;
     animation: fadeUp 1s ease-out forwards;
+}
+
+#youtube-container {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    width: 200px;
+    height: 200px;
+    z-index: 2;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+#youtube-container:hover {
+    opacity: 1;
+}
+
+#youtube-player {
+    width: 100%;
+    height: 100%;
 }
 
 @keyframes fadeUp {

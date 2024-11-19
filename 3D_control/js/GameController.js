@@ -11,6 +11,9 @@ import { SelectionMenu } from "./phases/SelectionMenu.js";
 import { Phase1 } from "./phases/Phase1.js"; 
 import { TestPhase } from "./phases/TestPhase.js";
 
+import { AudioPlayer } from './AudioPlayer.js';
+import { DataFetcher } from './DataFetcher.js';
+
 export class GameController {
     constructor() {
         // Initialize the GUI panel
@@ -24,6 +27,10 @@ export class GameController {
         this.textColor = 'white';
         this.gridColor = 'white';
         this.shadowColor = 0xcccccc; // requries to be hex
+
+        this.audioPlayer = new AudioPlayer();
+        this.dataFetcher = new DataFetcher();
+        this.setupMusicControls();
     }
 
     /**
@@ -191,7 +198,7 @@ export class GameController {
         
         this.handControls?.animate(); // Animate hand controls if they exist
 
-        if (this.gameStart && this.gameHandler) {
+        if (this.gameHandler) {
             this.gameHandler.animate();
         }
 
@@ -223,7 +230,20 @@ export class GameController {
     }
 
     startGame() {
-        this.gameStart = true; // Set the game to start
+        if (this.currentSong) {
+            this.audioPlayer.play();
+            document.getElementById('start-game').classList.add('hidden');
+            document.getElementById('end-game').classList.remove('hidden');
+            // Additional game start logic
+            this.gameStart = true; // Set the game to start
+        }
+    }
+
+    endGame() {
+        this.audioPlayer.stop();    
+        document.getElementById('end-game').classList.add('hidden');
+        document.getElementById('start-game').classList.remove('hidden');
+        // Additional game end logic
     }
 
     updateGamePhase(phase) {
@@ -244,6 +264,62 @@ export class GameController {
             default:
                 this.gameHandler = null;
                 break;
+        }
+    }
+
+    async setupMusicControls() {
+        // Setup song category selection
+        // const categorySelect = document.getElementById('song-category');
+        // categorySelect.addEventListener('change', async () => {
+        //     const category = categorySelect.value;
+        //     const songs = this.dataFetcher.getSongsByCategory(category);
+        //     this.updateSongList(songs);
+        // });
+
+        // // Setup song list
+        // const songList = document.getElementById('song-list');
+        // songList.addEventListener('click', async (e) => {
+        //     if (e.target.dataset.songId) {
+        //         const song = this.dataFetcher.getSongById(e.target.dataset.songId);
+        //         if (song) {
+        //             await this.loadSong(song);
+        //             document.getElementById('start-game').classList.remove('disabled');
+        //         }
+        //     }
+        // });
+
+        // // Setup game controls
+        // document.getElementById('start-game').addEventListener('click', () => {
+        //     if (!this.audioPlayer.isPlaying) {
+        //         this.startGame();
+        //     }
+        // });
+
+        // document.getElementById('end-game').addEventListener('click', () => {
+        //     this.endGame();
+        // });
+
+        // // Load initial song data
+        // await this.dataFetcher.fetchSongList();
+    }
+
+    updateSongList(songs) {
+        const songList = document.getElementById('song-list');
+        songList.innerHTML = songs.map(song => `
+            <div class="song-item" data-song-id="${song.id}">
+                <span class="song-title">${song.title}</span>
+                <span class="song-duration">${Math.floor(song.duration / 60)}:${(song.duration % 60).toString().padStart(2, '0')}</span>
+            </div>
+        `).join('');
+    }
+
+    async loadSong(song) {
+        try {
+            await this.audioPlayer.loadSong(song.url);
+            this.currentSong = song;
+        } catch (error) {
+            console.error('Error loading song:', error);
+            alert('Failed to load song. Please try again.');
         }
     }
 }
