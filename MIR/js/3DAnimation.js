@@ -112,8 +112,8 @@ export class GameAnimator {
             box.position.z += speed*timeDiff;
 
             // Rotate box
-            box.rotation.x += 0.01*timeDiff;
-            box.rotation.y += 0.01*timeDiff;
+            box.rotation.x += 1*timeDiff;
+            box.rotation.y += 1*timeDiff;
 
             // Remove box if it's too close or has been hit
             if (box.position.z > 5 || box.userData.isHit) {
