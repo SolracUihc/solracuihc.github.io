@@ -7,6 +7,7 @@ export class GameAnimator {
             alpha: true 
         });
         this.boxes = [];
+        this.boxScale = 1;
         this.initialize();
     }
 
@@ -66,7 +67,7 @@ export class GameAnimator {
     }
 
     createBox(beatData) {
-        const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+        const geometry = new THREE.BoxGeometry(0.4, 0.4, 0.4);
         const material = new THREE.MeshPhongMaterial({
             color: 0x00ff00,
             transparent: true,
@@ -75,8 +76,8 @@ export class GameAnimator {
 
         const box = new THREE.Mesh(geometry, material);
         box.position.set(
-            beatData.position.x * 4 - 2,
-            beatData.position.y * 4 - 2,
+            (beatData.position.x * 2 - 1) * this.boxScale,
+            (beatData.position.y * 2) * this.boxScale,
             -20
         );
 

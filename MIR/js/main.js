@@ -79,11 +79,11 @@ class Game {
 
         // Update hand visualization with all detected hands
         this.handAnimator.updateHandPosition(handsData);
-
+        
         // Check collisions for each hand
-        handsData.forEach(handData => {
+        this.handAnimator.targets.forEach((target, index) => {
             const collisions = this.collisionDetector.checkCollision(
-                { x: handData.x, y: handData.y, z: handData.z },
+                { x: target.position.x, y: target.position.y, z: target.position.z },
                 this.gameAnimator.boxes
             );
 
