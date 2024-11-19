@@ -71,11 +71,13 @@ class Game {
             const url = encodeURIComponent(this.currentSong.audioUrl); // Ensure the URL is properly encoded
             const response = await fetch(`http://127.0.0.1:5000/api/stream?url=${url}`, {
                 method: 'GET',
+            }).catch((error) => {
+                console.error('Error loading game:', error);
+                alert('The backend is not set up properly. Please make sure the backend server is running.');
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('menu-container').classList.remove('hidden');
+                this.isRunning = false;
             });
-            // console.log(response);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
             const data = await response.json();
             this.currentSong.beatMap = data;
             // console.log('BM',this.currentSong.beatMap);
@@ -88,11 +90,14 @@ class Game {
             this.audioPlayer.play();
             this.gameLoop();
         } catch (error) {
+            console.log(error.message);
             console.error('Error loading game:', error);
-            document.getElementById('loading').classList.add('hidden');
             alert('Failed to load the game. Please try again.');
+            document.getElementById('loading').classList.add('hidden');
             document.getElementById('menu-container').classList.remove('hidden');
             this.isRunning = false;
+            this.currentSong = null;
+            document.getElementById('start-game').className = 'disabled';
         }
     }
 

@@ -8,6 +8,7 @@
 > [!WARNING] 
 > Currently the song path CANNOT be youtube video. 
 > It must be predownloaded before usage.
+> Also, please make sure that the LOCAL backend server is running and they have SAME BACKEND FILES as the frontend.
 
 * Update how the boxes move.
 
