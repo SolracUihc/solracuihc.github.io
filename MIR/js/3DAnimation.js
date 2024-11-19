@@ -39,10 +39,10 @@ export class GameAnimator {
         this.scene.add(directionalLight);
 
         // Create ground plane
-        this.planeGeometry = new THREE.PlaneGeometry(10, 10, 20, 20);
+        this.planeGeometry = new THREE.PlaneGeometry(10, 10, 80, 80);
         this.planeMaterial = new THREE.MeshStandardMaterial({
             color: 0x000000,
-            roughness: 0.4,
+            roughness: 0.2,
             metalness: 0.2,
             transparent: true,
             opacity: 0.5
