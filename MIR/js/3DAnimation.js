@@ -97,7 +97,7 @@ export class GameAnimator {
 
     updateGround(beatMap) {
         // Change ground color based on beatMap.x
-        const colorValue = beatMap.x * 2;
+        const colorValue = beatMap.x * 10;
         this.planeMaterial.color.setHSL(colorValue % 1, 1, 0.5); // Normalize to 0-1 range
     
         // Update ground height based on beatMap.y
@@ -111,8 +111,8 @@ export class GameAnimator {
                 const index = (i * (heightSegments + 1) + j) * 3;
     
                 // Create wave-like motion using sine function
-                const waveHeight = Math.sin((i + beatMap.y) * 0.5) * 1.5 + Math.cos((j + beatMap.y) * 0.5) * 1.5; // Adjust amplitude of waves
-                vertexArray[index + 2] = waveHeight; // Set the height for the vertex
+                const waveHeight = Math.sin((i + beatMap.y*8) * 0.5) * 1.5 + Math.cos((j + beatMap.y*8) * 0.5) * 1.5; // Adjust amplitude of waves
+                vertexArray[index + 2] = waveHeight/2; // Set the height for the vertex
             }
         }
     
