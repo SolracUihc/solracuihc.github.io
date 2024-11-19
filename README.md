@@ -22,6 +22,9 @@
 **Precomputing**
 * Precompute the beatMaps beforehand may allow a smoother experience, but it's also okay to just keep it.
 
+**Instructions**
+* Provide clearer instructions to the user.
+
 ## Recent Updates
 
 **Support of Local Audio Added**
