@@ -9,60 +9,6 @@ import librosa
 import yt_dlp
 import json
 
-
-# def extract_music_features(audio_file):
-#     # Load audio file
-#     y, sr = librosa.load(audio_file)
-
-#     # Extract music features using librosa
-#     # onset info
-#     onset_frames = librosa.onset.onset_detect(y=y, sr=sr)
-#     onset_times = librosa.frames_to_time(onset_frames, sr=sr)
-
-#     tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
-#     # Pitch class
-#     chroma_stft = librosa.feature.chroma_stft(y=y, sr=sr)
-#     # Root Mean Square Energy: can be plotted over time to visualize the energy envelope of the audio signal
-#     rmse = librosa.feature.rms(y=y)
-    
-#     return {
-#         "onset_times": onset_times.tolist(), # 1D array
-#         "tempo": float(tempo[0]), # single value: BPM
-#         "beats": beats.tolist(), # 1D array 
-#         "chroma_stft": chroma_stft.tolist(), # 2D array
-#         "rmse": rmse.tolist() # 1D array
-#     }
-
-# def features2Map(audio_file):
-#     # Extract music features using the extract_music_features function
-#     music_features = extract_music_features(audio_file)
-    
-#     # Extract relevant features
-#     onset_times = music_features["onset_times"]
-#     chroma_stft = music_features["chroma_stft"]
-    
-#     # Prepare time, x, y triplets
-#     time_values = []
-#     x_values = []
-#     y_values = []
-    
-#     # Combine onset times with chroma_stft data for time, x, y triplets
-#     ### THIS CODE IS VERIFIED TO BE INCORRECT - ONSET_TIME AND CHROMA_DATA HAVE DIFFERENT LENGTHS.
-#     ### PROCEED TO USE CCC'S VERSION
-#     for onset_time, chroma_data in zip(onset_times, chroma_stft):
-#         for idx, chroma_value in enumerate(chroma_data):
-#             time_values.append(onset_time)
-#             x_values.append(idx)  # Assuming index is used as x value
-#             y_values.append(chroma_value)
-    
-#     # Create a list of dictionaries containing x, y pairs
-#     time_xy_pairs = [{"time": t, "x": 0, "y": 1, "z": 0, "points": 100} for t, x, y in zip(time_values, x_values, y_values)]
-    
-#     # Convert to JSON format
-#     # json_data = json.dumps(time_xy_pairs, indent=4)
-    
-#     return time_xy_pairs
-
 def min_max_normalize(data):
     # Extract x and y values
     x_values = [item['x'] for item in data]

@@ -96,13 +96,13 @@ export class GameAnimator {
         return box;
     }
 
-    updateBoxes(currentTime, speed = 0.1) {
+    updateBoxes(currentTime, speed = 10) {
         if (this.lastTime === undefined) {
             this.lastTime = currentTime;
             return;
         }
 
-        const timeDiff = (currentTime - this.lastTime)*100;
+        const timeDiff = currentTime - this.lastTime;
         this.lastTime = currentTime;
 
         for (let i = this.boxes.length - 1; i >= 0; i--) {
@@ -112,8 +112,8 @@ export class GameAnimator {
             box.position.z += speed*timeDiff;
 
             // Rotate box
-            box.rotation.x += 0.01*timeDiff;
-            box.rotation.y += 0.01*timeDiff;
+            box.rotation.x += 1*timeDiff;
+            box.rotation.y += 1*timeDiff;
 
             // Remove box if it's too close or has been hit
             if (box.position.z > 5 || box.userData.isHit) {

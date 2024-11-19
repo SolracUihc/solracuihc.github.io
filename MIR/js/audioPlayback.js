@@ -35,15 +35,39 @@ export class AudioPlayer {
             console.error('No audio loaded');
             return;
         }
-
+    
+        const silentDuration = 2.5;
+        const sampleRate = this.context.sampleRate;
+        const silentBuffer = this.context.createBuffer(
+            this.buffer.numberOfChannels,
+            sampleRate * silentDuration,
+            sampleRate
+        );
+    
+        const combinedBuffer = this.context.createBuffer(
+            this.buffer.numberOfChannels,
+            silentBuffer.length + this.buffer.length,
+            sampleRate
+        );
+    
+        for (let channel = 0; channel < this.buffer.numberOfChannels; channel++) {
+            const silentData = silentBuffer.getChannelData(channel);
+            const combinedData = combinedBuffer.getChannelData(channel);
+            
+            combinedData.set(silentData, 0);
+            
+            const audioData = this.buffer.getChannelData(channel);
+            combinedData.set(audioData, silentBuffer.length);
+        }
+    
         this.source = this.context.createBufferSource();
-        this.source.buffer = this.buffer;
+        this.source.buffer = combinedBuffer;
         this.source.connect(this.context.destination);
         
         this.startTime = this.context.currentTime;
         this.source.start(0);
         this.isPlaying = true;
-
+    
         this.source.onended = () => {
             this.isPlaying = false;
             this.source.disconnect();
