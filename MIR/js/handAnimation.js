@@ -192,7 +192,7 @@ export class HandAnimator extends THREE.EventDispatcher {
                 
                 // Convert coordinates to Three.js space
                 // Flip X coordinate to match mirrored webcam view
-                console.log(landmark, depth, wrist, handData, landmark.x/depth-wrist.x);
+                // console.log(landmark, depth, wrist, handData, landmark.x/depth-wrist.x);
 
                 let x = -landmark.x + .75;
                 let y = -landmark.y + .75;

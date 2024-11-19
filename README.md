@@ -5,8 +5,20 @@
 
 ## Things to do
 
+> [!WARNING] 
+> Currently the song path CANNOT be youtube video. 
+> It must be predownloaded before usage.
+
+* Update how the boxes move.
+
+## Recent Updates
+
+**Support of Local Audio Added**
+* Local audio is put within `backend/res/<file_name>.mp3`, which is referred in `MIR/songData.json` as `res/<file_name>.mp3`.
+
 ## Setting Up Backend
 
+* Install ffmpeg properly and check with `ffmpeg` on cmd.
 * Enter the subfolder `backend` and create a new virtual environment:
     ```bash
     python -m venv venv
@@ -70,11 +82,12 @@
 
 ## Backend
 
-Plan: Processing of music info here
+Processing of music info here
+* Local audio is put within `backend/res/<file_name>.mp3`, which is referred in `MIR/songData.json` as `res/<file_name>.mp3`.
 
 ## MIR
 
-Plan: Main UI here
+Main UI here
 
 ## Innovation Ideas
 

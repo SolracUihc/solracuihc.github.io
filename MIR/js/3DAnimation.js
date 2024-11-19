@@ -76,8 +76,8 @@ export class GameAnimator {
 
         const box = new THREE.Mesh(geometry, material);
         box.position.set(
-            (beatData.position.x * 2 - 1) * this.boxScale,
-            (beatData.position.y * 2) * this.boxScale,
+            (beatData.x * 2 - 1) * this.boxScale,
+            (beatData.y * 2) * this.boxScale,
             -20
         );
 

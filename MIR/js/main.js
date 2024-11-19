@@ -64,10 +64,36 @@ class Game {
         this.nextBeatIndex = 0;
         document.getElementById('menu-container').classList.add('hidden');
         
-        await this.audioPlayer.loadAudio(this.currentSong.audioUrl);
-        this.audioPlayer.play();
+        // Show loading screen
+        document.getElementById('loading').classList.remove('hidden');
+        
+        try {
+            const url = encodeURIComponent(this.currentSong.audioUrl); // Ensure the URL is properly encoded
+            const response = await fetch(`http://127.0.0.1:5000/api/stream?url=${url}`, {
+                method: 'GET',
+            });
+            // console.log(response);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            this.currentSong.beatMap = data;
+            // console.log('BM',this.currentSong.beatMap);
 
-        this.gameLoop();
+            await this.audioPlayer.loadAudio(this.currentSong.audioUrl);
+            
+            // Hide loading screen before starting the game
+            document.getElementById('loading').classList.add('hidden');
+            
+            this.audioPlayer.play();
+            this.gameLoop();
+        } catch (error) {
+            console.error('Error loading game:', error);
+            document.getElementById('loading').classList.add('hidden');
+            alert('Failed to load the game. Please try again.');
+            document.getElementById('menu-container').classList.remove('hidden');
+            this.isRunning = false;
+        }
     }
 
     async gameLoop() {

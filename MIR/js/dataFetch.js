@@ -26,7 +26,7 @@ export class DataFetcher {
             category: song.category,
             difficulty: song.difficulty,
             audioUrl: song.audioUrl,
-            beatMap: this.processBeatMap(song.beatMap)
+            // beatMap: this.processBeatMap(song.beatMap)
         }));
     }
 

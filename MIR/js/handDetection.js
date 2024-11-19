@@ -78,7 +78,7 @@ export class HandDetector {
                 return this.lastLandmarks.map((landmarks, index) => {
                     const palm = landmarks[0];
                     let [depth, depth2Offset, wrist] = this.calculateHandDepth(landmarks);
-                    console.log(depth);
+                    // console.log(depth);
                     return {
                         landmarks: landmarks,
                         depth: depth,
