@@ -19,6 +19,15 @@
       "beatMap": []
     },
     {
+      "id": "song25",
+      "title": "Test Song",
+      "category": "pop",
+      "difficulty": "medium",
+      "audioUrl": "res/audio/yoasobi_idol_short.mp3",
+      "beatMapUrl": "res/beatmaps/yoasobi_idol_short.json",
+      "beatMap": []
+    },
+    {
       "id": "song23",
       "title": "Idol (Backend)",
       "category": "pop",
