@@ -16,7 +16,7 @@ export class ScoreManager {
             const comboMultiplier = 1 + (this.combo * 0.1);
 
             const points = Math.round(
-                basePoints * accuracyMultiplier * comboMultiplier
+                basePoints * comboMultiplier
             );
 
             this.score += points;
