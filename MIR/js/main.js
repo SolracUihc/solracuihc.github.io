@@ -24,8 +24,10 @@ class Game {
             'boxMaxY': 2,
             // **Audio Player**
             'silenceDuration': 2.5, // seconds
-            'hitTimeOffset': 2, // seconds
-            'hitTimeWindow': .7 // seconds
+            'hitTimeOffset': 2.5, // seconds
+            'hitTimeWindow': .7, // seconds
+            // **Game**
+            'boxCreationTimeOffset': .5 // seconds
         };
 
         this.webcam = new WebcamHandler();
@@ -40,6 +42,8 @@ class Game {
         this.isRunning = false;
         this.currentSong = null;
         this.nextBeatIndex = 0;
+
+        this.boxCreationTimeOffset = settings?.boxCreationTimeOffset ?? .5;
     }
 
     async initialize() {
@@ -204,7 +208,7 @@ class Game {
     updateBeats(currentTime) {
         while (
             this.nextBeatIndex < this.currentSong.beatMap.length &&
-            this.currentSong.beatMap[this.nextBeatIndex].time <= currentTime
+            this.currentSong.beatMap[this.nextBeatIndex].time <= currentTime-this.boxCreationTimeOffset
         ) {
             const beatData = this.currentSong.beatMap[this.nextBeatIndex];
             this.gameAnimator.createBox(beatData);
