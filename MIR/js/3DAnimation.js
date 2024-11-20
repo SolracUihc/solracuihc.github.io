@@ -151,7 +151,7 @@ export class GameAnimator {
 
             const diff = currentTime - box.supposedHitTime - this.hitTimeOffset;
             const diff2 = diff / this.hintTimeWindow;
-            box.material.opacity = Math.abs(diff) < this.hitTimeWindow ? 1 : .5 + .4*Math.min(1, 1 - diff2*diff2);
+            box.material.opacity = Math.abs(diff) < this.hitTimeWindow ? 1 : Math.max(.5, Math.min(1, 1 - diff2*diff2));
             // Remove box if it's too close or has been hit
             if (box.position.z > 5) {
                 this.scene.remove(box);
