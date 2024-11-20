@@ -7,25 +7,27 @@ export class CollisionDetector {
         const collisions = [];
 
         boxes.forEach(box => {
-            keypoints.forEach(
-                kpt => {
-                    if (!box.userData.isHit) {
-                        const distance = this.calculateDistance(
-                            kpt.position,
-                            box.position
-                        );
-        
-                        if (distance < this.collisionThreshold) {
-                            box.userData.isHit = true;
-                            collisions.push({
-                                box: box,
-                                points: box.userData.points,
-                                accuracy: this.calculateAccuracy(distance)
-                            });
+            if (keypoints[0].visible) { //target
+                keypoints.forEach(
+                    kpt => {
+                        if (!box.userData.isHit) {
+                            const distance = this.calculateDistance(
+                                kpt.position,
+                                box.position
+                            );
+            
+                            if (distance < this.collisionThreshold) {
+                                box.userData.isHit = true;
+                                collisions.push({
+                                    box: box,
+                                    points: box.userData.points,
+                                    accuracy: this.calculateAccuracy(distance)
+                                });
+                            }
                         }
                     }
-                }
-            )
+                )
+            }
         });
 
         return collisions;

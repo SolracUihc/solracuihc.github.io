@@ -21,7 +21,14 @@ class Game {
             'boxMinX': -2,
             'boxMaxX': 2,
             'boxMinY': .5,
-            'boxMaxY': 2 
+            'boxMaxY': 2,
+            // **Audio Player**
+            'silenceDuration': 2.5, // seconds
+            'hitTimeOffset': 2.5, // seconds
+            'hintTimeWindow': .7, // seconds
+            'hitTimeWindow': .2, // seconds
+            // **Game**
+            'boxCreationTimeOffset': .6 // seconds
         };
 
         this.webcam = new WebcamHandler();
@@ -29,13 +36,15 @@ class Game {
         this.gameAnimator = new GameAnimator(settings);
         this.handAnimator = new HandAnimator(this.gameAnimator.scene, settings);
         this.dataFetcher = new DataFetcher();
-        this.audioPlayer = new AudioPlayer();
+        this.audioPlayer = new AudioPlayer(settings);
         this.collisionDetector = new CollisionDetector();
         this.scoreManager = new ScoreManager();
         
         this.isRunning = false;
         this.currentSong = null;
         this.nextBeatIndex = 0;
+
+        this.boxCreationTimeOffset = settings?.boxCreationTimeOffset ?? .5;
     }
 
     async initialize() {
@@ -182,23 +191,32 @@ class Game {
             this.scoreManager.updateScore(collisions);
         });
 
-        // Update game objects
+        // Update game beat
         const currentTime = this.audioPlayer.getCurrentTime();
         this.updateBeats(currentTime);
-        this.gameAnimator.updateBoxes(currentTime);
-        
+        // Update targets and check combo
+        if (this.gameAnimator.updateBoxes(currentTime)) {
+            this.scoreManager.missedNote();
+        }
 
         // Render scene
         this.gameAnimator.render();
 
         // Continue loop
         requestAnimationFrame(() => this.gameLoop());
+        if (currentTime === 0) {
+            console.log('END GAME');
+            this.endGame();
+            return;
+        }
+
+            
     }
 
     updateBeats(currentTime) {
         while (
             this.nextBeatIndex < this.currentSong.beatMap.length &&
-            this.currentSong.beatMap[this.nextBeatIndex].time <= currentTime
+            this.currentSong.beatMap[this.nextBeatIndex].time <= currentTime-this.boxCreationTimeOffset
         ) {
             const beatData = this.currentSong.beatMap[this.nextBeatIndex];
             this.gameAnimator.createBox(beatData);
@@ -230,7 +248,6 @@ class Game {
         this.isRunning = false;
         this.audioPlayer.pause();
         this.gameAnimator.clear();
-        this.handAnimator.clear();
 
         const stats = this.scoreManager.getGameStats();
         localStorage.setItem('gameStats', JSON.stringify(stats));
