@@ -212,6 +212,7 @@ class Game {
         ) {
             const beatData = this.currentSong.beatMap[this.nextBeatIndex];
             this.gameAnimator.createBox(beatData);
+            this.gameAnimator.updateGround(beatData);
             this.nextBeatIndex++;
         }
     }

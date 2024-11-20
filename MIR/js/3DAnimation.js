@@ -26,36 +26,39 @@ export class GameAnimator {
         // Setup renderer
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setClearColor(0x000000);
-        // this.renderer.shadowMap.enabled = true;
-        // this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         document.getElementById('game-container').appendChild(this.renderer.domElement);
 
         // Setup camera
         this.camera.position.set(0, 2, 5);
         this.camera.lookAt(0, 0, 0);
 
-        // Add lights for white shadows
+        // Add lights
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         this.scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(5, 5, 5);
-        
         this.scene.add(directionalLight);
 
-        // Add ground plane for white shadows
-        const planeGeometry = new THREE.PlaneGeometry(10, 10);
-        const planeMaterial = new THREE.MeshStandardMaterial({
+        // Create ground plane
+        this.planeGeometry = new THREE.PlaneGeometry(20, 20, 20, 20);
+        this.planeMaterial = new THREE.MeshStandardMaterial({
             color: 0x000000,
-            roughness: 0.4,
+            roughness: 0.2,
             metalness: 0.2,
             transparent: true,
-            opacity: 0.95
+            opacity: 0.5
         });
+        this.groundPlane = new THREE.Mesh(this.planeGeometry, this.planeMaterial);
+        this.groundPlane.rotation.x = -Math.PI / 2;
+        
+        // Set the y position lower
+        this.groundPlane.position.y = -1; // Adjust this value as needed
+        
+        this.scene.add(this.groundPlane);
 
         // Add grid
         const gridHelper = new THREE.GridHelper(10, 20, 0x444444, 0x222222);
-        gridHelper.position.y = 0;
         this.scene.add(gridHelper);
 
         // Handle window resize
@@ -82,8 +85,8 @@ export class GameAnimator {
 
         const box = new THREE.Mesh(geometry, material);
         box.position.set(
-            rand * (beatData.x * (this.boxMaxX-this.boxMinX) + this.boxMinX) * this.boxScale,
-            (beatData.y * (this.boxMaxY-this.boxMinY) + this.boxMinY) * this.boxScale,
+            rand * (beatData.x * (this.boxMaxX - this.boxMinX) + this.boxMinX) * this.boxScale,
+            (beatData.y * (this.boxMaxY - this.boxMinY) + this.boxMinY) * this.boxScale,
             -20
         );
         box.transparent = true;
@@ -101,6 +104,30 @@ export class GameAnimator {
         return box;
     }
 
+    updateGround(beatMap) {
+        // Change ground color based on beatMap.x
+        const colorValue = beatMap.x * 10;
+        this.planeMaterial.color.setHSL(colorValue % 1, 1, 0.5); // Normalize to 0-1 range
+    
+        // Update ground height based on beatMap.y
+        const widthSegments = this.planeGeometry.parameters.widthSegments;
+        const heightSegments = this.planeGeometry.parameters.heightSegments;
+        
+        const vertexArray = this.planeGeometry.attributes.position.array;
+    
+        for (let i = 0; i <= widthSegments; i++) {
+            for (let j = 0; j <= heightSegments; j++) {
+                const index = (i * (heightSegments + 1) + j) * 3;
+    
+                // Create wave-like motion using sine function
+                const waveHeight = Math.sin((i + beatMap.x*10)*3) * 1.5 + Math.cos((j + beatMap.y*10)*3) * 1.5; // Adjust amplitude of waves
+                vertexArray[index + 2] = waveHeight/2; // Set the height for the vertex
+            }
+        }
+    
+        this.planeGeometry.attributes.position.needsUpdate = true; // Notify Three.js that the position has changed
+    }
+
     updateBoxes(currentTime, speed = 10) {
         let boxRemoved = false;
         if (this.lastTime === undefined) {
@@ -113,13 +140,13 @@ export class GameAnimator {
 
         for (let i = this.boxes.length - 1; i >= 0; i--) {
             const box = this.boxes[i];
-            
+
             // Move box towards camera
-            box.position.z += speed*timeDiff;
+            box.position.z += speed * timeDiff;
 
             // Rotate box
-            box.rotation.x += 1*timeDiff;
-            box.rotation.y += 1*timeDiff;
+            box.rotation.x += 1 * timeDiff;
+            box.rotation.y += 1 * timeDiff;
 
             const diff = (currentTime - box.supposedHitTime - this.hitTimeOffset) / this.hitTimeWindow;
             box.material.opacity = Math.max(.5, Math.min(1, 1 - diff*diff));
