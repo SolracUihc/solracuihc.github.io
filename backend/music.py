@@ -8,7 +8,6 @@ import tempfile
 import librosa
 import yt_dlp
 import json
-import matplotlib.pyplot as plt
 
 def min_max_normalize(data):
     # Extract x and y values
@@ -33,61 +32,6 @@ def min_max_normalize(data):
 
     return normalized_data
 
-def plot_energy_curve(y, sr, output_path):
-    # Calculate RMS energy
-    rmse = librosa.feature.rms(y=y)[0]
-    
-    # Create time array
-    frames = range(len(rmse))
-    t = librosa.frames_to_time(frames)
-    
-    # Create the plot
-    plt.figure(figsize=(15, 5))
-    plt.plot(t, rmse, color='blue', alpha=0.7, linewidth=2)
-    plt.fill_between(t, rmse, alpha=0.3, color='blue')
-    
-    # Add labels and title
-    plt.xlabel('Time (seconds)')
-    plt.ylabel('RMS Energy')
-    plt.title('Audio Energy Over Time')
-    
-    # Add grid
-    plt.grid(True, alpha=0.3)
-    
-    # Customize appearance
-    plt.tight_layout()
-    
-    # Save plot
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    plt.close()  # Close the figure to free memory
-
-def plot_spectrogram(D, DB, sr, output_path='spectrogram.png'):
-    # Create figure
-    plt.figure(figsize=(15, 8))
-    
-    # Create spectrogram
-    librosa.display.specshow(
-        DB, 
-        sr=sr, 
-        x_axis='time', 
-        y_axis='hz',
-        cmap='viridis'
-    )
-    # Add colorbar
-    plt.colorbar(format='%+2.0f dB')
-    
-    # Add labels and title
-    plt.xlabel('Time (seconds)')
-    plt.ylabel('Frequency (Hz)')
-    plt.title('Spectrogram')
-    
-    # Adjust layout
-    plt.tight_layout()
-    
-    # Save and close
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    plt.close()
-
 def moving_average_energy(rmse, beat, beats, window_size=4):
     """ Calculate the average energy around a beat (±window_size) """
     # Get the index range for the window of surrounding beats
@@ -101,15 +45,10 @@ def moving_average_energy(rmse, beat, beats, window_size=4):
 def extract_music_features_ccc(audio_file):
     # Load audio file
     y, sr = librosa.load(audio_file)
-    plot_energy_curve(y, sr, 'energy_curve.png')
 
     # Short-time Fourier transform (STFT)
     D = np.abs(librosa.stft(y))  
     DB = librosa.amplitude_to_db(D, ref=np.max)
-    print(f"Shape of DB: {DB.shape}")
-    # Define the segment range (e.g., first 100 frames)
-    segment = DB[:, :100]
-    plot_spectrogram(D, segment, sr, 'spectrogram.png')
 
     # Extract beats
     tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
@@ -125,8 +64,6 @@ def extract_music_features_ccc(audio_file):
 
     high_energy_threshold = np.percentile(rmse, 80)     # Upper 20% percentile
     low_energy_threshold = np.percentile(rmse, 50)      # Lower 50% percentile
-    print(f"High-energy threshold: {high_energy_threshold}")
-    print(f"Low-energy threshold: {low_energy_threshold}")
 
     # Iterate through each beat
     for i, beat in enumerate(beats):
@@ -139,10 +76,10 @@ def extract_music_features_ccc(audio_file):
         if avg_energy > high_energy_threshold:
             # Add more beats during climax (higher density)
             if i < len(beats) - 1:
-                next_time = times[i + 1]
-                interpolated_time = (time + next_time) / 2  # Midpoint between two beats
+                # next_time = times[i + 1]
+                # interpolated_time = (time + next_time) / 2  # Midpoint between two beats
                 beat_map.append({
-                    'time': round(interpolated_time, 2),
+                    'time': round(time, 2),
                     'x': round(float(rmse[beat]), 2),
                     'y': np.where(DB.T[beat] == max(DB.T[beat]))[0][0],
                     'z': 0,

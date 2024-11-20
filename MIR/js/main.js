@@ -204,6 +204,13 @@ class Game {
 
         // Continue loop
         requestAnimationFrame(() => this.gameLoop());
+        if (currentTime === 0) {
+            console.log('END GAME');
+            this.endGame();
+            return;
+        }
+
+            
     }
 
     updateBeats(currentTime) {
@@ -241,7 +248,6 @@ class Game {
         this.isRunning = false;
         this.audioPlayer.pause();
         this.gameAnimator.clear();
-        this.handAnimator.clear();
 
         const stats = this.scoreManager.getGameStats();
         localStorage.setItem('gameStats', JSON.stringify(stats));
