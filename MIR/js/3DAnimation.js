@@ -16,6 +16,8 @@ export class GameAnimator {
         this.boxMaxX = settings?.boxMaxX ?? 2;
         this.boxMinY = settings?.boxMinY ?? 0;
         this.boxMaxY = settings?.boxMaxY ?? 3;
+        this.hitTimeOffset = settings?.hitTimeOffset ?? 2;
+        this.hitTimeWindow = settings?.hitTimeWindow ?? .2;
 
         this.initialize();
     }
@@ -84,6 +86,9 @@ export class GameAnimator {
             (beatData.y * (this.boxMaxY-this.boxMinY) + this.boxMinY) * this.boxScale,
             -20
         );
+        box.transparent = true;
+        box.material.opacity = .5;
+        box.supposedHitTime = beatData.time; // custom tags
 
         box.userData = {
             points: beatData.points,
@@ -115,6 +120,8 @@ export class GameAnimator {
             box.rotation.x += 1*timeDiff;
             box.rotation.y += 1*timeDiff;
 
+            const diff = (currentTime - box.supposedHitTime - this.hitTimeOffset) / this.hitTimeWindow;
+            box.material.opacity = Math.max(.5, Math.min(1, 1 - diff*diff));
             // Remove box if it's too close or has been hit
             if (box.position.z > 5 || box.userData.isHit) {
                 this.scene.remove(box);

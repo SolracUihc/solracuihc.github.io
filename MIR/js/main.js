@@ -21,7 +21,11 @@ class Game {
             'boxMinX': -2,
             'boxMaxX': 2,
             'boxMinY': .5,
-            'boxMaxY': 2 
+            'boxMaxY': 2,
+            // **Audio Player**
+            'silenceDuration': 2.5, // seconds
+            'hitTimeOffset': 2, // seconds
+            'hitTimeWindow': .7 // seconds
         };
 
         this.webcam = new WebcamHandler();
@@ -29,7 +33,7 @@ class Game {
         this.gameAnimator = new GameAnimator(settings);
         this.handAnimator = new HandAnimator(this.gameAnimator.scene, settings);
         this.dataFetcher = new DataFetcher();
-        this.audioPlayer = new AudioPlayer();
+        this.audioPlayer = new AudioPlayer(settings);
         this.collisionDetector = new CollisionDetector();
         this.scoreManager = new ScoreManager();
         

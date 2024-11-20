@@ -1,10 +1,12 @@
 export class AudioPlayer {
-    constructor() {
+    constructor(settings) {
         this.context = new (window.AudioContext || window.webkitAudioContext)();
         this.source = null;
         this.buffer = null;
         this.startTime = 0;
         this.isPlaying = false;
+
+        this.silentDuration = settings?.silenceDuration ?? 2.5;
     }
 
     async loadAudio(url) {
@@ -36,7 +38,7 @@ export class AudioPlayer {
             return;
         }
     
-        const silentDuration = 2.5;
+        const silentDuration = this.silentDuration;
         const sampleRate = this.context.sampleRate;
         const silentBuffer = this.context.createBuffer(
             this.buffer.numberOfChannels,
