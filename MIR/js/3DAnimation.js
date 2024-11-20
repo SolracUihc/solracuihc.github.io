@@ -18,6 +18,7 @@ export class GameAnimator {
         this.boxMaxY = settings?.boxMaxY ?? 3;
         this.hitTimeOffset = settings?.hitTimeOffset ?? 2;
         this.hitTimeWindow = settings?.hitTimeWindow ?? .2;
+        this.hintTimeWindow = settings?.hintTimeWindow ?? .7;
 
         this.initialize();
     }
@@ -148,8 +149,9 @@ export class GameAnimator {
             box.rotation.x += 1 * timeDiff;
             box.rotation.y += 1 * timeDiff;
 
-            const diff = (currentTime - box.supposedHitTime - this.hitTimeOffset) / this.hitTimeWindow;
-            box.material.opacity = Math.max(.5, Math.min(1, 1 - diff*diff));
+            const diff = currentTime - box.supposedHitTime - this.hitTimeOffset;
+            const diff2 = diff / this.hintTimeWindow;
+            box.material.opacity = Math.abs(diff) < this.hitTimeWindow ? 1 : .5 + .4*Math.min(1, 1 - diff2*diff2);
             // Remove box if it's too close or has been hit
             if (box.position.z > 5) {
                 this.scene.remove(box);

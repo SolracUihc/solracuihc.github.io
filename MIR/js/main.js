@@ -25,9 +25,10 @@ class Game {
             // **Audio Player**
             'silenceDuration': 2.5, // seconds
             'hitTimeOffset': 2.5, // seconds
-            'hitTimeWindow': .7, // seconds
+            'hintTimeWindow': .7, // seconds
+            'hitTimeWindow': .2, // seconds
             // **Game**
-            'boxCreationTimeOffset': .5 // seconds
+            'boxCreationTimeOffset': .6 // seconds
         };
 
         this.webcam = new WebcamHandler();
