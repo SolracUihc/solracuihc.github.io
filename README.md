@@ -2,6 +2,7 @@
 
 ## References
 * Built upon the article: https://tympanus.net/codrops/2024/10/24/creating-a-3d-hand-controller-using-a-webcam-with-mediapipe-and-three-js/
+* Forked from [\[Cai3ra/webcam-3D-handcontrols\]](https://github.com/Cai3ra/webcam-3D-handcontrols).
 
 ## Things to Do
 
