@@ -35,7 +35,7 @@ def get_stream():
         if audio_data is None:
             return jsonify(error="Failed to download or convert YouTube audio"), 500
         
-        features = music.extract_music_features_ccc(audio_data)
+        features = music.extract_music_features(audio_data)
         # audio_base64 = base64.b64encode(audio_data.getvalue()).decode('utf-8')
         # features["audio_data"] = audio_base64
         # print(features)
