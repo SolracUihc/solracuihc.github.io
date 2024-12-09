@@ -12,6 +12,9 @@
 >
 > Also, please make sure that the LOCAL backend server is running and they have SAME BACKEND FILES as the frontend.
 
+**Follow Beats**
+* Use the correct beatmap to generate the boxes.
+
 **Time Accuracy**
 * The boxes should ARRIVE at the player's side ON THE BEAT, instead of being CREATED on the beat.
 * There should be some kind of hint showing WHEN the player should hit the boxes.
@@ -19,6 +22,8 @@
 **Gameplay**
 * Update how the boxes move. Linear motion is boring.
 * Adjust the shapes and speeds of the boxes.
+* eg based on STRONG or WEAK beats.
+* More gestures for each type of box?
 
 **Instructions**
 * Provide clearer instructions to the user.
