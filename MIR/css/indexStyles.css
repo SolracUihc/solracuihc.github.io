@@ -60,14 +60,18 @@ body {
     /* background-color: #4CAF50; */
 }
 
-#score-container, #combo-container, #maxCombo-container {
+#score-container, #combo-container, #maxCombo-container, #songName-container {
     position: relative;
     padding-top: 10px;
-    padding-left: 20px;
     font-size: 20px;
     align-items: center;
     text-align: center;
     z-index: 3;
+}
+
+#songName-container {
+    font-size: 14px;
+    color: lightgrey;
 }
 
 /* Accuracy Bar */

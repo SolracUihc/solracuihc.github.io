@@ -239,8 +239,7 @@ class Game {
     }
 
     async updateSongList(category) {
-        this.currentSong = null;
-        document.getElementById('start-game').classList.add('disabled');
+        this.setSong(null);
 
         const songs = await this.dataFetcher.getSongsByCategory(category);
         const songList = document.getElementById('song-list');
@@ -250,11 +249,20 @@ class Game {
             const button = document.createElement('button');
             button.textContent = song.title;
             button.onclick = () => {
-                this.currentSong = song;
-                document.getElementById('start-game').classList.remove('disabled');
+                this.setSong(song);
             };
             songList.appendChild(button);
         });
+    }
+
+    setSong(song) {
+        this.currentSong = song;
+        if (this.currentSong === null) {
+            document.getElementById('start-game').classList.add('disabled');
+        } else {
+            document.getElementById('start-game').classList.remove('disabled');
+        }
+        document.getElementById('songName').textContent = this.currentSong?.title ?? '(None Selected)';
     }
 
     endGame() {
