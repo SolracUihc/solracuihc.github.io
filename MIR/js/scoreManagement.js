@@ -3,9 +3,11 @@ export class ScoreManager {
         this.score = 0;
         this.combo = 0;
         this.maxCombo = 0;
+        this.boxesMissed = 0;
         this.scoreElement = document.getElementById('score');
         this.comboElement = document.getElementById('combo');
         this.maxComboElement = document.getElementById('maxCombo');
+        this.accuracyElement = document.getElementById('accuracy');
         this.accuracyHistory = [];
     }
 
@@ -32,6 +34,7 @@ export class ScoreManager {
 
     missedNote() {
         this.combo = 0;
+        this.boxesMissed++;
         this.displayScore();
         this.displayCombo();
     }
@@ -53,6 +56,10 @@ export class ScoreManager {
         if (this.scoreElement) {
             this.scoreElement.textContent = this.score;
         }
+        if (this.accuracyElement) {
+            const accuracy = this.getAccuracy();
+            this.accuracyElement.textContent = `${accuracy.toFixed(1)}%`
+        }
     }
 
     displayCombo() {
@@ -64,17 +71,29 @@ export class ScoreManager {
         }
     }
 
-    getGameStats(boxesMissed) {
+    getAccuracy() {
+        const totalHits = this.accuracyHistory.length
+        const totalBoxes = this.accuracyHistory.length + this.boxesMissed
+        const accuracy = totalHits / totalBoxes * 100 || 0
+        return accuracy
+    }
+
+    getGameStats() {
         const averageAccuracy = this.accuracyHistory.length > 0
             ? this.accuracyHistory.reduce((a, b) => a + b) / this.accuracyHistory.length
             : 0;
+
+        const totalHits = this.accuracyHistory.length
+        const totalBoxes = this.accuracyHistory.length + this.boxesMissed
+        const accuracy = totalHits / totalBoxes * 100 || 0
 
         return {
             finalScore: this.score,
             maxCombo: this.maxCombo,
             averageAccuracy: averageAccuracy,
-            totalBoxes: this.accuracyHistory.length + boxesMissed,
-            totalHits: this.accuracyHistory.length
+            accuracy: accuracy,
+            totalBoxes: totalBoxes,
+            totalHits: totalHits
         };
     }
 

@@ -35,8 +35,7 @@
             document.getElementById('max-combo').textContent = stats.maxCombo || 0;
             // document.getElementById('avg-accuracy').textContent = 
             //     ((stats.averageAccuracy || 0).toFixed(1) + '%');
-            document.getElementById('accuracy').textContent = 
-                ((stats.totalHits / stats.totalBoxes * 100 || 0).toFixed(1) + '%');
+            document.getElementById('accuracy').textContent = ((stats.accuracy).toFixed(1) + '%');
             document.getElementById('total-hits').textContent = stats.totalHits || 0;
         });
     </script>

@@ -47,7 +47,6 @@ class Game {
         this.isRunning = false;
         this.currentSong = null;
         this.nextBeatIndex = 0;
-        this.boxesMissed = 0;
 
         this.boxCreationTimeOffset = settings?.boxCreationTimeOffset ?? .5;
     }
@@ -197,18 +196,21 @@ class Game {
         });
 
         // Update game beat
-        const currentTime = this.audioPlayer.getCurrentTime();
+        const currentTime = this.audioPlayer.getCurrentTime()
         const beatTime = currentTime-this.boxCreationTimeOffset
+        const audioLen = this.audioPlayer.getAudioLength()
+        let actualTime = this.audioPlayer.getActualTime()
+        actualTime = Math.min(Math.max(actualTime, 0), audioLen)
 
         // Update gui
-        document.getElementById('time').textContent = `${timeString(currentTime)}/${timeString(this.audioPlayer.getAudioLength())}`;
-        this.guiManager.updateTimeBar(this.audioPlayer.getActualTime()/this.audioPlayer.getAudioLength());
+        document.getElementById('time').textContent = `${timeString(actualTime)}/${timeString(audioLen)}`;
+        this.guiManager.updateTimeBar(1-actualTime/audioLen);
+        this.guiManager.updateAccuracyBar(this.scoreManager.getAccuracy()); 
 
         // Update boxes
         this.updateBeats(beatTime);
         // Update targets and check combo
         if (this.gameAnimator.updateBoxes(beatTime)) {
-            this.boxesMissed++;
             this.scoreManager.missedNote();
         }
 
@@ -260,7 +262,7 @@ class Game {
         this.audioPlayer.pause();
         this.gameAnimator.clear();
 
-        const stats = this.scoreManager.getGameStats(this.boxesMissed);
+        const stats = this.scoreManager.getGameStats();
         localStorage.setItem('gameStats', JSON.stringify(stats));
         
         window.location.href = 'end.html';
