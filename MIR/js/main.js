@@ -47,6 +47,7 @@ class Game {
         this.isRunning = false;
         this.currentSong = null;
         this.nextBeatIndex = 0;
+        this.boxesMissed = 0;
 
         this.boxCreationTimeOffset = settings?.boxCreationTimeOffset ?? .5;
     }
@@ -207,6 +208,7 @@ class Game {
         this.updateBeats(beatTime);
         // Update targets and check combo
         if (this.gameAnimator.updateBoxes(beatTime)) {
+            this.boxesMissed++;
             this.scoreManager.missedNote();
         }
 
@@ -258,7 +260,7 @@ class Game {
         this.audioPlayer.pause();
         this.gameAnimator.clear();
 
-        const stats = this.scoreManager.getGameStats();
+        const stats = this.scoreManager.getGameStats(this.boxesMissed);
         localStorage.setItem('gameStats', JSON.stringify(stats));
         
         window.location.href = 'end.html';

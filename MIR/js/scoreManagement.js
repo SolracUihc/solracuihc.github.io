@@ -64,7 +64,7 @@ export class ScoreManager {
         }
     }
 
-    getGameStats() {
+    getGameStats(boxesMissed) {
         const averageAccuracy = this.accuracyHistory.length > 0
             ? this.accuracyHistory.reduce((a, b) => a + b) / this.accuracyHistory.length
             : 0;
@@ -73,6 +73,7 @@ export class ScoreManager {
             finalScore: this.score,
             maxCombo: this.maxCombo,
             averageAccuracy: averageAccuracy,
+            totalBoxes: this.accuracyHistory.length + boxesMissed,
             totalHits: this.accuracyHistory.length
         };
     }
