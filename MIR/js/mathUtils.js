@@ -10,3 +10,8 @@ export function hash(str) {
     }
     return hash;
 }
+
+export function timeString(currentTime) {
+    const le_time = Math.round(currentTime % 60 * 1000)/1000;
+    return `${Math.floor(currentTime / 60)}:${le_time.toString().split('.')[0].padStart(2, '0')}.${le_time.toString().split('.')[1]?.padEnd(3, '0') ?? '000'}`;
+}

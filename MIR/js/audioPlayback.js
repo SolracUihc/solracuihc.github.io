@@ -97,4 +97,9 @@ export class AudioPlayer {
             gainNode.connect(this.context.destination);
         }
     }
+
+    getAudioLength() {
+        if (!this.buffer) return 0;
+        return this.buffer.duration;
+    }
 }
