@@ -50,37 +50,75 @@ body {
     z-index: 3;
 }
 
+/* UPPER PANEL */
+#upper-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 3;
+    /* background-color: #4CAF50; */
+}
+
 #score-container {
-    position: fixed;
-    top: 20px;
-    left: 20px;
+    position: relative;
+    padding-top: 10px;
+    padding-left: 20px;
     font-size: 24px;
     z-index: 3;
 }
 
 #combo-container {
-    position: fixed;
-    top: 50px;
-    left: 20px;
+    position: relative;
+    padding-top: 10px;
+    padding-left: 20px;
     font-size: 24px;
     z-index: 3;
 }
 
 #maxCombo-container {
-    position: fixed;
-    top: 80px;
-    left: 20px;
+    position: relative;
+    padding-top: 10px;
+    padding-left: 20px;
     font-size: 24px;
     z-index: 3;
 }
 
 #time-container {
-    position: fixed;
-    top: 110px;
-    left: 20px;
+    position: relative;
+    padding-top: 10px;
+    padding-left: 20px;
     font-size: 24px;
     z-index: 3;
 }
+
+/* Time Bar */
+#time-bar {
+    position: absolute;
+    margin-top: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
+    width: calc(100% - 40px);
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    z-index: 3;
+
+    border-radius: 10px;
+}
+
+#time-bar-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(to right, #4CAF50, #2196F3);
+
+    border-radius: 10px;
+}
+
+/* Menu Container */
 
 #menu-container {
     position: fixed;

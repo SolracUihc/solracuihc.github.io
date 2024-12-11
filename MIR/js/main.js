@@ -6,6 +6,8 @@ import { AudioPlayer } from './audioPlayback.js';
 import { GameAnimator } from './3DAnimation.js';
 import { CollisionDetector } from './collisionDetection.js';
 import { ScoreManager } from './scoreManagement.js';
+import { GUIManager } from './guiManager.js';
+
 import { timeString } from './mathUtils.js';
 
 class Game {
@@ -40,6 +42,7 @@ class Game {
         this.audioPlayer = new AudioPlayer(settings);
         this.collisionDetector = new CollisionDetector();
         this.scoreManager = new ScoreManager();
+        this.guiManager = new GUIManager();
         
         this.isRunning = false;
         this.currentSong = null;
@@ -193,11 +196,17 @@ class Game {
         });
 
         // Update game beat
-        const currentTime = this.audioPlayer.getCurrentTime()-this.boxCreationTimeOffset;
+        const currentTime = this.audioPlayer.getCurrentTime();
+        const beatTime = currentTime-this.boxCreationTimeOffset
+
+        // Update gui
         document.getElementById('time').textContent = `${timeString(currentTime)}/${timeString(this.audioPlayer.getAudioLength())}`;
-        this.updateBeats(currentTime);
+        this.guiManager.updateTimeBar(this.audioPlayer.getActualTime()/this.audioPlayer.getAudioLength());
+
+        // Update boxes
+        this.updateBeats(beatTime);
         // Update targets and check combo
-        if (this.gameAnimator.updateBoxes(currentTime)) {
+        if (this.gameAnimator.updateBoxes(beatTime)) {
             this.scoreManager.missedNote();
         }
 
@@ -205,12 +214,12 @@ class Game {
         this.gameAnimator.render();
 
         // Continue loop
-        requestAnimationFrame(() => this.gameLoop());
-        if (this.audioPlayer.getCurrentTime() === 0) {
+        if (!this.audioPlayer.isPlaying) {
             console.log('END GAME');
             this.endGame();
             return;
-        }            
+        }   
+        requestAnimationFrame(() => this.gameLoop());  
     }
 
     updateBeats(currentTime) {
