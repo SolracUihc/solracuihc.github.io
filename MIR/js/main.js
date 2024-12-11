@@ -6,6 +6,7 @@ import { AudioPlayer } from './audioPlayback.js';
 import { GameAnimator } from './3DAnimation.js';
 import { CollisionDetector } from './collisionDetection.js';
 import { ScoreManager } from './scoreManagement.js';
+import { timeString } from './mathUtils.js';
 
 class Game {
     constructor() {
@@ -192,7 +193,8 @@ class Game {
         });
 
         // Update game beat
-        const currentTime = this.audioPlayer.getCurrentTime();
+        const currentTime = this.audioPlayer.getCurrentTime()-this.boxCreationTimeOffset;
+        document.getElementById('time').textContent = `${timeString(currentTime)}/${timeString(this.audioPlayer.getAudioLength())}`;
         this.updateBeats(currentTime);
         // Update targets and check combo
         if (this.gameAnimator.updateBoxes(currentTime)) {
@@ -204,13 +206,11 @@ class Game {
 
         // Continue loop
         requestAnimationFrame(() => this.gameLoop());
-        if (currentTime === 0) {
+        if (this.audioPlayer.getCurrentTime() === 0) {
             console.log('END GAME');
             this.endGame();
             return;
-        }
-
-            
+        }            
     }
 
     updateBeats(currentTime) {
