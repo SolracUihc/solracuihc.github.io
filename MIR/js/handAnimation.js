@@ -1,227 +1,325 @@
 export class HandAnimator extends THREE.EventDispatcher {
-    constructor(a, b) { // Constructor takes two parameters: scene (a) and options (b)
-        super(), // Call the parent class constructor
-        this.scene = a, // Set the scene property to the provided scene
-        this.distScale = b?.distScale ?? 6, // Set distance scale, default to 6 if not provided
-        this.handScale = b?.handScale ?? 6, // Set hand scale, default to 6 if not provided
-        this.depthScale = b?.depthScale ?? 1, // Set depth scale, default to 1 if not provided
-        this.hands = [{ meshes: [], lines: [] }, { meshes: [], lines: [] }], // Initialize hands with empty meshes and lines
+    constructor(scene, settings) {
+        super();
+        this.scene = scene;
+
+        // Scale and offset parameters
+        this.distScale = settings?.distScale ?? 6;
+        this.handScale = settings?.handScale ?? 6;
+        this.depthScale = settings?.depthScale ?? 1;
+
+        // Hands
+        this.hands = [
+            { meshes: [], lines: [] },
+            { meshes: [], lines: [] }
+        ];
         this.connections = [
-            [0, 1], [1, 2], [2, 3], [3, 4],
-            [0, 5], [5, 6], [6, 7], [7, 8],
-            [0, 9], [9, 10], [10, 11], [11, 12],
-            [0, 13], [13, 14], [14, 15], [15, 16],
-            [0, 17], [17, 18], [18, 19], [19, 20],
-            [5, 9], [9, 13], [13, 17]
-        ], // Define connections between hand joints
+            [0, 1], [1, 2], [2, 3], [3, 4],           // thumb
+            [0, 5], [5, 6], [6, 7], [7, 8],           // index
+            [0, 9], [9, 10], [10, 11], [11, 12],      // middle
+            [0, 13], [13, 14], [14, 15], [15, 16],    // ring
+            [0, 17], [17, 18], [18, 19], [19, 20],    // pinky
+            [5, 9], [9, 13], [13, 17]                 // palm
+        ];
+
+        // Materials for each hand
         this.materials = [
             {
                 joint: new THREE.MeshStandardMaterial({
-                    color: 65280,
-                    transparent: !0,
-                    opacity: .8,
-                    roughness: .3,
-                    metalness: .2,
+                    color: 0x00ff00,
+                    transparent: true,
+                    opacity: 0.8,
+                    roughness: 0.3,
+                    metalness: 0.2,
                     shadowSide: THREE.FrontSide
                 }),
                 line: new THREE.LineBasicMaterial({
-                    color: 65280,
-                    transparent: !0,
-                    opacity: .5,
+                    color: 0x00ff00,
+                    transparent: true,
+                    opacity: 0.5,
                     linewidth: 2
                 })
             },
             {
                 joint: new THREE.MeshStandardMaterial({
-                    color: 65535,
-                    transparent: !0,
-                    opacity: .8,
-                    roughness: .3,
-                    metalness: .2,
+                    color: 0x00ffff,
+                    transparent: true,
+                    opacity: 0.8,
+                    roughness: 0.3,
+                    metalness: 0.2,
                     shadowSide: THREE.FrontSide
                 }),
                 line: new THREE.LineBasicMaterial({
-                    color: 65535,
-                    transparent: !0,
-                    opacity: .5,
+                    color: 0x00ffff,
+                    transparent: true,
+                    opacity: 0.5,
                     linewidth: 2
                 })
             }
-        ], // Define materials for hand joints and lines
-        this.jointGeometry = new THREE.SphereGeometry(.012 * this.handScale, 16, 16), // Create geometry for the hand joints
-        this.targets = [], // Initialize targets array for gesture detection
-        this.closedFists = [!1, !1], // Array to track if fists are closed
-        this.selected = [null, null], // Array to track selected objects for each hand
+        ];
+
+        // Geometry for joints
+        this.jointGeometry = new THREE.SphereGeometry(0.012*this.handScale, 16, 16);
+
+        // Gesture detection properties
+        this.targets = [];
+        this.closedFists = [false, false];
+        this.selected = [null, null];
         this.gestureCompute = {
-            depthFrom: new THREE.Vector3,
-            depthTo: new THREE.Vector3,
-            from: new THREE.Vector3,
-            to: new THREE.Vector3
-        }, // Initialize vectors for gesture computation
-        this.distanceToGrab = .25, // Set distance threshold for grabbing
-        this.initializeHandMeshes(), // Call method to initialize hand meshes
-        this.initializeTargets() // Call method to initialize target objects
+            depthFrom: new THREE.Vector3(),
+            depthTo: new THREE.Vector3(),
+            from: new THREE.Vector3(),
+            to: new THREE.Vector3(),
+        };
+        this.distanceToGrab = 0.25;
+
+        // Initialize hand meshes and targets
+        this.initializeHandMeshes();
+        this.initializeTargets();
     }
 
-    initializeTargets() { // Method to initialize target objects
-        for (let a = 0; 2 > a; a++) { // Loop for both hands
-            const b = new THREE.MeshStandardMaterial({
-                color: this.materials[a].joint.color,
-                transparent: !0,
-                opacity: .8,
-                roughness: .3,
-                metalness: .2
-            }), // Create material for targets
-            c = new THREE.Mesh(new THREE.SphereGeometry(.03 * this.handScale, 32, 16), b); // Create a mesh for the target with sphere geometry
-            c.castShadow = !0, // Enable shadow casting for the target
-            c.visible = !1, // Set target visibility to false initially
-            this.scene.add(c), // Add target mesh to the scene
-            this.targets.push(c) // Push target mesh into the targets array
+    initializeTargets() {
+        for (let i = 0; i < 2; i++) {
+            const cursorMat = new THREE.MeshStandardMaterial({
+                color: this.materials[i].joint.color,
+                transparent: true,
+                opacity: 0.8,
+                roughness: 0.3,
+                metalness: 0.2
+            });
+
+            const cursor = new THREE.Mesh(
+                new THREE.SphereGeometry(0.03*this.handScale, 32, 16),
+                cursorMat
+            );
+            cursor.castShadow = true;
+            cursor.visible = false;
+            this.scene.add(cursor);
+            this.targets.push(cursor);
         }
     }
 
-    initializeHandMeshes() { // Method to initialize hand meshes
-        for (let a = 0; 2 > a; a++) { // Loop for both hands
-            for (let b = 0; 21 > b; b++) { // Loop for each joint (21 joints)
-                const b = new THREE.Mesh(this.jointGeometry, this.materials[a].joint.clone()); // Create joint mesh using joint geometry and material
-                b.visible = !1, // Set joint visibility to false initially
-                b.castShadow = !0, // Enable shadow casting for the joint
-                b.receiveShadow = !1, // Disable shadow receiving for the joint
-                this.scene.add(b), // Add joint mesh to the scene
-                this.hands[a].meshes.push(b) // Add joint to the corresponding hand's meshes array
+    initializeHandMeshes() {
+        // Create meshes for each hand
+        for (let h = 0; h < 2; h++) {
+            // Create 21 joints (landmarks) for each hand
+            for (let i = 0; i < 21; i++) {
+                const joint = new THREE.Mesh(this.jointGeometry, this.materials[h].joint.clone());
+                joint.visible = false;
+                joint.castShadow = true;
+                joint.receiveShadow = false;
+                this.scene.add(joint);
+                this.hands[h].meshes.push(joint);
             }
-            for (const b of this.connections) { // Loop through each connection
-                const b = new THREE.BufferGeometry, // Create buffer geometry for line connections
-                c = new THREE.Line(b, this.materials[a].line.clone()); // Create a line using the geometry and material
-                c.visible = !1, // Set line visibility to false initially
-                this.scene.add(c), // Add line to the scene
-                this.hands[a].lines.push(c) // Add line to the corresponding hand's lines array
+
+            // Create connections between joints for each hand
+            for (const connection of this.connections) {
+                const geometry = new THREE.BufferGeometry();
+                const line = new THREE.Line(geometry, this.materials[h].line.clone());
+                line.visible = false;
+                this.scene.add(line);
+                this.hands[h].lines.push(line);
             }
         }
     }
 
-    calculateGestures(a) { // Method to calculate gestures for a hand
-        const b = this.hands[a], // Get the hand based on index a
-        c = b.meshes[0].position, // Get position of the first joint
-        d = b.meshes[9].position, // Get position of the thumb base joint
-        e = b.meshes[12].position, // Get position of the middle finger base joint
-        f = e.clone().sub(c).length() / d.clone().sub(c).length(), // Calculate the ratio of distances for gesture detection
-        g = this.closedFists[a]; // Store previous closed fist state
-        this.closedFists[a] = 1.3 > f, // Update closed fist state based on ratio
-        this.closedFists[a] !== g && ( // Check if the closed fist state has changed
-            this.closedFists[a] ? this.dispatchEvent({ type: "closed_fist", handIndex: a }) : // Dispatch closed fist event if now closed
-            (this.dispatchEvent({ type: "opened_fist", handIndex: a }), // Dispatch opened fist event if now opened
-            this.selected[a] && (
-                this.dispatchEvent({ type: "drag_end", object: this.selected[a], handIndex: a }),
-                this.selected[a] = null
-            )) // If an object is selected, dispatch drag end event and reset selection
+    calculateGestures(handIndex, landmarks) {
+        const hand = this.hands[handIndex];
+        
+        // Calculate palm-finger ratio for fist detection
+        const node0Pos = hand.meshes[0].position;
+        const node9Pos = hand.meshes[9].position;
+        const node12Pos = hand.meshes[12].position;
+        const palmFingerRatio = node12Pos.clone().sub(node0Pos).length() / 
+                               node9Pos.clone().sub(node0Pos).length();
+        
+        // Update fist state
+        const wasClosed = this.closedFists[handIndex];
+        this.closedFists[handIndex] = palmFingerRatio < 1.3;
+        
+        // Emit events on state change
+        if (this.closedFists[handIndex] !== wasClosed) {
+            if (this.closedFists[handIndex]) {
+                this.dispatchEvent({ type: "closed_fist", handIndex });
+            } else {
+                this.dispatchEvent({ type: "opened_fist", handIndex });
+                if (this.selected[handIndex]) {
+                    this.dispatchEvent({
+                        type: "drag_end",
+                        object: this.selected[handIndex],
+                        handIndex
+                    });
+                    this.selected[handIndex] = null;
+                }
+            }
+        }
+
+        // Update target position (hand center)
+        const indices = [0, 0, 0, 5, 9, 13, 17];
+        let sumX = 0, sumY = 0, sumZ = 0;
+        indices.forEach(index => {
+            sumX += hand.meshes[index].position.x;
+            sumY += hand.meshes[index].position.y;
+            sumZ += hand.meshes[index].position.z;
+        });
+        const numPoints = indices.length;
+        this.targets[handIndex].position.set(
+            sumX / numPoints,
+            sumY / numPoints,
+            sumZ / numPoints
         );
-        const h = [0, 0, 0, 5, 9, 13, 17]; // Array of joint indices to calculate target position
-        let i = 0, j = 0, k = 0; // Initialize coordinates for average position
-        h.forEach(a => { // Loop through the joint indices
-            i += b.meshes[a].position.x, // Sum x coordinates
-            j += b.meshes[a].position.y, // Sum y coordinates
-            k += b.meshes[a].position.z // Sum z coordinates
-        }); 
-        const l = h.length; // Get the count of indices for averaging
-        this.targets[a].position.set(i / l, j / l, k / l), // Set target position to the average
-        this.targets[a].visible = !0 // Make the target visible
+        this.targets[handIndex].visible = true;
     }
 
-    updateHandPosition(a) { // Method to update the hand position based on input data
-        this.hideAllHands(), // Hide all hands before updating
-        a.forEach((a, b) => { // Loop through the hand data for each hand
-            if (2 <= b) return; // Only process for the first two hands
-            const c = this.hands[b], // Get the current hand
-            d = a.landmarks, // Get landmarks from input data
-            e = a.depth, // Get depth information
-            f = a.depth2Offset, // Get secondary depth offset
-            g = a.wrist; // Get wrist position
-            for (let h = 0; h < d.length; h++) { // Loop through each landmark
-                const a = d[h], // Current landmark data
-                b = c.meshes[h]; // Corresponding mesh for the landmark
-                let i = -a.x + .5, // Calculate x position
-                j = -a.y + .5, // Calculate y position
-                k = a.z, // Get z position
-                l = -g.x + .5, // Calculate wrist x position
-                m = -g.y + .5; // Calculate wrist y position
-                i = (i - l) / e * this.handScale + this.distScale * l, // Adjust x position based on depth and scaling
-                j = (j - m) / e * this.handScale + this.distScale * m, // Adjust y position based on depth and scaling
-                k -= f * this.depthScale, // Adjust z position based on depth offset
-                b.position.set(i, j, k), // Set the position of the mesh
-                b.visible = !0 // Make the mesh visible
+    updateHandPosition(handsData) {
+        // Hide all hands first
+        this.hideAllHands();
+
+        // Update each detected hand
+        handsData.forEach((handData, handIndex) => {
+            if (handIndex >= 2) return; // Only handle up to 2 hands
+
+            const hand = this.hands[handIndex];
+            const landmarks = handData.landmarks;
+            const depth = handData.depth;
+            const depth2Offset = handData.depth2Offset;
+            const wrist = handData.wrist;
+
+            // Update joint positions
+            for (let i = 0; i < landmarks.length; i++) {
+                const landmark = landmarks[i];
+                const mesh = hand.meshes[i];
+                
+                // Convert coordinates to Three.js space
+                // Flip X coordinate to match mirrored webcam view
+                // console.log(landmark, depth, wrist, handData, landmark.x/depth-wrist.x);
+
+                let x = -landmark.x + .5;
+                let y = -landmark.y + .5;
+                let z = landmark.z;
+
+                let wristX = -wrist.x + .5;
+                let wristY = -wrist.y + .5;
+
+                // console.log(landmark.x);
+
+                x = (x-wristX)/depth*this.handScale+this.distScale*wristX;
+                y = (y-wristY)/depth*this.handScale+this.distScale*wristY;
+                z = z-depth2Offset*this.depthScale;
+
+                mesh.position.set(x, y, z);
+                mesh.visible = true;
             }
-            for (let d = 0; d < this.connections.length; d++) { // Loop through each connection
-                const [a, b] = this.connections[d], // Get joint indices for the connection
-                e = c.meshes[a].position, // Get position of the first joint in the connection
-                f = c.meshes[b].position, // Get position of the second joint in the connection
-                g = new THREE.BufferGeometry().setFromPoints([e, f]); // Create geometry from the two joint positions
-                c.lines[d].geometry.dispose(), // Dispose of the old geometry
-                c.lines[d].geometry = g, // Set the new geometry for the line
-                c.lines[d].visible = !0 // Make the line visible
+
+            // Update connections
+            for (let i = 0; i < this.connections.length; i++) {
+                const [startIdx, endIdx] = this.connections[i];
+                const startPos = hand.meshes[startIdx].position;
+                const endPos = hand.meshes[endIdx].position;
+
+                const geometry = new THREE.BufferGeometry().setFromPoints([startPos, endPos]);
+                hand.lines[i].geometry.dispose();
+                hand.lines[i].geometry = geometry;
+                hand.lines[i].visible = true;
             }
-            this.calculateGestures(b, d) // Calculate gestures for the hand
-        })
+
+            // Calculate gestures
+            this.calculateGestures(handIndex, landmarks);
+        });
     }
 
-    hideAllHands() { // Method to hide all hand meshes and lines
-        this.hands.forEach(a => { // Loop through each hand
-            a.meshes.forEach(a => a.visible = !1), // Hide all meshes for the hand
-            a.lines.forEach(a => a.visible = !1) // Hide all lines for the hand
-        }), 
-        this.targets.forEach(a => a.visible = !1) // Hide all targets
+    hideAllHands() {
+        this.hands.forEach(hand => {
+            hand.meshes.forEach(mesh => mesh.visible = false);
+            hand.lines.forEach(line => line.visible = false);
+        });
+        this.targets.forEach(target => target.visible = false);
     }
 
-    checkCollisions(a) { // Method to check for collisions with other objects
-        a && a.length && ( // Check if there are any objects to check against
-            a.forEach(a => { // Loop through each object
-                a.material && (a.material.opacity = 1), // Set opacity to 1 if material exists
-                a.userData.hasCollision = !1 // Reset collision state
-            }), 
-            this.targets.forEach((b, c) => { // Loop through each target
-                if (!b.visible) return; // Skip if target is not visible
-                const d = new THREE.Box3().setFromObject(b), // Create bounding box from the target
-                e = a.filter(a => { // Filter objects to find collisions
-                    const b = new THREE.Box3().setFromObject(a); // Create bounding box for the object
-                    return d.intersectsBox(b) // Check for intersection with the target's bounding box
-                }); 
-                0 < e.length ? ( // If there are collisions
-                    e.forEach(a => { // Loop through each collided object
-                        a.userData.hasCollision = !0, // Set collision state
-                        this.closedFists[c] && !this.selected[c] && (this.selected[c] = a, // If fist is closed and no selection, select the collided object
-                            this.dispatchEvent({ type: "drag_start", object: a, handIndex: c })), // Dispatch drag start event
-                        a.material && (a.material.opacity = .4) // Reduce opacity of the collided object
-                    }), 
-                    this.dispatchEvent({ type: "collision", state: "on", objects: e, handIndex: c }) : // Dispatch collision event if there are collisions
-                    !this.selected.some(a => null !== a) && this.dispatchEvent({ type: "collision", state: "off", objects: null, handIndex: c }), // Dispatch collision off event if nothing is selected
-                    this.selected[c] && this.closedFists[c] && this.selected[c].position.lerp(b.position, .3) // Lerp selected object's position towards the target position
-                )
-            })
-        )
+    checkCollisions(objects) {
+        if (!objects || !objects.length) return;
+
+        // Reset object states
+        objects.forEach(obj => {
+            if (obj.material) {
+                obj.material.opacity = 1;
+            }
+            obj.userData.hasCollision = false;
+        });
+
+        // Check collisions for each hand
+        this.targets.forEach((target, handIndex) => {
+            if (!target.visible) return;
+
+            const targetBox = new THREE.Box3().setFromObject(target);
+            const collidingObjects = objects.filter(obj => {
+                const objBox = new THREE.Box3().setFromObject(obj);
+                return targetBox.intersectsBox(objBox);
+            });
+
+            if (collidingObjects.length > 0) {
+                collidingObjects.forEach(obj => {
+                    obj.userData.hasCollision = true;
+                    if (this.closedFists[handIndex] && !this.selected[handIndex]) {
+                        this.selected[handIndex] = obj;
+                        this.dispatchEvent({ 
+                            type: "drag_start", 
+                            object: obj, 
+                            handIndex 
+                        });
+                    }
+                    if (obj.material) {
+                        obj.material.opacity = 0.4;
+                    }
+                });
+                this.dispatchEvent({ 
+                    type: "collision", 
+                    state: "on", 
+                    objects: collidingObjects, 
+                    handIndex 
+                });
+            } else if (!this.selected.some(s => s !== null)) {
+                this.dispatchEvent({ 
+                    type: "collision", 
+                    state: "off", 
+                    objects: null, 
+                    handIndex 
+                });
+            }
+
+            // Update selected object position
+            if (this.selected[handIndex] && this.closedFists[handIndex]) {
+                this.selected[handIndex].position.lerp(target.position, 0.3);
+            }
+        });
     }
 
-    dispose() { // Method to clean up resources
-        this.jointGeometry.dispose(), // Dispose of joint geometry
-        this.materials.forEach(a => { // Loop through each material
-            a.joint.dispose(), // Dispose of joint material
-            a.line.dispose() // Dispose of line material
-        }), 
-        this.hands.forEach(a => { // Loop through each hand
-            a.meshes.forEach(a => { // Loop through each mesh
-                a.geometry.dispose(), // Dispose of mesh geometry
-                a.material.dispose(), // Dispose of mesh material
-                this.scene.remove(a) // Remove mesh from the scene
-            }), 
-            a.lines.forEach(a => { // Loop through each line
-                a.geometry.dispose(), // Dispose of line geometry
-                a.material.dispose(), // Dispose of line material
-                this.scene.remove(a) // Remove line from the scene
-            })
-        }), 
-        this.targets.forEach(a => { // Loop through each target
-            a.geometry.dispose(), // Dispose of target geometry
-            a.material.dispose(), // Dispose of target material
-            this.scene.remove(a) // Remove target from the scene
-        }) 
+    dispose() {
+        // Clean up Three.js objects
+        this.jointGeometry.dispose();
+        this.materials.forEach(material => {
+            material.joint.dispose();
+            material.line.dispose();
+        });
+        
+        this.hands.forEach(hand => {
+            hand.meshes.forEach(mesh => {
+                mesh.geometry.dispose();
+                mesh.material.dispose();
+                this.scene.remove(mesh);
+            });
+            
+            hand.lines.forEach(line => {
+                line.geometry.dispose();
+                line.material.dispose();
+                this.scene.remove(line);
+            });
+        });
+
+        this.targets.forEach(target => {
+            target.geometry.dispose();
+            target.material.dispose();
+            this.scene.remove(target);
+        });
     }
 }
