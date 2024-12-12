@@ -123,6 +123,7 @@ export class GameAnimator {
         
             this.groundPlane.geometry.attributes.position.needsUpdate = true; // Update geometry
         }
+    }
 
     updateBoxes(currentTime, speed = 10) {
         let boxRemoved = false;
