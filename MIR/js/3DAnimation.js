@@ -117,7 +117,7 @@ export class GameAnimator {
             
             // If within the wave radius, increase the height
             if (distance < waveRadius) {
-                const waveHeight = beatMap.y * Math.cos((distance / waveRadius) * Math.PI); // Smooth wave effect
+                const waveHeight = beatMap.y*10 * Math.cos((distance / waveRadius) * Math.PI); // Smooth wave effect
                 vertices[i + 1] += waveHeight;
             }
         
