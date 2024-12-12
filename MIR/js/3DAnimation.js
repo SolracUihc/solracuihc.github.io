@@ -84,8 +84,8 @@ export class GameAnimator {
         // this.scene.add(gridHelper);
 
         // Background
-        this.scene.background = new THREE.Color( 0xaaccff );
-        this.scene.fog = new THREE.FogExp2( 0xaaccff, 0.0007 );
+        // this.scene.background = new THREE.Color( 0xaaccff );
+        // this.scene.fog = new THREE.FogExp2( 0xaaccff, 0.0007 );
 
         // Handle window resize
         window.addEventListener('resize', () => this.onWindowResize(), false);
