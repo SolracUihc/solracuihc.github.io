@@ -153,8 +153,6 @@ export class GameAnimator {
 
     render() {
         this.renderer.render(this.scene, this.camera);
-        const time = clock.getElapsedTime();
-        this.groundPlane.material.map.offset.y = time * 0.5; // Adjust the speed of the movement
     }
 
     clear() {
