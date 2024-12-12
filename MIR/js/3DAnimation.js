@@ -66,7 +66,7 @@ export class GameAnimator {
             roughness: 0.2,
             metalness: 0.8,
             transparent: true,
-            opacity: 1,
+            opacity: 0.5,
             wireframe: false
         });
         
