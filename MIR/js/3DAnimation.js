@@ -60,6 +60,32 @@ export class GameAnimator {
         window.addEventListener('resize', () => this.onWindowResize(), false);
     }
 
+    updateGround(beatMap) {
+        // Change ground color based on beatMap.x
+        const colorValue = beatMap.x * 10;
+        this.planeMaterial.color.setHSL(colorValue % 1, 1, 0.5); // Normalize to 0-1 range
+    
+        // generate a wave at specific coordinates
+        const vertices = this.groundPlane.geometry.attributes.position.array;
+        const waveRadius = 2; // Radius of the wave effect
+    
+        for (let i = 0; i < vertices.length; i += 3) {
+            const vertX = vertices[i];
+            const vertZ = vertices[i + 2];
+            
+            // Calculate distance from the wave center
+            const distance = Math.sqrt((vertX - beatMap.x) ** 2 + (vertZ - beatMap.x) ** 2);
+            
+            // If within the wave radius, increase the height
+            if (distance < waveRadius) {
+                const waveHeight = beatMap.y*10 * Math.cos((distance / waveRadius) * Math.PI); // Smooth wave effect
+                vertices[i + 1] += waveHeight;
+            }
+        
+            this.groundPlane.geometry.attributes.position.needsUpdate = true; // Update geometry
+        }
+    }
+
     reset_seed(audio_file) {
         THREE.MathUtils.seededRandom(hash(audio_file));
     }
@@ -99,31 +125,6 @@ export class GameAnimator {
         return box;
     }
 
-    updateGround(beatMap) {
-        // Change ground color based on beatMap.x
-        const colorValue = beatMap.x * 10;
-        this.planeMaterial.color.setHSL(colorValue % 1, 1, 0.5); // Normalize to 0-1 range
-    
-        // generate a wave at specific coordinates
-        const vertices = this.groundPlane.geometry.attributes.position.array;
-        const waveRadius = 2; // Radius of the wave effect
-    
-        for (let i = 0; i < vertices.length; i += 3) {
-            const vertX = vertices[i];
-            const vertZ = vertices[i + 2];
-            
-            // Calculate distance from the wave center
-            const distance = Math.sqrt((vertX - beatMap.x) ** 2 + (vertZ - beatMap.x) ** 2);
-            
-            // If within the wave radius, increase the height
-            if (distance < waveRadius) {
-                const waveHeight = beatMap.y*10 * Math.cos((distance / waveRadius) * Math.PI); // Smooth wave effect
-                vertices[i + 1] += waveHeight;
-            }
-        
-            this.groundPlane.geometry.attributes.position.needsUpdate = true; // Update geometry
-        }
-    }
 
     updateBoxes(currentTime, speed = 10) {
         let boxRemoved = false;
