@@ -42,12 +42,14 @@ export class GameAnimator {
         this.scene.add(directionalLight);
 
         // Create ground plane
-        this.planeGeometry = new THREE.PlaneGeometry(20000, 20000, 127, 127);
-        const texture = new THREE.TextureLoader().load( 'textures/water.jpg' );
-        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set( 5, 5 );
-        texture.colorSpace = THREE.SRGBColorSpace;
-        this.planeMaterial = new THREE.MeshBasicMaterial( { color: 0x0044ff, map: texture } );
+        this.planeGeometry = new THREE.PlaneGeometry(20, 20, 20, 20);
+        this.planeMaterial = new THREE.MeshStandardMaterial({
+            color: 0x000000,
+            roughness: 0.2,
+            metalness: 0.2,
+            transparent: true,
+            opacity: 0.5
+        });
         this.groundPlane = new THREE.Mesh(this.planeGeometry, this.planeMaterial);
         this.groundPlane.rotation.x = -Math.PI / 2;
         
@@ -57,8 +59,8 @@ export class GameAnimator {
         this.scene.add(this.groundPlane);
 
         // Add grid
-        // const gridHelper = new THREE.GridHelper(10, 20, 0x444444, 0x222222);
-        // this.scene.add(gridHelper);
+        const gridHelper = new THREE.GridHelper(10, 20, 0x444444, 0x222222);
+        this.scene.add(gridHelper);
 
         // Handle window resize
         window.addEventListener('resize', () => this.onWindowResize(), false);
