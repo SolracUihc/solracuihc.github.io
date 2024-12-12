@@ -42,14 +42,8 @@ export class GameAnimator {
         this.scene.add(directionalLight);
 
         // Create ground plane
-        this.planeGeometry = new THREE.PlaneGeometry(20000, 20000, 127, 127);
-        this.planeMaterial = new THREE.MeshStandardMaterial({
-            color: 0x000000,
-            roughness: 0.2,
-            metalness: 0.2,
-            transparent: true,
-            opacity: 0.5
-        });
+        this.planeGeometry = new THREE.PlaneGeometry(100, 100, 32, 32);
+        this.planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
         this.groundPlane = new THREE.Mesh(this.planeGeometry, this.planeMaterial);
         this.groundPlane.rotation.x = -Math.PI / 2;
         
@@ -59,8 +53,8 @@ export class GameAnimator {
         this.scene.add(this.groundPlane);
 
         // Add grid
-        const gridHelper = new THREE.GridHelper(10, 20, 0x444444, 0x222222);
-        this.scene.add(gridHelper);
+        // const gridHelper = new THREE.GridHelper(10, 20, 0x444444, 0x222222);
+        // this.scene.add(gridHelper);
 
         // Handle window resize
         window.addEventListener('resize', () => this.onWindowResize(), false);
@@ -110,24 +104,25 @@ export class GameAnimator {
         const colorValue = beatMap.x * 10;
         this.planeMaterial.color.setHSL(colorValue % 1, 1, 0.5); // Normalize to 0-1 range
     
-        // Update ground height based on beatMap.y
-        const widthSegments = this.planeGeometry.parameters.widthSegments;
-        const heightSegments = this.planeGeometry.parameters.heightSegments;
-        
-        const vertexArray = this.planeGeometry.attributes.position.array;
+        // generate a wave at specific coordinates
+        const vertices = this.groundPlane.geometry.attributes.position.array;
+        const waveRadius = 2; // Radius of the wave effect
     
-        for (let i = 0; i <= widthSegments; i++) {
-            for (let j = 0; j <= heightSegments; j++) {
-                const index = (i * (heightSegments + 1) + j) * 3;
-    
-                // Create wave-like motion using sine function
-                const waveHeight = Math.sin((i + beatMap.x*10)*3) * 1.5 + Math.cos((j + beatMap.y*10)*3) * 1.5; // Adjust amplitude of waves
-                vertexArray[index + 2] = waveHeight/2; // Set the height for the vertex
+        for (let i = 0; i < vertices.length; i += 3) {
+            const vertX = vertices[i];
+            const vertZ = vertices[i + 2];
+            
+            // Calculate distance from the wave center
+            const distance = Math.sqrt((vertX - beatMap.x) ** 2 + (vertZ - beatMap.x) ** 2);
+            
+            // If within the wave radius, increase the height
+            if (distance < waveRadius) {
+                const waveHeight = beatMap.y * Math.cos((distance / waveRadius) * Math.PI); // Smooth wave effect
+                vertices[i + 1] += waveHeight;
             }
+        
+            this.groundPlane.geometry.attributes.position.needsUpdate = true; // Update geometry
         }
-    
-        this.planeGeometry.attributes.position.needsUpdate = true; // Notify Three.js that the position has changed
-    }
 
     updateBoxes(currentTime, speed = 10) {
         let boxRemoved = false;
