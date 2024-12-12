@@ -20,6 +20,17 @@ export class GameAnimator {
         this.hitTimeWindow = settings?.hitTimeWindow ?? .2;
         this.hintTimeWindow = settings?.hintTimeWindow ?? .7;
 
+        // Add animation state for the ground
+        this.groundState = {
+            time: 0,
+            currentAmplitude: 0,
+            currentFrequency: 0,
+            targetAmplitude: 0,
+            targetFrequency: 0,
+            lastBeatTime: 0,
+            beatDuration: 100 // ms between beats
+        };
+
         this.initialize();
     }
 
@@ -41,45 +52,68 @@ export class GameAnimator {
         directionalLight.position.set(5, 5, 5);
         this.scene.add(directionalLight);
 
-        // Create ground plane
-        this.geometry = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(-5, 0, 0), // Start point
-            new THREE.Vector3(5, 0, 0)   // End point
-        ]);
-        this.material = new THREE.LineBasicMaterial({ color: 0x0000ff });
-        this.line = new THREE.Line(this.geometry, this.material);
+        // Create ground plane with more segments for smoother animation
+        this.planeGeometry = new THREE.PlaneGeometry(20, 20, 32, 32);
+        this.planeMaterial = new THREE.MeshStandardMaterial({
+            color: 0x000000,
+            roughness: 0.2,
+            metalness: 0.2,
+            transparent: true,
+            opacity: 0.5,
+            wireframe: false
+        });
         
-        this.scene.add(this.line);
+        this.groundPlane = new THREE.Mesh(this.planeGeometry, this.planeMaterial);
+        this.groundPlane.rotation.x = -Math.PI / 2;
+        this.groundPlane.position.y = -1;
+        
+        // Store original vertex positions
+        this.originalVertices = [...this.planeGeometry.attributes.position.array];
+        
+        this.scene.add(this.groundPlane);
 
         // Add grid
-        // const gridHelper = new THREE.GridHelper(10, 20, 0x444444, 0x222222);
-        // this.scene.add(gridHelper);
+        const gridHelper = new THREE.GridHelper(10, 20, 0x444444, 0x222222);
+        this.scene.add(gridHelper);
 
         // Handle window resize
         window.addEventListener('resize', () => this.onWindowResize(), false);
     }
 
     updateGround(beatMap) {
-        // Change ground color based on beatMap.x
-        // const colorValue = beatMap.x * 10;
-        // this.planeMaterial.color.setHSL(colorValue % 1, 1, 0.5); // Normalize to 0-1 range
-    
-        const startTime = performance.now();
-    
-        const elapsed = performance.now() - startTime;
-        const t = Math.min(elapsed / beatMap.x, 1); // Normalize time
-        const offset = Math.sin(t * Math.PI * 2) * beatMap.y; // Calculate offset
-
-        this.line.position.y = offset; // Apply vibration effect
-
-        if (t < 1) {
-            requestAnimationFrame(vibrate); // Continue vibrating
-        } else {
-            this.line.position.y = 0; // Reset position
-        }
-
+        // Update animation targets
+        this.groundState.targetAmplitude = Math.abs(beatMap.y) * 0.5;
+        this.groundState.targetFrequency = Math.abs(beatMap.x) * 2;
+        
+        // Update color
+        const hue = (beatMap.x * 10) % 1;
+        this.planeMaterial.color.setHSL(hue, 1, 0.5);
     }
 
+    updateGroundAnimation(currentTime) {
+        // Interpolate animation parameters
+        this.groundState.currentAmplitude += 
+            (this.groundState.targetAmplitude - this.groundState.currentAmplitude) * 0.1;
+        this.groundState.currentFrequency += 
+            (this.groundState.targetFrequency - this.groundState.currentFrequency) * 0.1;
+
+        // Update vertex positions
+        const vertexArray = this.planeGeometry.attributes.position.array;
+        
+        for (let i = 0; i < vertexArray.length; i += 3) {
+            const originalZ = this.originalVertices[i + 2];
+            const x = vertexArray[i];
+            const y = vertexArray[i + 1];
+            
+            // Create smooth wave pattern
+            const wave = Math.sin(x * this.groundState.currentFrequency + currentTime * 0.001) * 
+                        Math.cos(y * this.groundState.currentFrequency + currentTime * 0.001);
+            
+            vertexArray[i + 2] = originalZ + wave * this.groundState.currentAmplitude;
+        }
+
+        this.planeGeometry.attributes.position.needsUpdate = true;
+    }
     reset_seed(audio_file) {
         THREE.MathUtils.seededRandom(hash(audio_file));
     }
@@ -163,6 +197,8 @@ export class GameAnimator {
     }
 
     render() {
+        const currentTime = performance.now();
+        this.updateGroundAnimation(currentTime);
         this.renderer.render(this.scene, this.camera);
     }
 
