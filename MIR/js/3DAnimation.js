@@ -43,13 +43,22 @@ export class GameAnimator {
 
         // Create ground plane
         this.planeGeometry = new THREE.PlaneGeometry(20000, 20000, 127, 127);
+        planeGeometry.rotateX( - Math.PI / 2 );
+        const position = planeGeometry.attributes.position;
+        position.usage = THREE.DynamicDrawUsage;
+        for ( let i = 0; i < position.count; i ++ ) {
+            const y = 35 * Math.sin( i / 2 );
+            position.setY( i, y );
+
+        }
+        
         const texture = new THREE.TextureLoader().load( 'textures/water.jpg' );
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
         texture.repeat.set( 5, 5 );
         texture.colorSpace = THREE.SRGBColorSpace;
         this.planeMaterial = new THREE.MeshBasicMaterial( { color: 0x0044ff, map: texture } );
+        
         this.groundPlane = new THREE.Mesh(this.planeGeometry, this.planeMaterial);
-        this.groundPlane.rotation.x = -Math.PI / 2;
         
         // Set the y position lower
         this.groundPlane.position.y = -1; // Adjust this value as needed
