@@ -65,7 +65,7 @@ export class GameAnimator {
         // Change ground color based on beatMap.x
         // const colorValue = beatMap.x * 10;
         // this.planeMaterial.color.setHSL(colorValue % 1, 1, 0.5); // Normalize to 0-1 range
-        this.groundPlane.material.map.offset.y = beatMap.time * beatMap.y; // Adjust the speed of the movement
+        // this.groundPlane.material.map.offset.y = beatMap.time * beatMap.y; // Adjust the speed of the movement
 
     }
 
@@ -153,6 +153,8 @@ export class GameAnimator {
 
     render() {
         this.renderer.render(this.scene, this.camera);
+        const time = clock.getElapsedTime();
+        this.groundPlane.material.map.offset.y = time * 0.5; // Adjust the speed of the movement
     }
 
     clear() {
