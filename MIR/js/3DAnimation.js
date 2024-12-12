@@ -64,9 +64,9 @@ export class GameAnimator {
         this.planeMaterial = new THREE.MeshStandardMaterial({
             color: 0x000000,
             roughness: 0.2,
-            metalness: 0.2,
+            metalness: 0.8,
             transparent: true,
-            opacity: 0.5,
+            opacity: 1,
             wireframe: false
         });
         
