@@ -28,7 +28,14 @@ export class GameAnimator {
             targetAmplitude: 0,
             targetFrequency: 0,
             lastBeatTime: 0,
-            beatDuration: 100 // ms between beats
+            beatDuration: 100,
+            // Add color state
+            currentHue: 0,
+            targetHue: 0,
+            currentSaturation: 1,
+            targetSaturation: 1,
+            currentLightness: 0.5,
+            targetLightness: 0.5
         };
 
         this.initialize();
@@ -82,20 +89,45 @@ export class GameAnimator {
 
     updateGround(beatMap) {
         // Update animation targets
-        this.groundState.targetAmplitude = Math.abs(beatMap.y) * 0.5;
-        this.groundState.targetFrequency = Math.abs(beatMap.x) * 2;
+        this.groundState.targetAmplitude = Math.abs(beatMap.y*2) * 0.5;
+        this.groundState.targetFrequency = Math.abs(beatMap.x*2) * 2;
         
-        // Update color
-        const hue = (beatMap.x * 10) % 1;
-        this.planeMaterial.color.setHSL(hue, 1, 0.5);
+        // Update color targets
+        this.groundState.targetHue = (beatMap.x * 10) % 1;
+        this.groundState.targetSaturation = 1;
+        this.groundState.targetLightness = 0.5 + (beatMap.y * 0.2); // Vary lightness based on y
     }
 
     updateGroundAnimation(currentTime) {
+        const interpolationFactor = 0.1; // Adjust this value to control transition speed (0-1)
+
         // Interpolate animation parameters
         this.groundState.currentAmplitude += 
-            (this.groundState.targetAmplitude - this.groundState.currentAmplitude) * 0.1;
+            (this.groundState.targetAmplitude - this.groundState.currentAmplitude) * interpolationFactor;
         this.groundState.currentFrequency += 
-            (this.groundState.targetFrequency - this.groundState.currentFrequency) * 0.1;
+            (this.groundState.targetFrequency - this.groundState.currentFrequency) * interpolationFactor;
+
+        // Interpolate color parameters
+        // Handle hue interpolation specially because it's circular
+        let hueDiff = this.groundState.targetHue - this.groundState.currentHue;
+        
+        // Adjust for shortest path around the color wheel
+        if (hueDiff > 0.5) hueDiff -= 1;
+        if (hueDiff < -0.5) hueDiff += 1;
+        
+        this.groundState.currentHue = (this.groundState.currentHue + hueDiff * interpolationFactor + 1) % 1;
+        
+        this.groundState.currentSaturation += 
+            (this.groundState.targetSaturation - this.groundState.currentSaturation) * interpolationFactor;
+        this.groundState.currentLightness += 
+            (this.groundState.targetLightness - this.groundState.currentLightness) * interpolationFactor;
+
+        // Update color
+        this.planeMaterial.color.setHSL(
+            this.groundState.currentHue,
+            this.groundState.currentSaturation,
+            this.groundState.currentLightness
+        );
 
         // Update vertex positions
         const vertexArray = this.planeGeometry.attributes.position.array;
@@ -114,6 +146,7 @@ export class GameAnimator {
 
         this.planeGeometry.attributes.position.needsUpdate = true;
     }
+
     reset_seed(audio_file) {
         THREE.MathUtils.seededRandom(hash(audio_file));
     }
