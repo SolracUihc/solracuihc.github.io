@@ -80,8 +80,12 @@ export class GameAnimator {
         this.scene.add(this.groundPlane);
 
         // Add grid
-        const gridHelper = new THREE.GridHelper(10, 20, 0x444444, 0x222222);
-        this.scene.add(gridHelper);
+        // const gridHelper = new THREE.GridHelper(10, 20, 0x444444, 0x222222);
+        // this.scene.add(gridHelper);
+
+        // Background
+        this.scene.background = new THREE.Color( 0xaaccff );
+        this.scene.fog = new THREE.FogExp2( 0xaaccff, 0.0007 );
 
         // Handle window resize
         window.addEventListener('resize', () => this.onWindowResize(), false);
