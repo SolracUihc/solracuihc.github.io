@@ -15,9 +15,19 @@ body {
     z-index: 1;
 }
 
-#webcam-container {
+#audioDynamics-container {
     position: fixed;
     bottom: 10px;
+    right: 10px;
+    width: 200px;
+    height: 150px;
+    /* border: 2px solid #fff; */
+    z-index: 2;
+}
+
+#webcam-container {
+    position: fixed;
+    top: 10px;
     right: 10px;
     width: 200px;
     height: 150px;
@@ -40,29 +50,113 @@ body {
     z-index: 3;
 }
 
-#score-container {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    font-size: 24px;
+/* UPPER PANEL */
+#upper-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 3;
+    /* background-color: #4CAF50; */
+}
+
+#score-container, #combo-container, #maxCombo-container, #songName-container {
+    position: relative;
+    padding-top: 10px;
+    font-size: 20px;
+    align-items: center;
+    text-align: center;
     z-index: 3;
 }
 
-#combo-container {
-    position: fixed;
-    top: 50px;
-    left: 20px;
-    font-size: 24px;
+#songName-container {
+    font-size: 14px;
+    color: lightgrey;
+}
+
+/* Accuracy Bar */
+#accuracy-container {
+    position: absolute;
+    right: 0;
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-right: 0px;
+    width: 50%;
     z-index: 3;
 }
 
-#maxCombo-container {
-    position: fixed;
-    top: 80px;
-    left: 20px;
-    font-size: 24px;
+#accuracy-text {
+    position: absolute;
+    top: 30px;
+    left: 0px;
+    align-items: center;
+    text-align: center;
     z-index: 3;
 }
+
+#accuracy-bar {
+    position: absolute;
+    width: calc(60% - 40px);
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+
+    border-radius: 10px;
+}
+
+#accuracy-bar-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(to right, red, #FFA500);
+
+    border-radius: 10px;
+}
+
+/* Time Bar */
+#time-container {
+    position: absolute;
+    margin-top: 10px;
+    margin-left: 20px;
+    margin-right: 10px;
+    width: 50%;
+    z-index: 3;
+}
+
+#time-text {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    align-items: center;
+    text-align: center;
+    z-index: 3;
+}
+
+#time-bar {
+    position: absolute;
+    right: 40px;
+    width: calc(60% - 40px);
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+
+    border-radius: 10px;
+}
+
+#time-bar-fill {
+    position: absolute;
+    bottom: 0;
+    /* left: 0; */
+    right: 0;
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(to right, #4CAF50, #2196F3);
+
+    border-radius: 10px;
+}
+
+/* Menu Container */
 
 #menu-container {
     position: fixed;

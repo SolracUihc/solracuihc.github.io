@@ -19,16 +19,45 @@
         <video id="webcam" playsinline></video>
     </div>
 
-    <div id="score-container">
-        Score: <span id="score">0</span>
+    <div id="upper-panel">
+        <div id="score-container">
+            Score: <span id="score">0</span>
+        </div>
+    
+        <div id="combo-container">
+            Combo: <span id="combo">0</span>
+        </div>
+    
+        <div id="maxCombo-container">
+            Max Combo: <span id="maxCombo">0</span>
+        </div>
+
+        <div id="songName-container">
+            Song: <span id="songName">(None Selected)</span>
+        </div>
+
+        <div id="accuracy-container">
+            <div id="accuracy-bar">
+                <div id="accuracy-bar-fill"></div>
+            </div>
+            <div id="accuracy-text">
+                <b>Accuracy / </b><span id="accuracy">0</span>
+            </div>
+        </div>
+    
+        <div id="time-container">
+            <div id="time-bar">
+                <div id="time-bar-fill"></div>
+            </div>
+            <div id="time-text">
+                <b>Time / </b><span id="time"></span>
+            </div>
+        </div>
+        
     </div>
 
-    <div id="combo-container">
-        Combo: <span id="combo">0</span>
-    </div>
-
-    <div id="maxCombo-container">
-        Max Combo: <span id="maxCombo">0</span>
+    <div id="audioDynamics-container">
+        <canvas id="audioDynamics"></canvas>
     </div>
 
     <div id="menu-container">

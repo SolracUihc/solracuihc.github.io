@@ -40,7 +40,12 @@ export class AudioPlayer {
     
         const silentDuration = this.silentDuration;
         const sampleRate = this.context.sampleRate;
-        const silentBuffer = this.context.createBuffer(
+        const silentBufferBefore = this.context.createBuffer(
+            this.buffer.numberOfChannels,
+            sampleRate * silentDuration,
+            sampleRate
+        );
+        const silentBufferAfter = this.context.createBuffer(
             this.buffer.numberOfChannels,
             sampleRate * silentDuration,
             sampleRate
@@ -48,18 +53,21 @@ export class AudioPlayer {
     
         const combinedBuffer = this.context.createBuffer(
             this.buffer.numberOfChannels,
-            silentBuffer.length + this.buffer.length,
+            silentBufferBefore.length + this.buffer.length + silentBufferAfter.length,
             sampleRate
         );
     
         for (let channel = 0; channel < this.buffer.numberOfChannels; channel++) {
-            const silentData = silentBuffer.getChannelData(channel);
+            const silentDataBefore = silentBufferBefore.getChannelData(channel);
+            const silentDataAfter = silentBufferAfter.getChannelData(channel);
             const combinedData = combinedBuffer.getChannelData(channel);
             
-            combinedData.set(silentData, 0);
+            combinedData.set(silentDataBefore, 0);
             
             const audioData = this.buffer.getChannelData(channel);
-            combinedData.set(audioData, silentBuffer.length);
+            combinedData.set(audioData, silentBufferBefore.length);
+            
+            combinedData.set(silentDataAfter, silentBufferBefore.length + this.buffer.length);
         }
     
         this.source = this.context.createBufferSource();
@@ -85,8 +93,13 @@ export class AudioPlayer {
     }
 
     getCurrentTime() {
-        if (!this.isPlaying) return 0;
+        if (!this.isPlaying) return -1;
         return this.context.currentTime - this.startTime;
+    }
+
+    getActualTime() {
+        if (!this.isPlaying) return -1;
+        return this.context.currentTime - this.startTime - this.silentDuration;
     }
 
     setVolume(volume) {
@@ -96,5 +109,10 @@ export class AudioPlayer {
             this.source.connect(gainNode);
             gainNode.connect(this.context.destination);
         }
+    }
+
+    getAudioLength() {
+        if (!this.buffer) return 0;
+        return this.buffer.duration;
     }
 }

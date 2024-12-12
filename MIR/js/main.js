@@ -6,6 +6,9 @@ import { AudioPlayer } from './audioPlayback.js';
 import { GameAnimator } from './3DAnimation.js';
 import { CollisionDetector } from './collisionDetection.js';
 import { ScoreManager } from './scoreManagement.js';
+import { GUIManager } from './guiManager.js';
+
+import { timeString } from './mathUtils.js';
 
 class Game {
     constructor() {
@@ -39,6 +42,7 @@ class Game {
         this.audioPlayer = new AudioPlayer(settings);
         this.collisionDetector = new CollisionDetector();
         this.scoreManager = new ScoreManager();
+        this.guiManager = new GUIManager();
         
         this.isRunning = false;
         this.currentSong = null;
@@ -192,10 +196,21 @@ class Game {
         });
 
         // Update game beat
-        const currentTime = this.audioPlayer.getCurrentTime();
-        this.updateBeats(currentTime);
+        const currentTime = this.audioPlayer.getCurrentTime()
+        const beatTime = currentTime-this.boxCreationTimeOffset
+        const audioLen = this.audioPlayer.getAudioLength()
+        let actualTime = this.audioPlayer.getActualTime()
+        actualTime = Math.min(Math.max(actualTime, 0), audioLen)
+
+        // Update gui
+        document.getElementById('time').textContent = `${timeString(actualTime)}/${timeString(audioLen)}`;
+        this.guiManager.updateTimeBar(1-actualTime/audioLen);
+        this.guiManager.updateAccuracyBar(this.scoreManager.getAccuracy()); 
+
+        // Update boxes
+        this.updateBeats(beatTime);
         // Update targets and check combo
-        if (this.gameAnimator.updateBoxes(currentTime)) {
+        if (this.gameAnimator.updateBoxes(beatTime)) {
             this.scoreManager.missedNote();
         }
 
@@ -203,14 +218,12 @@ class Game {
         this.gameAnimator.render();
 
         // Continue loop
-        requestAnimationFrame(() => this.gameLoop());
-        if (currentTime === 0) {
+        if (!this.audioPlayer.isPlaying) {
             console.log('END GAME');
             this.endGame();
             return;
-        }
-
-            
+        }   
+        requestAnimationFrame(() => this.gameLoop());  
     }
 
     updateBeats(currentTime) {
@@ -226,8 +239,7 @@ class Game {
     }
 
     async updateSongList(category) {
-        this.currentSong = null;
-        document.getElementById('start-game').classList.add('disabled');
+        this.setSong(null);
 
         const songs = await this.dataFetcher.getSongsByCategory(category);
         const songList = document.getElementById('song-list');
@@ -237,11 +249,20 @@ class Game {
             const button = document.createElement('button');
             button.textContent = song.title;
             button.onclick = () => {
-                this.currentSong = song;
-                document.getElementById('start-game').classList.remove('disabled');
+                this.setSong(song);
             };
             songList.appendChild(button);
         });
+    }
+
+    setSong(song) {
+        this.currentSong = song;
+        if (this.currentSong === null) {
+            document.getElementById('start-game').classList.add('disabled');
+        } else {
+            document.getElementById('start-game').classList.remove('disabled');
+        }
+        document.getElementById('songName').textContent = this.currentSong?.title ?? '(None Selected)';
     }
 
     endGame() {
