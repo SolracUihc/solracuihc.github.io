@@ -66,21 +66,17 @@ export class GameAnimator {
     
         const startTime = performance.now();
     
-        function vibrate() {
-            const elapsed = performance.now() - startTime;
-            const t = Math.min(elapsed / beatMap.x, 1); // Normalize time
-            const offset = Math.sin(t * Math.PI * 2) * beatMap.y; // Calculate offset
-    
-            this.line.position.y = offset; // Apply vibration effect
-    
-            if (t < 1) {
-                requestAnimationFrame(vibrate); // Continue vibrating
-            } else {
-                this.line.position.y = 0; // Reset position
-            }
+        const elapsed = performance.now() - startTime;
+        const t = Math.min(elapsed / beatMap.x, 1); // Normalize time
+        const offset = Math.sin(t * Math.PI * 2) * beatMap.y; // Calculate offset
+
+        this.line.position.y = offset; // Apply vibration effect
+
+        if (t < 1) {
+            requestAnimationFrame(vibrate); // Continue vibrating
+        } else {
+            this.line.position.y = 0; // Reset position
         }
-    
-        vibrate(); // Start vibrating
 
     }
 
