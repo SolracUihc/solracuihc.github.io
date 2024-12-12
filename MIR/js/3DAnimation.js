@@ -42,16 +42,14 @@ export class GameAnimator {
         this.scene.add(directionalLight);
 
         // Create ground plane
-        this.planeGeometry = new THREE.PlaneGeometry(100, 100);
-        this.oceanTexture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/water.jpg'); // Placeholder texture
-        this.planeMaterial = new THREE.MeshBasicMaterial({ map: this.oceanTexture, side: THREE.DoubleSide });
-        this.groundPlane = new THREE.Mesh(this.planeGeometry, this.planeMaterial);
-        this.groundPlane.rotation.x = -Math.PI / 2;
+        this.geometry = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(-5, 0, 0), // Start point
+            new THREE.Vector3(5, 0, 0)   // End point
+        ]);
+        this.material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+        this.line = new THREE.Line(this.geometry, this.material);
         
-        // Set the y position lower
-        this.groundPlane.position.y = -1; // Adjust this value as needed
-        
-        this.scene.add(this.groundPlane);
+        this.scene.add(this.line);
 
         // Add grid
         // const gridHelper = new THREE.GridHelper(10, 20, 0x444444, 0x222222);
@@ -65,7 +63,24 @@ export class GameAnimator {
         // Change ground color based on beatMap.x
         // const colorValue = beatMap.x * 10;
         // this.planeMaterial.color.setHSL(colorValue % 1, 1, 0.5); // Normalize to 0-1 range
-        // this.groundPlane.material.map.offset.y = beatMap.time * beatMap.y; // Adjust the speed of the movement
+    
+        const startTime = performance.now();
+    
+        function vibrate() {
+            const elapsed = performance.now() - startTime;
+            const t = Math.min(elapsed / beatMap.x, 1); // Normalize time
+            const offset = Math.sin(t * Math.PI * 2) * beatMap.y; // Calculate offset
+    
+            this.line.position.y = offset; // Apply vibration effect
+    
+            if (t < 1) {
+                requestAnimationFrame(vibrate); // Continue vibrating
+            } else {
+                this.line.position.y = 0; // Reset position
+            }
+        }
+    
+        vibrate(); // Start vibrating
 
     }
 
