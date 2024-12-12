@@ -42,36 +42,6 @@ export class GameAnimator {
         this.initialize();
     }
 
-    function initSky() {
-        // Add Sky
-        this.sky = new Sky();
-        this.sky.scale.setScalar(450000);
-        this.scene.add(sky);
-
-        this.sun = new THREE.Vector3();
-
-        // Default sky parameters
-        const turbidity = 10;
-        const rayleigh = 3;
-        const mieCoefficient = 0.005;
-        const mieDirectionalG = 0.7;
-        const elevation = 2;
-        const azimuth = 180;
-
-        const uniforms = sky.material.uniforms;
-        uniforms['turbidity'].value = turbidity;
-        uniforms['rayleigh'].value = rayleigh;
-        uniforms['mieCoefficient'].value = mieCoefficient;
-        uniforms['mieDirectionalG'].value = mieDirectionalG;
-
-        const phi = THREE.MathUtils.degToRad(90 - elevation);
-        const theta = THREE.MathUtils.degToRad(azimuth);
-        this.sun.setFromSphericalCoords(1, phi, theta);
-
-        uniforms['sunPosition'].value.copy(sun);
-        this.renderer.toneMappingExposure = 0.5; // Default exposure
-    }
-
     initialize() {
         // Setup renderer
         this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -118,8 +88,33 @@ export class GameAnimator {
         // this.scene.background = new THREE.Color( 0xaaccff );
         // this.scene.fog = new THREE.FogExp2( 0xaaccff, 0.0007 );
 
-        // Add sky
-        initSky();
+        // Add Sky
+        this.sky = new Sky();
+        this.sky.scale.setScalar(450000);
+        this.scene.add(sky);
+
+        this.sun = new THREE.Vector3();
+
+        // Default sky parameters
+        const turbidity = 10;
+        const rayleigh = 3;
+        const mieCoefficient = 0.005;
+        const mieDirectionalG = 0.7;
+        const elevation = 2;
+        const azimuth = 180;
+
+        const uniforms = sky.material.uniforms;
+        uniforms['turbidity'].value = turbidity;
+        uniforms['rayleigh'].value = rayleigh;
+        uniforms['mieCoefficient'].value = mieCoefficient;
+        uniforms['mieDirectionalG'].value = mieDirectionalG;
+
+        const phi = THREE.MathUtils.degToRad(90 - elevation);
+        const theta = THREE.MathUtils.degToRad(azimuth);
+        this.sun.setFromSphericalCoords(1, phi, theta);
+
+        uniforms['sunPosition'].value.copy(sun);
+        this.renderer.toneMappingExposure = 0.5; // Default exposure
 
         // Handle window resize
         window.addEventListener('resize', () => this.onWindowResize(), false);
