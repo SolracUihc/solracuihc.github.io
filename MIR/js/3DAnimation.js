@@ -42,8 +42,9 @@ export class GameAnimator {
         this.scene.add(directionalLight);
 
         // Create ground plane
-        this.planeGeometry = new THREE.PlaneGeometry(100, 100, 32, 32);
-        this.planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+        this.planeGeometry = new THREE.PlaneGeometry(100, 100);
+        this.oceanTexture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/water.jpg'); // Placeholder texture
+        this.planeMaterial = new THREE.MeshBasicMaterial({ map: this.oceanTexture, side: THREE.DoubleSide });
         this.groundPlane = new THREE.Mesh(this.planeGeometry, this.planeMaterial);
         this.groundPlane.rotation.x = -Math.PI / 2;
         
@@ -62,28 +63,10 @@ export class GameAnimator {
 
     updateGround(beatMap) {
         // Change ground color based on beatMap.x
-        const colorValue = beatMap.x * 10;
-        this.planeMaterial.color.setHSL(colorValue % 1, 1, 0.5); // Normalize to 0-1 range
-    
-        // generate a wave at specific coordinates
-        const vertices = this.groundPlane.geometry.attributes.position.array;
-        const waveRadius = 2; // Radius of the wave effect
-    
-        for (let i = 0; i < vertices.length; i += 3) {
-            const vertX = vertices[i];
-            const vertZ = vertices[i + 2];
-            
-            // Calculate distance from the wave center
-            const distance = Math.sqrt((vertX - beatMap.x) ** 2 + (vertZ - beatMap.x) ** 2);
-            
-            // If within the wave radius, increase the height
-            if (distance < waveRadius) {
-                const waveHeight = beatMap.y*10 * Math.cos((distance / waveRadius) * Math.PI); // Smooth wave effect
-                vertices[i + 1] += waveHeight;
-            }
-        
-            this.groundPlane.geometry.attributes.position.needsUpdate = true; // Update geometry
-        }
+        // const colorValue = beatMap.x * 10;
+        // this.planeMaterial.color.setHSL(colorValue % 1, 1, 0.5); // Normalize to 0-1 range
+        this.groundPlane.material.map.offset.y = beatMap.time * beatMap.y; // Adjust the speed of the movement
+
     }
 
     reset_seed(audio_file) {
