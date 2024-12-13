@@ -1,16 +1,48 @@
 # AI Music Project
 
-## References
-* Built upon the article: https://tympanus.net/codrops/2024/10/24/creating-a-3d-hand-controller-using-a-webcam-with-mediapipe-and-three-js/
-* Forked from [\[Cai3ra/webcam-3D-handcontrols\]](https://github.com/Cai3ra/webcam-3D-handcontrols).
+## Start Playing!
 
-## Things to Do
+Without using the backend, you can play the game via any of the following methods:
+* **Method 1**: Local Running
+  * Clone this project to the local, and execute `python3 -m http.server` in the terminal AT THE PROJECT ROOT.
+  * Visit http://127.0.0.1:8000/ to play the game. 
+* **Method 2**: Online Running
+    * You can directly play the game on https://solracuihc.github.io/ or a backup in https://ash3327.github.io/ai_music_project/.
 
-> [!WARNING] 
-> Currently the song path CANNOT be youtube video. 
->   * It must be predownloaded before usage.
->
-> Also, please make sure that the LOCAL backend server is running and they have SAME BACKEND FILES as the frontend while running the frontend.
+Note that you CANNOT choose the songs marked with '(Backend)' without running the backend.
+
+## Generation of Beat Maps
+
+* All relevant files are within `backend/`, and commands should be executed under `backend/`.
+* Run `batch_process.py` to process all the audio files in `res/audio/` and generate json files in `res/beatmaps/`.
+  * Songs with existing beatmaps will be skipped.
+
+## List of Songs
+
+* The list of songs can be found in `MIR/songData.json`.
+* The audio files are stored in `backend/res/audio/`. The file paths are specified in `MIR/songData.json`
+  * Online sources & urls are also supported (requires the backend if not predownloaded). The URL MUST BE DIRECTED TO AN AUDIO FILE (ends with .mp3).
+  * Does NOT support youtube videos.
+
+## Backend: Setting Up 
+
+* The backend server is only needed if the song specified within `MIR/songData.json` does not have a `beatMapUrl` field or the specified file is missing.
+* All relevant files are within `backend/`.
+* Install ffmpeg properly and check with `ffmpeg` on cmd.
+* Enter the subfolder `backend` and create a new virtual environment:
+    ```bash
+    python -m venv venv
+    .\venv\Script\activate # windows
+    source ./venv/bin/activate # linux
+    ```
+* Install required packages:
+    ```bash
+    pip install -r requirements.txt
+    ```
+* Set up the backend Flask server by running `app.py`:
+    ```bash
+    python app.py
+    ```
 
 ## Recent Updates
 
@@ -30,85 +62,6 @@
 * This will generate `backend/res/beatmaps/<file_name>.json` as the json files for every audio in `backend/res/audio/`.
 * You STILL NEED TO MANUALLY CHANGE the `songData.json` by specifying the `beatMapUrl` of the song. If this field is missing or the file it is pointing to is missing, API call to backend will be used instead to load the audio.
 
-## Setting Up Backend
-
-* Install ffmpeg properly and check with `ffmpeg` on cmd.
-* Enter the subfolder `backend` and create a new virtual environment:
-    ```bash
-    python -m venv venv
-    .\venv\Script\activate # windows
-    source ./venv/bin/activate # linux
-    ```
-* Install required packages:
-    ```bash
-    pip install -r requirements.txt
-    ```
-* Set up Flask by running `app.py`:
-    ```bash
-    python app.py
-    ```
-* Testing:
-    * Install Postman (you do not need to log in)
-    * Refer to the URL as stated after you run `app.py`:
-        ```
-        Running on http://127.0.0.1:5000
-        ```
-    * Go to Postman and enter the relevant URL for the functionality you want to test:
-        ![alt text](readme-src/image-5.png)
-
-## Changelog
-
-* `GameController` now controls most features of the game.
-* Under `js/phases/` are the different phases of the game. 
-    * `SelectionMenu` is not implemented yet. It is supposed to be the selection menu for users.
-    * Refer to `Phase1` for more information on how the `initialize()` and `animate()` functions are defined.
-    * Remember to clear screen in the initialization.
-    * `cleanUp()` function cleans the entire canvas while exiting the current one.
-    * More: read the code or ask Sam.
-* The `target` now tracks the center of the palm.
-
-## 3D_control
-
-### General GUI
-
-* Click "Back to Menu" to exit to the menu.
-* **Close Mode**:
-    * "Close Mode" assumes that you are sitting right in front of the camera.
-    * When the "Close Mode" is off, we assume that you are standing at least 1 meter away from the camera.
-    * Adjust the `this.handControls.handOffsetZDistance` parameter in `GameController.js` for changing the perceived depth of the hand.
-* Maximum number of hands is set programmatically in `MediaPipeHands.js`.
-
-### Selection Menu
-
-* Either punch or grab at the boxes indicating the level of your choice.
-    * "punch" means holding your fist closed, and touching the boxes.
-    * "grab" ("select") means you close your fist while colliding with the boxes.
-
-    ![alt text](readme-src/image-1.png)
-
-### Test Phase
-
-* For developer use
-* Currently is testing on the detection of each finger's status (opened `O`/ closed `-`).
-* You can also read the rotation of the palm.
-
-![alt text](readme-src/image.png)
-
-## Backend
-
-Processing of music info here
-* Local audio is put within `backend/res/<file_name>.mp3`, which is referred in `MIR/songData.json` as `res/<file_name>.mp3`.
-
-## MIR
-
-Main UI here
-
-## Innovation Ideas
-
-* https://www.notion.so/AI-Music-Course-1393e2057e258093a9f7f0fb55184f7f?pvs=4
-    * Gesture control of 3d scene
-
-## Final Notes
-
-* Plan to tidy up the commit history at the end or (do not tidy at all)
-* Just view the vs code control graph for more info, or in github, just filter by the author of the commit.
+## References
+* Built upon the article: https://tympanus.net/codrops/2024/10/24/creating-a-3d-hand-controller-using-a-webcam-with-mediapipe-and-three-js/
+* Forked from [\[Cai3ra/webcam-3D-handcontrols\]](https://github.com/Cai3ra/webcam-3D-handcontrols).
