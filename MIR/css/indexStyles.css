@@ -259,8 +259,10 @@ h1 {
     position: fixed;
     color: #fff;
     font-size: 20px;
+    text-align: center;
     pointer-events: none;
     animation: fadeUp 2s ease-out forwards;
+    z-index: 6;
 }
 
 #youtube-container {
