@@ -11,8 +11,11 @@ Relevant code: `handDetection.js` and `handAnimation.js`.
    - Calculates hand depth using palm size and landmark distances (`calculateHandDepth` in `handDetection.js`):
      $$A_\text{palmSize}=\max_{p\in S}{\text{dist}(w,p)}$$
    - The coordinates of other keypoints within each hand are also scaled down centered at the wrist to maintain a consistent palm size in the gameplay (`updateHandPosition` in `handAnimation.js`):
+     
      $$d_\text{hand}=10A_\text{palmSize}$$
+     
      $$p_x'=c_\text{handScale}\cdot(p_x-w_x)/d_\text{hand}+c_\text{distScale}\cdot w_x$$
+     
      $$p_z'=p_z-c_\text{depthScale}\cdot (d_\text{hand}-2)$$
 
 3. **Visualization**
