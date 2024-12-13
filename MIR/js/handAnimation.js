@@ -22,11 +22,12 @@ export class HandAnimator extends THREE.EventDispatcher {
             [5, 9], [9, 13], [13, 17]                 // palm
         ];
 
+        const colors = [0x0080ff, 0x0080ff];
         // Materials for each hand
         this.materials = [
-            {
+            { // right hand
                 joint: new THREE.MeshStandardMaterial({
-                    color: 0x00ff00,
+                    color: colors[0],
                     transparent: true,
                     opacity: 0.8,
                     roughness: 0.3,
@@ -34,15 +35,15 @@ export class HandAnimator extends THREE.EventDispatcher {
                     shadowSide: THREE.FrontSide
                 }),
                 line: new THREE.LineBasicMaterial({
-                    color: 0x00ff00,
+                    color: colors[0],
                     transparent: true,
                     opacity: 0.5,
                     linewidth: 2
                 })
             },
-            {
+            { // left hand
                 joint: new THREE.MeshStandardMaterial({
-                    color: 0x00ffff,
+                    color: colors[1],
                     transparent: true,
                     opacity: 0.8,
                     roughness: 0.3,
@@ -50,7 +51,7 @@ export class HandAnimator extends THREE.EventDispatcher {
                     shadowSide: THREE.FrontSide
                 }),
                 line: new THREE.LineBasicMaterial({
-                    color: 0x00ffff,
+                    color: colors[1],
                     transparent: true,
                     opacity: 0.5,
                     linewidth: 2
