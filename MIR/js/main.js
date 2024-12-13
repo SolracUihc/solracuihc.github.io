@@ -1,10 +1,10 @@
-// (temp) import { WebcamHandler } from './webcam.js';
-// (temp) import { HandDetector } from './handDetection.js';
-// (temp) import { HandAnimator } from './handAnimation.js';
+import { WebcamHandler } from './webcam.js';
+import { HandDetector } from './handDetection.js';
+import { HandAnimator } from './handAnimation.js';
 import { DataFetcher } from './dataFetch.js';
 import { AudioPlayer } from './audioPlayback.js';
 import { GameAnimator } from './3DAnimation.js';
-// (temp) import { CollisionDetector } from './collisionDetection.js';
+import { CollisionDetector } from './collisionDetection.js';
 import { ScoreManager } from './scoreManagement.js';
 import { GUIManager } from './guiManager.js';
 
@@ -34,13 +34,13 @@ class Game {
             'boxCreationTimeOffset': .6 // seconds
         };
 
-        // (temp) this.webcam = new WebcamHandler();
-        // (temp) this.handDetector = new HandDetector(settings);
+        this.webcam = new WebcamHandler();
+        this.handDetector = new HandDetector(settings);
         this.gameAnimator = new GameAnimator(settings);
-        // (temp) this.handAnimator = new HandAnimator(this.gameAnimator.scene, settings);
+        this.handAnimator = new HandAnimator(this.gameAnimator.scene, settings);
         this.dataFetcher = new DataFetcher();
         this.audioPlayer = new AudioPlayer(settings);
-        // (temp) this.collisionDetector = new CollisionDetector();
+        this.collisionDetector = new CollisionDetector();
         this.scoreManager = new ScoreManager();
         this.guiManager = new GUIManager();
         
@@ -55,8 +55,8 @@ class Game {
         try {
             document.getElementById('loading').classList.remove('hidden');
             
-            // (temp) await this.webcam.initialize();
-            // (temp) await this.handDetector.initialize();
+            await this.webcam.initialize();
+            await this.handDetector.initialize();
             await this.dataFetcher.fetchSongList();
 
             this.setupEventListeners();
@@ -177,14 +177,14 @@ class Game {
         if (!this.isRunning) return;
 
         // Detect hands
-        // (temp) const frame = this.webcam.getFrame();
-        // (temp) const handsData = await this.handDetector.detectHands(frame);
+        const frame = this.webcam.getFrame();
+        const handsData = await this.handDetector.detectHands(frame);
 
         // Update hand visualization with all detected hands
-        // (temp) this.handAnimator.updateHandPosition(handsData);
+        this.handAnimator.updateHandPosition(handsData);
         
         // Check collisions for each hand
-        /* (temp) 
+        
         this.handAnimator.targets.forEach((target, index) => {
             // console.log('HND', this.handAnimator.hands[index].meshes);
             const collisions = this.collisionDetector.checkCollision(
@@ -195,7 +195,6 @@ class Game {
             // Update score
             this.scoreManager.updateScore(collisions);
         });
-        */
 
         // Update game beat
         const currentTime = this.audioPlayer.getCurrentTime()
