@@ -195,7 +195,6 @@ class Game {
         this.handAnimator.updateHandPosition(handsData);
         
         // Check collisions for each hand
-        /* (temp) 
         this.handAnimator.targets.forEach((target, index) => {
             // console.log('HND', this.handAnimator.hands[index].meshes);
             const collisions = this.collisionDetector.checkCollision(
@@ -206,7 +205,6 @@ class Game {
             // Update score
             this.scoreManager.updateScore(collisions);
         });
-        */
 
         // Update game beat
         const currentTime = this.audioPlayer.getCurrentTime()
