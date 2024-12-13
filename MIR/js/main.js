@@ -50,6 +50,7 @@ class Game {
         this.nextGroundIndex = 0;
 
         this.boxCreationTimeOffset = settings?.boxCreationTimeOffset ?? .5;
+        this.groundTimeOffset = settings?.silenceDuration ?? 2.5;
     }
 
     async initialize() {
@@ -211,7 +212,7 @@ class Game {
 
         // Update boxes
         this.updateBeats(beatTime);
-        this.updateBeatsGround(beatTime);
+        this.updateBeatsGround(currentTime);
         // Update targets and check combo
         if (this.gameAnimator.updateBoxes(beatTime)) {
             this.scoreManager.missedNote();
@@ -243,7 +244,7 @@ class Game {
     updateBeatsGround(currentTime) {
         while (
             this.nextGroundIndex < this.currentSong.beatMap.length &&
-            this.currentSong.beatMap[this.nextGroundIndex].time <= currentTime-2*this.boxCreationTimeOffset
+            this.currentSong.beatMap[this.nextGroundIndex].time <= currentTime-this.groundTimeOffset
         ) {
             const beatData = this.currentSong.beatMap[this.nextGroundIndex];
             this.gameAnimator.updateGround(beatData);
