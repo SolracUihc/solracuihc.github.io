@@ -56,7 +56,7 @@ export class GameAnimator {
         this.scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(5, 5, 5);
+        directionalLight.position.set(0, 5, 5);
         this.scene.add(directionalLight);
 
         // Create ground plane with more segments for smoother animation
@@ -67,7 +67,7 @@ export class GameAnimator {
             metalness: 0.8,
             transparent: true,
             opacity: 0.6,
-            wireframe: false
+            wireframe: true
         });
         
         this.groundPlane = new THREE.Mesh(this.planeGeometry, this.planeMaterial);
@@ -178,6 +178,13 @@ export class GameAnimator {
         box.transparent = true;
         box.material.opacity = .5;
         box.supposedHitTime = beatData.time; // custom tags
+
+        // Change the material color based on the x position
+        if (box.position.x <= 0) {
+            box.material.color.set(0xff0000); // Red
+        } else {
+            box.material.color.set(0x0000ff); // Blue
+        }
 
         box.userData = {
             points: beatData.points,
