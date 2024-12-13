@@ -153,6 +153,16 @@ class Game {
         }
     }
 
+    displayInstructions() {
+        document.getElementById('instruction').classList.remove('hidden');
+        document.getElementById('instruction').querySelector('h1').textContent = 'Move your hands to capture the incoming targets to gain points!';
+        const instruction = document.getElementById('instruction');
+        instruction.style.opacity = '1'; // Ensure it is visible
+        setTimeout(() => {
+            instruction.classList.add('hidden'); // Hide element after fade-out is complete
+        }, 4000); // This should match the duration of the fade-out plus the initial display time
+    }
+
     countdownStartGame() {
         this.countdownValue -= 1;
         document.getElementById('countdown').querySelector('h1').textContent = this.countdownValue != 0 ? this.countdownValue : "Ready?";
@@ -161,6 +171,7 @@ class Game {
             clearInterval(this.countdownInterval);
             document.getElementById('countdown').classList.add('hidden');
             this.audioPlayer.play();
+            this.displayInstructions();
             this.gameLoop();
         }
     }

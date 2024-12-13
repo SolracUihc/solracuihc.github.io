@@ -129,6 +129,24 @@ export class GameAnimator {
         this.planeGeometry.attributes.position.needsUpdate = true; // Notify Three.js that the position has changed
     }
 
+    renderScorePopup(x, y) {
+        const scorePopup = document.createElement('div');
+        scorePopup.className = 'score-popup';
+        scorePopup.textContent = 'NICE!';
+    
+        // Set the position of the score popup
+        scorePopup.style.left = `${x}px`;
+        scorePopup.style.top = `${y}px`;
+    
+        // Append it to the game container
+        document.getElementById('game-container').appendChild(scorePopup);
+    
+        // Remove the popup after the animation ends
+        scorePopup.addEventListener('animationend', () => {
+            scorePopup.remove();
+        });
+    }
+
     updateBoxes(currentTime, speed = 10) {
         let boxRemoved = false;
         if (this.lastTime === undefined) {
@@ -158,6 +176,7 @@ export class GameAnimator {
                 this.boxes.splice(i, 1);
                 boxRemoved = true;
             } else if (box.userData.isHit) {
+                this.renderScorePopup(box.position.x, box.position.y);
                 this.scene.remove(box);
                 this.boxes.splice(i, 1);
             }
