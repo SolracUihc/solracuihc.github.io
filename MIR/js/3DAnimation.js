@@ -60,13 +60,13 @@ export class GameAnimator {
         this.scene.add(directionalLight);
 
         // Create ground plane with more segments for smoother animation
-        this.planeGeometry = new THREE.PlaneGeometry(40, 200, 64, 320);
+        this.planeGeometry = new THREE.PlaneGeometry(40, 400, 64, 640);
         this.planeMaterial = new THREE.MeshStandardMaterial({
             color: 0x000000,
             roughness: 0.2,
             metalness: 0.8,
             transparent: true,
-            opacity: 0.9,
+            opacity: 0.6,
             wireframe: false
         });
         
