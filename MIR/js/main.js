@@ -195,6 +195,7 @@ class Game {
         this.handAnimator.updateHandPosition(handsData);
         
         // Check collisions for each hand
+        
         this.handAnimator.targets.forEach((target, index) => {
             // console.log('HND', this.handAnimator.hands[index].meshes);
             const collisions = this.collisionDetector.checkCollision(
