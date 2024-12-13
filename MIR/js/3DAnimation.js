@@ -48,7 +48,7 @@ export class GameAnimator {
         document.getElementById('game-container').appendChild(this.renderer.domElement);
 
         // Setup camera
-        this.camera.position.set(0, 2, 5);
+        this.camera.position.set(0, 1, 5);
         this.camera.lookAt(0, 0, -10);
 
         // Add lights
