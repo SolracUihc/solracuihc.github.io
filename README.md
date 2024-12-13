@@ -10,26 +10,13 @@
 > Currently the song path CANNOT be youtube video. 
 >   * It must be predownloaded before usage.
 >
-> Also, please make sure that the LOCAL backend server is running and they have SAME BACKEND FILES as the frontend.
+> Also, please make sure that the LOCAL backend server is running and they have SAME BACKEND FILES as the frontend while running the frontend.
 
-**Follow Beats**
-* Use the correct beatmap to generate the boxes.
-
-**Time Accuracy**
-* The boxes should ARRIVE at the player's side ON THE BEAT, instead of being CREATED on the beat.
-* There should be some kind of hint showing WHEN the player should hit the boxes.
-
-**Gameplay**
-* Update how the boxes move. Linear motion is boring.
-* Adjust the shapes and speeds of the boxes.
-* eg based on STRONG or WEAK beats.
-* More gestures for each type of box?
+## Recent Updates
 
 **Instructions**
 * Provide clearer instructions to the user.
 * E.g. counting down so that the user can prepare.
-
-## Recent Updates
 
 **Support of Local Audio Added**
 * Local audio is put within `backend/res/audio/<file_name>.mp3`, which is referred in `MIR/songData.json` as `res/audio/<file_name>.mp3`.
