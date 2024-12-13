@@ -243,7 +243,7 @@ class Game {
     updateBeatsGround(currentTime) {
         while (
             this.nextGroundIndex < this.currentSong.beatMap.length &&
-            this.currentSong.beatMap[this.nextGroundIndex].time <= currentTime
+            this.currentSong.beatMap[this.nextGroundIndex].time <= currentTime-2*this.boxCreationTimeOffset
         ) {
             const beatData = this.currentSong.beatMap[this.nextGroundIndex];
             this.gameAnimator.updateGround(beatData);
