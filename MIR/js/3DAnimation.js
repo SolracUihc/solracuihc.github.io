@@ -52,7 +52,7 @@ export class GameAnimator {
         this.camera.lookAt(0, 0, 0);
 
         // Add lights
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
         this.scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -60,13 +60,13 @@ export class GameAnimator {
         this.scene.add(directionalLight);
 
         // Create ground plane with more segments for smoother animation
-        this.planeGeometry = new THREE.PlaneGeometry(40, 20, 64, 32);
+        this.planeGeometry = new THREE.PlaneGeometry(40, 200, 64, 320);
         this.planeMaterial = new THREE.MeshStandardMaterial({
             color: 0x000000,
             roughness: 0.2,
-            metalness: 0.2,
+            metalness: 0.8,
             transparent: true,
-            opacity: 0.5,
+            opacity: 0.1,
             wireframe: false
         });
         
