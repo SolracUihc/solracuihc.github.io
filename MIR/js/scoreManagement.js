@@ -42,7 +42,11 @@ export class ScoreManager {
     createScorePopup(points, accuracy) {
         const popup = document.createElement('div');
         popup.className = 'score-popup';
-        popup.textContent = `+${points} (${accuracy.toFixed(1)}%)`;
+        popup.textContent = `+${points}`;
+
+        popup.style.left = '0';
+        popup.style.right = '0';
+        popup.style.top = '30%';
 
         document.body.appendChild(popup);
 
