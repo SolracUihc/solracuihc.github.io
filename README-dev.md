@@ -1,4 +1,5 @@
-# AI Music Project
+# AI Music Project: 3D Hand Motion Music Game
+(Developer Notes)
 
 ## Setting Up Backend
 
