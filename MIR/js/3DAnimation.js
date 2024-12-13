@@ -49,7 +49,7 @@ export class GameAnimator {
 
         // Setup camera
         this.camera.position.set(0, 2, 5);
-        this.camera.lookAt(0, 0, 0);
+        this.camera.lookAt(0, 0, -10);
 
         // Add lights
         const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
@@ -93,13 +93,13 @@ export class GameAnimator {
 
     updateGround(beatMap) {
         // Update animation targets
-        this.groundState.targetAmplitude = Math.abs(beatMap.y*2) * 0.5;
-        this.groundState.targetFrequency = Math.abs(beatMap.x*2) * 2;
+        this.groundState.targetAmplitude = Math.abs(beatMap.x*2) * 0.5;
+        this.groundState.targetFrequency = Math.abs(beatMap.y*2) * 2;
         
         // Update color targets
-        this.groundState.targetHue = (beatMap.x * 10) % 1;
+        this.groundState.targetHue = (beatMap.y * 10) % 1;
         this.groundState.targetSaturation = 1;
-        this.groundState.targetLightness = 0.5 + (beatMap.y * 0.2); // Vary lightness based on y
+        this.groundState.targetLightness = 0.5 + (beatMap.x * 0.2); // Vary lightness based on y
     }
 
     updateGroundAnimation(currentTime) {
