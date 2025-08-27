@@ -1,6 +1,0 @@
-# pip install -r requirements.txt
-
-Flask
-flask-cors
-librosa
-yt-dlp
