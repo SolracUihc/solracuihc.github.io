@@ -5,7 +5,7 @@ let streetData = [];
 async function loadData() {
     try {
         // Replace with your GitHub raw URL
-        const response = await fetch('https://raw.githubusercontent.com/yourusername/yourrepo/main/streets.xlsx');
+        const response = await fetch('https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/master/streets.xlsx');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
