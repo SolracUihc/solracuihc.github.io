@@ -5,7 +5,7 @@ let streetData = [];
 async function loadData() {
     try {
         // Replace with your GitHub raw URL
-        const response = await fetch('https://raw.githubusercontent.com/SolracUihc/solracuihc.github.io/master/streets.xlsx');
+        const response = await fetch('https://raw.githubusercontent.com/solracuihc/solracuihc.github.io/master/war_time_streets.xlsx');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -30,6 +30,11 @@ async function loadData() {
 function normalizeInput(input, field) {
     if (!input) return { normalized: '', type: field };
     const normalized = input.trim().toLowerCase();
+    // For general search, guess type based on format
+    if (field === 'general') {
+        const isIndex = normalized.includes('.') || /\b[a-z]+\.\d+/.test(normalized);
+        return { normalized, type: isIndex ? 'index' : 'name' };
+    }
     return { normalized, type: field }; // 'name' or 'index'
 }
 
@@ -75,10 +80,10 @@ function search(inputObj, data) {
 
 // Suggestion Generator Component
 function generateSuggestions(results, inputObj) {
-    if (results.length === 0) return ['No close matches found. Try a different input.'];
+    if (results.length === 0) return [{ text: 'No close matches found.', value: null, result: null }];
     const field = inputObj.type;
     return results.slice(0, 3).map(item => ({
-        text: `Did you mean "${item[field]}"?`,
+        text: item[field],
         value: item[field],
         result: inputObj.type === 'index' ? item.name : item.index
     }));
@@ -90,14 +95,14 @@ function displayResults(results, inputObj) {
     resultsDiv.innerHTML = '';
     
     if (results.length === 0) {
-        resultsDiv.innerHTML = '<p>No results found.</p>';
+        resultsDiv.innerHTML = '<p>No results to display.</p>';
         return;
     }
     
     results.forEach(item => {
         const result = inputObj.type === 'index' ? item.name : item.index;
         const p = document.createElement('p');
-        p.textContent = `${inputObj.type === 'index' ? 'Street Name' : 'Index'}: ${result}`;
+        p.textContent = `${inputObj.type === 'index' ? 'Street Number' : 'Lot Number'}: ${result}`;
         resultsDiv.appendChild(p);
     });
 }
@@ -118,8 +123,22 @@ function showError(message) {
 function setupEventListeners() {
     const nameInput = document.getElementById('nameInput');
     const indexInput = document.getElementById('indexInput');
+    const generalSearchInput = document.getElementById('generalSearchInput');
     const button = document.getElementById('searchButton');
     const suggestionsDiv = document.getElementById('suggestions');
+    
+    function positionSuggestions(inputElement) {
+        const rect = inputElement.getBoundingClientRect();
+        suggestionsDiv.style.top = `${rect.bottom + window.scrollY}px`;
+        suggestionsDiv.style.left = `${rect.left + window.scrollX}px`;
+        suggestionsDiv.style.width = `${rect.width}px`;
+        suggestionsDiv.style.display = 'block';
+    }
+    
+    function hideSuggestions() {
+        suggestionsDiv.style.display = 'none';
+        suggestionsDiv.innerHTML = '';
+    }
     
     function performSearch(inputElement, field) {
         const inputValue = inputElement.value;
@@ -127,44 +146,44 @@ function setupEventListeners() {
         document.getElementById('errorMessage').textContent = '';
         
         if (!inputValue) {
-            suggestionsDiv.innerHTML = '';
-            document.getElementById('results').innerHTML = '';
-            return;
+            hideSuggestions();
+            document.getElementById('results').innerHTML = '<p>No results to display.</p>';
+            return [];
         }
         
         const results = search(inputObj, streetData);
         displayResults(results, inputObj);
         
-        // Display suggestions
+        // Display suggestions as dropdown
         suggestionsDiv.innerHTML = '';
         const suggestions = generateSuggestions(results, inputObj);
         suggestions.forEach(suggestion => {
             const p = document.createElement('p');
-            if (suggestion.text.startsWith('Did you mean')) {
-                const link = document.createElement('a');
-                link.textContent = suggestion.text;
-                link.href = '#';
+            const link = document.createElement('a');
+            link.textContent = suggestion.text;
+            link.href = '#';
+            if (suggestion.value) {
                 link.onclick = () => {
-                    if (inputObj.type === 'name') {
-                        nameInput.value = suggestion.value;
-                        indexInput.value = suggestion.result;
-                    } else {
-                        indexInput.value = suggestion.value;
-                        nameInput.value = suggestion.result;
-                    }
+                    nameInput.value = inputObj.type === 'name' ? suggestion.value : suggestion.result;
+                    indexInput.value = inputObj.type === 'index' ? suggestion.value : suggestion.result;
+                    generalSearchInput.value = '';
                     displayConfirmation(
                         inputObj.type === 'name' ? suggestion.value : suggestion.result,
                         inputObj.type === 'index' ? suggestion.value : suggestion.result
                     );
-                    suggestionsDiv.innerHTML = '';
+                    hideSuggestions();
                     return false;
                 };
-                p.appendChild(link);
-            } else {
-                p.textContent = suggestion.text;
             }
+            p.appendChild(link);
             suggestionsDiv.appendChild(p);
         });
+        
+        if (suggestions.length > 0 && suggestions[0].value) {
+            positionSuggestions(inputElement);
+        } else {
+            hideSuggestions();
+        }
         
         return results;
     }
@@ -172,43 +191,64 @@ function setupEventListeners() {
     function handleSearchButton() {
         const nameValue = nameInput.value;
         const indexValue = indexInput.value;
+        const generalValue = generalSearchInput.value;
         let results = [];
         
-        if (nameValue && !indexValue) {
+        if (nameValue && !indexValue && !generalValue) {
             results = performSearch(nameInput, 'name');
-        } else if (indexValue && !nameValue) {
+        } else if (indexValue && !nameValue && !generalValue) {
             results = performSearch(indexInput, 'index');
+        } else if (generalValue && !nameValue && !indexValue) {
+            results = performSearch(generalSearchInput, 'general');
         } else {
-            showError('Please enter either a street name or an index, not both.');
+            showError('Please enter only one field: Street Number, Lot Number, or Search.');
+            hideSuggestions();
             return;
         }
         
         if (results.length > 0) {
             const topResult = results[0];
-            if (nameValue) {
-                nameInput.value = topResult.name;
-                indexInput.value = topResult.index;
-                displayConfirmation(topResult.name, topResult.index);
-            } else {
-                indexInput.value = topResult.index;
-                nameInput.value = topResult.name;
-                displayConfirmation(topResult.name, topResult.index);
-            }
-            suggestionsDiv.innerHTML = '';
+            nameInput.value = topResult.name;
+            indexInput.value = topResult.index;
+            generalSearchInput.value = '';
+            displayConfirmation(topResult.name, topResult.index);
+            hideSuggestions();
         }
     }
     
     nameInput.addEventListener('keyup', () => {
-        if (!indexInput.value) performSearch(nameInput, 'name');
+        if (!indexInput.value && !generalSearchInput.value) performSearch(nameInput, 'name');
+        else hideSuggestions();
     });
     indexInput.addEventListener('keyup', () => {
-        if (!nameInput.value) performSearch(indexInput, 'index');
+        if (!nameInput.value && !generalSearchInput.value) performSearch(indexInput, 'index');
+        else hideSuggestions();
     });
+    generalSearchInput.addEventListener('keyup', () => {
+        if (!nameInput.value && !indexInput.value) performSearch(generalSearchInput, 'general');
+        else hideSuggestions();
+    });
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('input') && !e.target.closest('.suggestions')) {
+            hideSuggestions();
+        }
+    });
+    
     button.addEventListener('click', handleSearchButton);
 }
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
+    // Debug CSS loading
+    const cssLink = document.querySelector('link[href="styles.css"]');
+    if (!cssLink.sheet) {
+        console.error('CSS file failed to load. Check path or file presence.');
+    } else {
+        console.log('CSS file loaded successfully.');
+    }
+    
     await loadData();
     setupEventListeners();
 });
