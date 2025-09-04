@@ -142,7 +142,7 @@ function displayResults(results) {
     const table = document.createElement('table');
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
-    ['Historical Name', 'Modern Name', 'Index', 'Source'].forEach(col => {
+    ['Historical Street Number', 'Modern Name', 'Log Number', 'Reference'].forEach(col => {
         const th = document.createElement('th');
         th.textContent = col;
         headerRow.appendChild(th);
