@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,19 +11,55 @@
 <body>
     <div class="container">
         <h1>Street Number & Lot Converter</h1>
+        <div class="options-section">
+            <label for="dataSource">Data Source:</label>
+            <select id="dataSource">
+                <option value="en">Source 1 (EN)</option>
+                <option value="zh">Source 2 (ZH)</option>
+                <option value="both" selected>Both</option>
+            </select>
+            <label for="searchMode">Search Mode:</label>
+            <select id="searchMode">
+                <option value="best" selected>Search Best</option>
+                <option value="all">Search All</option>
+            </select>
+            <button id="instructionsButton">Instructions</button>
+        </div>
         <div class="input-section">
             <input type="text" id="nameInput" placeholder="Enter Street Number...">
             <span class="convert-text">Convert</span>
             <input type="text" id="indexInput" placeholder="Enter Lot Number...">
         </div>
         <div class="search-section">
-            <input type="text" id="generalSearchInput" placeholder="Search Street Number or Lot Number...">
+            <input type="text" id="generalSearchInput" placeholder="Search Street or Lot...">
             <button id="searchButton">Search</button>
+            <button id="clearButton">Clear</button>
         </div>
         <div id="suggestions" class="suggestions"></div>
         <div id="errorMessage" class="error-message"></div>
         <div id="results" class="results">
             <p>No results to display.</p>
+        </div>
+        <div id="instructionsModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span id="closeModal" class="close">&times;</span>
+                <h2>Instructions</h2>
+                <p>Use this tool to convert between street numbers and lot numbers:</p>
+                <ul>
+                    <li><strong>Choose Data Source</strong>: Select "Source 1 (EN)" for English data, "Source 2 (ZH)" for Chinese data, or "Both" to search both datasets.</li>
+                    <li><strong>Choose Search Mode</strong>: Select "Search Best" to get the most similar match or "Search All" to get all matches, sorted alphabetically by modern name.</li>
+                    <li><strong>Enter Input</strong>: Type in one field only:
+                        <ul>
+                            <li><strong>Street Number</strong>: Enter a historical street name (e.g., "Hak Po").</li>
+                            <li><strong>Lot Number</strong>: Enter a lot number (e.g., "K.I.L 1572").</li>
+                            <li><strong>Search</strong>: Enter either a street or lot number; the app will guess the type.</li>
+                        </ul>
+                    </li>
+                    <li><strong>View Suggestions</strong>: As you type, a dropdown suggests up to 3 matches. Click a suggestion to select it and see the result in a table.</li>
+                    <li><strong>Search</strong>: Click the Search button to display results in a table, showing Historical Name, Modern Name, Index, and Source.</li>
+                    <li><strong>Clear</strong>: Click Clear to reset all fields and results.</li>
+                </ul>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>
