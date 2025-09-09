@@ -2,123 +2,125 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 body {
-    background-color: #F5F5DC; /* Light beige/brown */
-    color: #4A2F1A; /* Dark brown text */
+    background-color: #2d3748; /* Dark grey background */
+    color: #e2e8f0; /* Light grey text for contrast */
     display: flex;
     justify-content: center;
-    padding: 20px;
+    padding: 16px;
 }
 
 .container {
-    max-width: 900px;
+    max-width: 800px;
     width: 100%;
-    background-color: #D2B48C; /* Light brown */
-    padding: 20px;
+    background-color: #4a5568; /* Darker grey container */
+    padding: 24px;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* Slightly darker shadow */
 }
 
 h1 {
     text-align: center;
-    margin-bottom: 20px;
-    color: #8B4513; /* Saddle brown */
+    margin-bottom: 24px;
+    color: #edf2f7; /* Light grey for heading */
 }
 
 .options-section {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
 }
 
 .options-section label {
-    font-size: 16px;
-    color: #4A2F1A;
+    font-size: 14px;
+    color: #e2e8f0; /* Light grey text */
 }
 
 .options-section select, .options-section button {
     padding: 8px;
-    border: 2px solid #8B4513;
+    border: 1px solid #718096; /* Medium grey border */
     border-radius: 4px;
-    background-color: #FFF8DC;
-    font-size: 16px;
+    background-color: #2d3748; /* Dark grey background */
+    font-size: 14px;
+    color: #e2e8f0; /* Light grey text */
 }
 
 #instructionsButton {
-    background-color: #8B4513; /* Saddle brown */
+    background-color: #2b6cb0; /* Dark blue button */
     color: white;
     border: none;
     cursor: pointer;
 }
 
 #instructionsButton:hover {
-    background-color: #A0522D; /* Sienna */
+    background-color: #2c5282; /* Slightly darker blue on hover */
 }
 
 .input-section {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
 }
 
-#nameInput, #indexInput, #generalSearchInput {
+input {
     flex: 1;
-    padding: 10px;
-    border: 2px solid #8B4513;
+    padding: 8px;
+    border: 1px solid #718096; /* Medium grey border */
     border-radius: 4px;
-    font-size: 16px;
-    background-color: #FFF8DC; /* Cream background */
+    font-size: 14px;
+    background-color: #2d3748; /* Dark grey background */
+    color: #e2e8f0; /* Light grey text */
 }
 
-#nameInput:focus, #indexInput:focus, #generalSearchInput:focus {
+input:focus {
     outline: none;
-    border-color: #A0522D; /* Sienna */
+    border-color: #2b6cb0; /* Dark blue border on focus */
+    box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.3); /* Subtle dark blue glow */
 }
 
-.convert-text {
-    font-size: 16px;
-    color: #4A2F1A;
+input::placeholder {
+    color: #a0aec0; /* Lighter grey for placeholders */
 }
 
 .search-section {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
 }
 
 #searchButton, #clearButton {
-    padding: 10px 20px;
-    background-color: #8B4513; /* Saddle brown */
+    padding: 8px 16px;
+    background-color: #2b6cb0; /* Dark blue button */
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 #searchButton:hover, #clearButton:hover {
-    background-color: #A0522D; /* Sienna */
+    background-color: #2c5282; /* Slightly darker blue on hover */
 }
 
 .error-message {
-    color: #B22222; /* Firebrick for errors */
-    margin-bottom: 15px;
+    color: #f56565; /* Red for errors, visible on dark background */
+    margin-bottom: 16px;
     min-height: 20px;
+    font-size: 14px;
 }
 
 .results {
-    margin-top: 15px;
-    padding: 20px;
-    background-color: #FFF8DC; /* Cream */
+    padding: 16px;
+    background-color: #2d3748; /* Dark grey background */
     border-radius: 4px;
-    border: 1px solid #8B4513;
-    min-height: 200px; /* Large canvas */
+    border: 1px solid #718096; /* Medium grey border */
+    min-height: 150px;
     overflow-x: auto;
 }
 
@@ -128,39 +130,37 @@ h1 {
 }
 
 .results th, .results td {
-    border: 1px solid #8B4513;
+    border: 1px solid #718096; /* Medium grey border */
     padding: 8px;
     text-align: left;
+    font-size: 14px;
+    color: #e2e8f0; /* Light grey text */
 }
 
 .results th {
-    background-color: #D2B48C;
-}
-
-.results p {
-    margin: 5px 0;
+    background-color: #4a5568; /* Darker grey for table header */
 }
 
 .suggestions {
     position: absolute;
-    background-color: #FFF8DC;
-    border: 1px solid #8B4513;
+    background-color: #4a5568; /* Darker grey background */
+    border: 1px solid #718096; /* Medium grey border */
     border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     z-index: 1000;
     max-width: 300px;
-    display: none; /* Hidden by default */
+    display: none;
 }
 
 .suggestions a {
-    color: #4A2F1A;
+    color: #e2e8f0; /* Light grey text */
     text-decoration: none;
     display: block;
-    padding: 8px 12px;
+    padding: 8px;
 }
 
 .suggestions a:hover {
-    background-color: #DEB887; /* Burlywood for hover highlight */
+    background-color: #718096; /* Medium grey on hover */
 }
 
 .modal {
@@ -169,7 +169,7 @@ h1 {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+    background-color: rgba(0, 0, 0, 0.6); /* Slightly darker overlay */
     display: none;
     justify-content: center;
     align-items: center;
@@ -177,23 +177,24 @@ h1 {
 }
 
 .modal-content {
-    background-color: #FFF8DC;
-    padding: 20px;
+    background-color: #4a5568; /* Darker grey background */
+    padding: 24px;
     border-radius: 8px;
-    border: 2px solid #8B4513;
+    border: 1px solid #718096; /* Medium grey border */
     max-width: 500px;
     width: 90%;
     position: relative;
 }
 
 .modal-content h2 {
-    color: #8B4513;
-    margin-bottom: 15px;
+    color: #edf2f7; /* Light grey for heading */
+    margin-bottom: 16px;
 }
 
 .modal-content p, .modal-content ul {
-    color: #4A2F1A;
-    margin-bottom: 15px;
+    color: #e2e8f0; /* Light grey text */
+    margin-bottom: 16px;
+    font-size: 14px;
 }
 
 .modal-content ul {
@@ -203,33 +204,28 @@ h1 {
 
 .close {
     position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    color: #4A2F1A;
+    top: 12px;
+    right: 12px;
+    font-size: 20px;
+    color: #e2e8f0; /* Light grey */
     cursor: pointer;
 }
 
 .close:hover {
-    color: #A0522D;
+    color: #2b6cb0; /* Dark blue on hover */
 }
 
 @media (max-width: 600px) {
     .container {
-        padding: 15px;
+        padding: 16px;
     }
 
     .options-section, .input-section, .search-section {
         flex-direction: column;
-        align-items: stretch;
+        gap: 8px;
     }
 
-    .convert-text {
-        text-align: center;
-        margin: 10px 0;
-    }
-
-    #searchButton, #generalSearchInput, #clearButton, #instructionsButton {
+    input, #searchButton, #clearButton, #instructionsButton {
         width: 100%;
     }
 
