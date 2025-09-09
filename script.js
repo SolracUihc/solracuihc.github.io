@@ -1,190 +1,179 @@
-// Data storage
-let enData = [];
-let zhData = [];
+const dataSources = [
+    { id: 'wts_en', name: 'War Time Streets', url: 'https://raw.githubusercontent.com/solracuihc/solracuihc.github.io/master/war_time_streets_inUse.xlsx' },
+    { id: 'en', name: 'Sample Data (en)', url: 'https://raw.githubusercontent.com/solracuihc/solracuihc.github.io/master/sample_street_data_en.xlsx' }
+];
 
-// Data Loader Component
+let sourceData = {};
+
 async function loadData() {
-    const enUrl = 'https://raw.githubusercontent.com/solracuihc/solracuihc.github.io/master/sample_street_data_en.xlsx';
-    const zhUrl = 'https://raw.githubusercontent.com/solracuihc/solracuihc.github.io/master/sample_street_data_zh.xlsx';
-
     async function fetchAndParse(url) {
         try {
             const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`Failed to load ${url}`);
             const data = await response.arrayBuffer();
-            const uint8Array = new Uint8Array(data);
-            const workbook = XLSX.read(uint8Array, { type: 'array' });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(sheet);
-            return json.map(row => ({
+            const workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
+            return XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]).map(row => ({
                 'historical name': String(row['historical name'] || '').trim(),
-                'index': String(row['index'] || '').trim(),
                 'modern name': String(row['modern name'] || '').trim(),
+                'index': String(row['index'] || '').trim(),
                 'source': String(row['source'] || '').trim()
             }));
         } catch (e) {
-            showError(`Failed to load file from ${url}. Check the URL.`);
+            showError(`Failed to load data from ${url}`);
             return [];
         }
     }
 
-    enData = await fetchAndParse(enUrl);
-    zhData = await fetchAndParse(zhUrl);
-
-    if (enData.length === 0 && zhData.length === 0) {
-        showError('No data loaded from either file.');
+    for (const source of dataSources) {
+        sourceData[source.id] = await fetchAndParse(source.url);
+    }
+    if (Object.values(sourceData).every(data => !data.length)) {
+        showError('No data loaded.');
     }
 }
 
-// Get current data based on source selection
+function populateDataSourceDropdown() {
+    const select = document.getElementById('dataSource');
+    dataSources.forEach(source => {
+        const option = document.createElement('option');
+        option.value = source.id;
+        option.textContent = source.name;
+        select.appendChild(option);
+    });
+    const bothOption = document.createElement('option');
+    bothOption.value = 'both';
+    bothOption.textContent = 'Both';
+    bothOption.selected = true;
+    select.appendChild(bothOption);
+}
+
 function getCurrentData() {
     const source = document.getElementById('dataSource').value;
-    if (source === 'en') return enData;
-    if (source === 'zh') return zhData;
-    return [...enData, ...zhData];
+    return source === 'both' ? Object.values(sourceData).flat() : sourceData[source] || [];
 }
 
-// Input Handler Component
-function normalizeInput(input, field) {
-    if (!input) return { normalized: '', type: field };
-    const normalized = input.trim().toLowerCase();
-    // For general search, guess type based on format
-    if (field === 'general') {
-        const isIndex = normalized.includes('.') || /\b[a-z]+\.\d+/.test(normalized);
-        return { normalized, type: isIndex ? 'index' : 'name' };
-    }
-    return { normalized, type: field }; // 'name' or 'index'
+function normalizeInput(input) {
+    return input ? input.trim().toLowerCase() : '';
 }
 
-// Search Engine Component
-function search(inputObj, data) {
-    if (!inputObj.normalized || data.length === 0) return [];
-    
-    const results = [];
-    
-    // Simple Levenshtein distance for fuzzy matching
+function search(input, data, field) {
+    if (!input || !data.length) return [];
+
     function levenshtein(a, b) {
         const matrix = Array(b.length + 1).fill().map(() => Array(a.length + 1).fill(0));
         for (let i = 0; i <= a.length; i++) matrix[0][i] = i;
         for (let j = 0; j <= b.length; j++) matrix[j][0] = j;
         for (let j = 1; j <= b.length; j++) {
             for (let i = 1; i <= a.length; i++) {
-                const indicator = a[i - 1] === b[j - 1] ? 0 : 1;
                 matrix[j][i] = Math.min(
                     matrix[j][i - 1] + 1,
                     matrix[j - 1][i] + 1,
-                    matrix[j - 1][i - 1] + indicator
+                    matrix[j - 1][i - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
                 );
             }
         }
         return matrix[b.length][a.length];
     }
-    
+
+    const results = [];
     data.forEach(item => {
-        let target = '';
-        let similarity = 0;
-        if (inputObj.type === 'index') {
-            target = (item['index'] || '').toLowerCase();
-            const distance = levenshtein(inputObj.normalized, target);
-            const maxLen = Math.max(inputObj.normalized.length, target.length);
-            similarity = maxLen ? 1 - distance / maxLen : 0;
+        if (field === 'general') {
+            const targets = [
+                { value: item['historical name'], key: 'historical name' },
+                { value: item['modern name'], key: 'modern name' },
+                { value: item['index'], key: 'index' }
+            ];
+            const matches = targets.map(t => {
+                const val = (t.value || '').toLowerCase();
+                const distance = levenshtein(input, val);
+                const maxLen = Math.max(input.length, val.length);
+                const similarity = maxLen ? 1 - distance / maxLen : 0;
+                return { ...item, similarity, matchedField: t.key };
+            }).filter(m => m.similarity > 0.7 || (m[m.matchedField] || '').toLowerCase().includes(input));
+            if (matches.length) results.push(...matches);
         } else {
-            // For name, only search historical name
-            target = (item['historical name'] || '').toLowerCase();
-            const distance = levenshtein(inputObj.normalized, target);
-            const maxLen = Math.max(inputObj.normalized.length, target.length);
-            similarity = maxLen ? 1 - distance / maxLen : 0;
-            if (target.includes(inputObj.normalized)) {
-                similarity = 1;
+            const fieldKey = field === 'name' ? 'historical name' : field === 'modern' ? 'modern name' : 'index';
+            const target = (item[fieldKey] || '').toLowerCase();
+            const distance = levenshtein(input, target);
+            const maxLen = Math.max(input.length, target.length);
+            const similarity = maxLen ? 1 - distance / maxLen : 0;
+            if (target.includes(input) || similarity > 0.7) {
+                results.push({ ...item, similarity });
             }
         }
-        
-        if (target === inputObj.normalized || similarity > 0.7 || target.includes(inputObj.normalized)) {
-            results.push({ ...item, similarity });
-        }
     });
-    
-    // Sort by similarity descending
+    console.log(`Search for field '${field}' with input '${input}':`, results);
     return results.sort((a, b) => b.similarity - a.similarity);
 }
 
-// Filter results based on mode
-function filterResultsByMode(results, mode) {
-    if (mode === 'best') {
-        return results.slice(0, 1); // Most similar only
-    } else {
-        // Search All: all matches, sorted alphabetically by modern name
-        return results.sort((a, b) => (a['modern name'] || '').localeCompare(b['modern name'] || ''));
-    }
-}
-
-// Suggestion Generator Component
-function generateSuggestions(results, inputObj) {
-    if (results.length === 0) return [{ text: 'No close matches found.', value: null, result: null }];
+function generateGeneralSuggestions(results) {
+    if (!results.length) return [{ text: 'No matches found.', value: null, result: null }];
     return results.slice(0, 3).map(item => ({
-        text: inputObj.type === 'index' ? item['index'] : item['historical name'],
-        item // Full item for selection
+        text: item.matchedField === 'historical name' ? item['historical name'] :
+              item.matchedField === 'modern name' ? item['modern name'] : item['index'],
+        item
     }));
 }
 
-// Result Display Component (as table)
+function generateSpecificSuggestions(results, field) {
+    if (!results.length) return [{ text: 'No matches found.', value: null, result: null }];
+    const displayField = field === 'index' ? 'index' : field === 'modern' ? 'modern name' : 'historical name';
+    return results.slice(0, 3).map(item => ({
+        text: item[displayField] || '',
+        item
+    }));
+}
+
 function displayResults(results) {
     const resultsDiv = document.getElementById('results');
-    resultsDiv.innerHTML = '';
+    resultsDiv.innerHTML = results.length ? '' : '<p>No results to display.</p>';
     
-    if (results.length === 0) {
-        resultsDiv.innerHTML = '<p>No results to display.</p>';
-        return;
+    if (results.length) {
+        const table = document.createElement('table');
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Street Number</th>
+                    <th>Modern Street Name</th>
+                    <th>Lot Number</th>
+                    <th>Source</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${results.map(item => `
+                    <tr>
+                        <td>${item['historical name'] || ''}</td>
+                        <td>${item['modern name'] || ''}</td>
+                        <td>${item['index'] || ''}</td>
+                        <td>${item['source'] || ''}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        `;
+        resultsDiv.appendChild(table);
     }
-    
-    const table = document.createElement('table');
-    const thead = document.createElement('thead');
-    const headerRow = document.createElement('tr');
-    ['Historical Street Number', 'Modern Name', 'Log Number', 'Reference'].forEach(col => {
-        const th = document.createElement('th');
-        th.textContent = col;
-        headerRow.appendChild(th);
-    });
-    thead.appendChild(headerRow);
-    table.appendChild(thead);
-    
-    const tbody = document.createElement('tbody');
-    results.forEach(item => {
-        const row = document.createElement('tr');
-        ['historical name', 'modern name', 'index', 'source'].forEach(key => {
-            const td = document.createElement('td');
-            td.textContent = item[key] || '';
-            row.appendChild(td);
-        });
-        tbody.appendChild(row);
-    });
-    table.appendChild(tbody);
-    
-    resultsDiv.appendChild(table);
 }
 
-// Error and Feedback Handler Component
 function showError(message) {
-    const errorDiv = document.getElementById('errorMessage');
-    errorDiv.textContent = message;
+    document.getElementById('errorMessage').textContent = message;
 }
 
-// User Interface Component (event handling)
 function setupEventListeners() {
-    const nameInput = document.getElementById('nameInput');
-    const indexInput = document.getElementById('indexInput');
-    const generalSearchInput = document.getElementById('generalSearchInput');
-    const dataSourceSelect = document.getElementById('dataSource');
-    const searchModeSelect = document.getElementById('searchMode');
+    const inputs = {
+        name: document.getElementById('nameInput'),
+        modern: document.getElementById('modernInput'),
+        index: document.getElementById('indexInput'),
+        general: document.getElementById('generalSearchInput')
+    };
     const searchButton = document.getElementById('searchButton');
     const clearButton = document.getElementById('clearButton');
     const instructionsButton = document.getElementById('instructionsButton');
     const suggestionsDiv = document.getElementById('suggestions');
+    const dataSourceSelect = document.getElementById('dataSource');
+    const searchModeSelect = document.getElementById('searchMode');
     const instructionsModal = document.getElementById('instructionsModal');
     const closeModal = document.getElementById('closeModal');
-    
+
     function positionSuggestions(inputElement) {
         const rect = inputElement.getBoundingClientRect();
         suggestionsDiv.style.top = `${rect.bottom + window.scrollY}px`;
@@ -192,28 +181,24 @@ function setupEventListeners() {
         suggestionsDiv.style.width = `${rect.width}px`;
         suggestionsDiv.style.display = 'block';
     }
-    
+
     function hideSuggestions() {
         suggestionsDiv.style.display = 'none';
         suggestionsDiv.innerHTML = '';
     }
-    
+
     function showSuggestions(inputElement, field) {
-        const inputValue = inputElement.value;
-        const inputObj = normalizeInput(inputValue, field);
-        document.getElementById('errorMessage').textContent = '';
-        
+        const inputValue = normalizeInput(inputElement.value);
+        showError('');
         if (!inputValue) {
             hideSuggestions();
             return [];
         }
-        
-        const currentData = getCurrentData();
-        let results = search(inputObj, currentData);
-        
-        // Only show suggestions, do not update results
+
+        const data = getCurrentData();
+        const results = search(inputValue, data, field);
         suggestionsDiv.innerHTML = '';
-        const suggestions = generateSuggestions(results, inputObj);
+        const suggestions = field === 'general' ? generateGeneralSuggestions(results) : generateSpecificSuggestions(results, field);
         suggestions.forEach(suggestion => {
             const p = document.createElement('p');
             const link = document.createElement('a');
@@ -221,9 +206,10 @@ function setupEventListeners() {
             link.href = '#';
             if (suggestion.item) {
                 link.onclick = () => {
-                    nameInput.value = suggestion.item['modern name'] || suggestion.item['historical name'] || '';
-                    indexInput.value = suggestion.item['index'] || '';
-                    generalSearchInput.value = '';
+                    inputs.name.value = suggestion.item['historical name'] || '';
+                    inputs.modern.value = suggestion.item['modern name'] || '';
+                    inputs.index.value = suggestion.item['index'] || '';
+                    inputs.general.value = '';
                     displayResults([suggestion.item]);
                     hideSuggestions();
                     return false;
@@ -232,125 +218,69 @@ function setupEventListeners() {
             p.appendChild(link);
             suggestionsDiv.appendChild(p);
         });
-        
-        if (suggestions.length > 0 && suggestions[0].item) {
-            positionSuggestions(inputElement);
-        } else {
-            hideSuggestions();
-        }
-        
+
+        suggestions.length && suggestions[0].item ? positionSuggestions(inputElement) : hideSuggestions();
         return results;
     }
-    
-    function handleSearchButton() {
-        const nameValue = nameInput.value;
-        const indexValue = indexInput.value;
-        const generalValue = generalSearchInput.value;
-        let results = [];
-        
-        if (nameValue && !indexValue && !generalValue) {
-            const inputObj = normalizeInput(nameValue, 'name');
-            results = search(inputObj, getCurrentData());
-        } else if (indexValue && !nameValue && !generalValue) {
-            const inputObj = normalizeInput(indexValue, 'index');
-            results = search(inputObj, getCurrentData());
-        } else if (generalValue && !nameValue && !indexValue) {
-            const inputObj = normalizeInput(generalValue, 'general');
-            results = search(inputObj, getCurrentData());
-        } else {
-            showError('Please enter only one field: Street Number, Lot Number, or Search.');
+
+    function handleSearch() {
+        const values = Object.entries(inputs).map(([field, input]) => ({ field, value: input.value }));
+        const activeInput = values.find(v => v.value);
+        if (!activeInput || values.filter(v => v.value).length > 1) {
+            showError('Please enter only one field.');
             hideSuggestions();
             return;
         }
-        
-        if (results.length > 0) {
-            const mode = searchModeSelect.value;
-            results = filterResultsByMode(results, mode);
-            displayResults(results);
-            const topResult = results[0];
-            nameInput.value = topResult['modern name'] || topResult['historical name'] || '';
-            indexInput.value = topResult['index'] || '';
-            generalSearchInput.value = '';
+
+        const inputValue = normalizeInput(activeInput.value);
+        const results = search(inputValue, getCurrentData(), activeInput.field);
+        if (results.length) {
+            const filteredResults = filterResultsByMode(results, searchModeSelect.value);
+            displayResults(filteredResults);
+            const topResult = filteredResults[0];
+            inputs.name.value = topResult['historical name'] || '';
+            inputs.modern.value = topResult['modern name'] || '';
+            inputs.index.value = topResult['index'] || '';
+            inputs.general.value = '';
             hideSuggestions();
         } else {
             displayResults([]);
             showError('No matches found.');
         }
     }
-    
+
     function handleClear() {
-        nameInput.value = '';
-        indexInput.value = '';
-        generalSearchInput.value = '';
+        Object.values(inputs).forEach(input => input.value = '');
         hideSuggestions();
         displayResults([]);
         showError('');
     }
-    
-    function showInstructions() {
-        instructionsModal.style.display = 'flex';
+
+    function filterResultsByMode(results, mode) {
+        return mode === 'best' ? results.slice(0, 1) : results.sort((a, b) => (a['modern name'] || '').localeCompare(b['modern name'] || ''));
     }
-    
-    function hideInstructions() {
-        instructionsModal.style.display = 'none';
-    }
-    
-    nameInput.addEventListener('keyup', () => {
-        if (!indexInput.value && !generalSearchInput.value) showSuggestions(nameInput, 'name');
-        else hideSuggestions();
+
+    Object.entries(inputs).forEach(([field, input]) => {
+        input.addEventListener('keyup', () => {
+            showSuggestions(input, field);
+        });
     });
-    indexInput.addEventListener('keyup', () => {
-        if (!nameInput.value && !generalSearchInput.value) showSuggestions(indexInput, 'index');
-        else hideSuggestions();
-    });
-    generalSearchInput.addEventListener('keyup', () => {
-        if (!nameInput.value && !indexInput.value) showSuggestions(generalSearchInput, 'general');
-        else hideSuggestions();
-    });
-    
-    // Re-search on option changes
+
     dataSourceSelect.addEventListener('change', () => {
-        const activeInput = nameInput.value ? nameInput : indexInput.value ? indexInput : generalSearchInput.value ? generalSearchInput : null;
-        if (activeInput) {
-            const field = activeInput === nameInput ? 'name' : activeInput === indexInput ? 'index' : 'general';
-            showSuggestions(activeInput, field);
-        }
+        const active = Object.entries(inputs).find(([_, i]) => i.value);
+        if (active) showSuggestions(inputs[active[0]], active[0]);
     });
-    searchModeSelect.addEventListener('change', () => {
-        // Only affects button click, no action needed here
-    });
-    
-    // Hide suggestions when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('input') && !e.target.closest('.suggestions')) {
-            hideSuggestions();
-        }
-    });
-    
-    // Instructions modal events
-    instructionsButton.addEventListener('click', showInstructions);
-    closeModal.addEventListener('click', hideInstructions);
-    // Close modal when clicking outside content
-    instructionsModal.addEventListener('click', (e) => {
-        if (e.target === instructionsModal) {
-            hideInstructions();
-        }
-    });
-    
-    searchButton.addEventListener('click', handleSearchButton);
+
+    searchButton.addEventListener('click', handleSearch);
     clearButton.addEventListener('click', handleClear);
+    instructionsButton.addEventListener('click', () => instructionsModal.style.display = 'flex');
+    closeModal.addEventListener('click', () => instructionsModal.style.display = 'none');
+    instructionsModal.addEventListener('click', e => e.target === instructionsModal && (instructionsModal.style.display = 'none'));
+    document.addEventListener('click', e => !e.target.closest('input, .suggestions') && hideSuggestions());
 }
 
-// Initialize on page load
 document.addEventListener('DOMContentLoaded', async () => {
-    // Debug CSS loading
-    const cssLink = document.querySelector('link[href="styles.css"]');
-    if (!cssLink.sheet) {
-        console.error('CSS file failed to load. Check path or file presence.');
-    } else {
-        console.log('CSS file loaded successfully.');
-    }
-    
+    populateDataSourceDropdown();
     await loadData();
     setupEventListeners();
 });
