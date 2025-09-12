@@ -20,6 +20,9 @@ body {
     padding: 24px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 32px); /* Ensure container stretches to fit footer */
 }
 
 h1 {
@@ -215,6 +218,22 @@ input::placeholder {
     color: #319795; /* Soft teal on hover */
 }
 
+.footer {
+    margin-top: auto; /* Push footer to bottom of container */
+    text-align: center;
+    padding: 16px 0;
+    color: #2d3748; /* Dark grey text */
+    font-size: 12px;
+}
+
+.footer p {
+    margin-bottom: 8px;
+}
+
+.footer .disclaimer {
+    font-style: italic;
+}
+
 @media (max-width: 600px) {
     .container {
         padding: 16px;
@@ -231,5 +250,9 @@ input::placeholder {
 
     .suggestions {
         max-width: 100%;
+    }
+
+    .footer {
+        padding: 12px 0;
     }
 }
