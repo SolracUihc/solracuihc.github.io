@@ -1,6 +1,6 @@
 const dataSources = [
     { id: 'wts_en', name: 'War Time Streets', url: 'https://raw.githubusercontent.com/solracuihc/solracuihc.github.io/master/war_time_streets_inUse.xlsx' },
-    { id: 'en', name: 'Sample Data (en)', url: 'https://raw.githubusercontent.com/solracuihc/solracuihc.github.io/master/sample_street_data_en.xlsx' }
+    { id: '1938_en', name: '1938 Street Index (Batch 1)', url: 'https://raw.githubusercontent.com/solracuihc/solracuihc.github.io/master/1938_Street_index_inUse.xlsx' }
 ];
 
 let sourceData = {};
