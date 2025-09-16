@@ -89,7 +89,7 @@ function search(input, data, field) {
                 const maxLen = Math.max(input.length, val.length);
                 const similarity = maxLen ? 1 - distance / maxLen : 0;
                 return { ...item, similarity, matchedField: t.key };
-            }).filter(m => m.similarity > 0.7 || (m[m.matchedField] || '').toLowerCase().includes(input));
+            }).filter(m => m.similarity > 0.9 || (m[m.matchedField] || '').toLowerCase().includes(input));
             if (matches.length) results.push(...matches);
         } else {
             const fieldKey = field === 'name' ? 'historical name' : field === 'modern' ? 'modern name' : 'index';
@@ -97,7 +97,7 @@ function search(input, data, field) {
             const distance = levenshtein(input, target);
             const maxLen = Math.max(input.length, target.length);
             const similarity = maxLen ? 1 - distance / maxLen : 0;
-            if (target.includes(input) || similarity > 0.7) {
+            if (target.includes(input) || similarity > 0.9) {
                 results.push({ ...item, similarity });
             }
         }
