@@ -1,0 +1,59 @@
+{
+  "nodes": {
+    "q1": {
+      "qid": "q1",
+      "text": "How to estimate average treatment effect (ATE) without randomization?",
+      "level": 0,
+      "paragraph": "p1",
+      "children": ["q1.1", "q1.2"],
+      "keywords": ["ate", "causal", "treatment", "randomization"]
+    },
+    "q1.1": {
+      "qid": "q1.1",
+      "text": "What is a propensity score?",
+      "level": 1,
+      "paragraph": "p2",
+      "children": [],
+      "keywords": ["propensity", "score", "matching"]
+    },
+    "q1.2": {
+      "qid": "q1.2",
+      "text": "Why does simple matching fail in high dimensions?",
+      "level": 1,
+      "paragraph": "p3",
+      "children": [],
+      "keywords": ["matching", "curse", "dimensionality"]
+    }
+  },
+  "paragraphs": {
+    "p1": {
+      "text": "The average treatment effect (ATE) is the expected difference in outcomes under treatment vs control. Without randomization, we use observational data and adjust for confounding.",
+      "source": "Neyman (1923), Section 3.1"
+    },
+    "p2": {
+      "text": "The propensity score is the probability of treatment assignment conditional on observed covariates. It allows matching units with similar treatment likelihood.",
+      "source": "Rosenbaum & Rubin (1983)"
+    },
+    "p3": {
+      "text": "In high dimensions, exact matching becomes impossible due to the curse of dimensionality. Even close matches diverge in unobserved ways.",
+      "source": "Imbens & Rubin (2015)"
+    }
+  },
+  "index": [
+    {
+      "qid": "q1",
+      "text": "How to estimate average treatment effect...",
+      "keywords": ["ate", "causal"]
+    },
+    {
+      "qid": "q1.1",
+      "text": "What is a propensity score?",
+      "keywords": ["propensity", "score"]
+    },
+    {
+      "qid": "q1.2",
+      "text": "Why does simple matching fail...",
+      "keywords": ["matching", "curse"]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "maxRootQuestions": 5,
+  "maxDepth": 6,
+  "fuseOptions": {
+    "threshold": 0.4,
+    "keys": ["text", "keywords"]
+  },
+  "ui": {
+    "titles": {
+      "root": "Pick a starting question:",
+      "next": "Go deeper:"
+    },
+    "buttons": {
+      "back": "Back",
+      "summary": "Jump to Summary",
+      "new": "New Search"
+    },
+    "placeholder": "Enter keyword (e.g., causal inference)"
+  }
+}
