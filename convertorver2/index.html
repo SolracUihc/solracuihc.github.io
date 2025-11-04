@@ -1,0 +1,120 @@
+<!-- <!DOCTYPE html> -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Street Number & Lot Converter</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Street Number & Lot Converter</h1>
+        <div class="options-section">
+            <label for="dataSource">Data Source:</label>
+            <select id="dataSource"></select>
+            <label for="searchMode">Search Mode:</label>
+            <select id="searchMode">
+                <option value="best">Best Result</option>
+                <option value="all">All Results</option>
+            </select>
+            <button id="instructionsButton">Instructions</button>
+            <button id="abbreviationsButton">Abbreviations</button>
+        </div>
+        <div class="input-section">
+            <input type="text" id="nameInput" placeholder="Enter Street Number...">
+            <input type="text" id="modernInput" placeholder="Enter Modern Street Name...">
+            <input type="text" id="indexInput" placeholder="Enter Lot Number...">
+        </div>
+        <div class="search-section">
+            <input type="text" id="generalSearchInput" placeholder="Enter Anything...">
+            <button id="searchButton">Search</button>
+            <button id="clearButton">Clear</button>
+        </div>
+        <div id="suggestions" class="suggestions"></div>
+        <div id="errorMessage" class="error-message"></div>
+        <div id="results" class="results">
+            <p>No results to display.</p>
+        </div>
+        <div id="instructionsModal" class="modal">
+            <div class="modal-content">
+                <span id="closeInstructionsModal" class="close">&times;</span>
+                <h2>Instructions</h2>
+                <p>Use this tool to convert between street numbers and lot numbers:</p>
+                <ul>
+                    <li><strong>Data Source</strong>: Select a source (e.g., Japanese Property Registration, or Both).</li>
+                    <li><strong>Search Mode</strong>: Choose "Best Result" for the closest match or "All Results" for all matches, sorted by modern name.</li>
+                    <li><strong>Input</strong>: Enter one field:
+                        <ul>
+                            <li><strong>Street Number</strong>: E.g., "Bowen Road".</li>
+                            <li><strong>Modern Street Name</strong>: E.g., "Modern Road".</li>
+                            <li><strong>Lot Number</strong>: E.g., "I.L. 1416 R.P.".</li>
+                            <li><strong>Enter Anything</strong>: Search street number, modern name, or lot number.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Suggestions</strong>: Type to see up to 3 matches; click to select.</li>
+                    <li><strong>Search/Clear</strong>: Search to view results in a table; Clear to reset.</li>
+                </ul>
+            </div>
+        </div>
+        <div id="abbreviationsModal" class="modal">
+            <div class="modal-content">
+                <span id="closeAbbreviationsModal" class="close">&times;</span>
+                <h2>Abbreviations</h2>
+                <ul>
+                    <li><strong>A.I.L.</strong> = Aberdeen Inland Lot</li>
+                    <li><strong>A.M.L.</strong> = Aberdeen Marine Lot</li>
+                    <li><strong>Adty.L.</strong> = Admiralty Lot</li>
+                    <li><strong>Apl.I.L.</strong> = Aplichau (or Apleechow or Ap Lei Chau) Inland Lot</li>
+                    <li><strong>Apl.M.L.</strong> = Aplichau (or Apleechow or Ap Lei Chau) Marine Lot</li>
+                    <li><strong>Bldg.</strong> = Building</li>
+                    <li><strong>C.W.I.L.</strong> = Chai Wan Inland Lot</li>
+                    <li><strong>F.L.</strong> = Farm Lot</li>
+                    <li><strong>G.L.</strong> = Garden Lot</li>
+                    <li><strong>H.H.I.L.</strong> = Hung Hom Inland Lot</li>
+                    <li><strong>Ind.</strong> = Industrial</li>
+                    <li><strong>I.L.</strong> = Inland Lot</li>
+                    <li><strong>K.I.L.</strong> = Kowloon Inland Lot</li>
+                    <li><strong>K.M.L.</strong> = Kowloon Marine Lot</li>
+                    <li><strong>K.P.P.</strong> = Kowloon Permanent Pier</li>
+                    <li><strong>Κ.Τ.Ι.L.</strong> = Kun (or Kwun) Tong Inland Lot</li>
+                    <li><strong>M.L.</strong> = Marine Lot</li>
+                    <li><strong>M.O.D.L.</strong> = Ministry of Defence Lot</li>
+                    <li><strong>N.K.D.F.L.</strong> = New Kowloon Dairy Farm Lot</li>
+                    <li><strong>Ν.Κ.Ι.L.</strong> = New Kowloon Inland Lot</li>
+                    <li><strong>N.K.P.P.</strong> = New Kowloon Permanent Pier</li>
+                    <li><strong>R.P.</strong> = Remaining Portion</li>
+                    <li><strong>P.D.F.L.</strong> = Pokfulam Dairy Farm Lot</li>
+                    <li><strong>P.R.M.L.</strong> = Praya Reclamation of Marine Lot</li>
+                    <li><strong>Q.B.I.L.</strong> = Quarry Bay Inland Lot</li>
+                    <li><strong>Q.B.M.L.</strong> = Quarry Bay Marine Lot</li>
+                    <li><strong>R.B.L.</strong> = Rural Building Lot</li>
+                    <li><strong>S.L.</strong> = Shaukiwan (or Sowkewan) Lot</li>
+                    <li><strong>S.I.L.</strong> = Shaukiwan (or Shau Kei Wan) Inland Lot</li>
+                    <li><strong>S.M.L.</strong> = Shaukiwan (or Shau Kei Wan) Marine Lot</li>
+                    <li><strong>S.O.I.L.</strong> = Shek O Inland Lot</li>
+                    <li><strong>S.O.V.L.</strong> = Shek O Village Lot</li>
+                    <li><strong>Stanley I.L.</strong> = Stanley Inland Lot</li>
+                    <li><strong>S.</strong> = Section</li>
+                    <li><strong>SS.</strong> = Subsection</li>
+                    <li><strong>T.H.L.</strong> = Tai Hang Lot</li>
+                    <li><strong>T.H.I.L.</strong> = Tai Hang Inland Lot</li>
+                    <li><strong>W.D.L.</strong> = War Department Lot</li>
+                    <li><strong>Y.T.I.L.</strong> = Yau Tong Inland Lot</li>
+                    <li><strong>Y.T.M.L.</strong> = Yau Tong Marine Lot</li>
+                    
+                </ul>
+                <p><strong>Source:</strong> The 57th Edition of the Street Index, The Land Registry, https://www.landreg.gov.hk/en/public/si_web.htm</p>
+            </div>
+        </div>
+        <footer class="footer">
+            <p>&copy; 2025 Street Number & Lot Converter. All rights reserved.</p>
+            <p class="disclaimer">Disclaimer: The data provided is for informational purposes only and may consist manual errors.</p>
+        </footer>
+    <div id="map" class="map-hidden"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
