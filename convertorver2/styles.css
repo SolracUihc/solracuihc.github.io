@@ -305,3 +305,9 @@ input::placeholder {
     padding: 12px;
     background: white;
 }
+
+#map {
+    height: 45vh;           /* same relative size */
+    margin-top: 16px;
+    display: none;          /* still hidden until results appear */
+}
