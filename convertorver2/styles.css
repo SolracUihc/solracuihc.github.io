@@ -306,8 +306,14 @@ input::placeholder {
     background: white;
 }
 
+/* ─────── BIG, SCROLLABLE MAP ─────── */
 #map {
-    height: 45vh;           /* same relative size */
-    margin-top: 16px;
-    display: none;          /* still hidden until results appear */
+    height: 70vh !important;     /* 70% of screen height – feels huge */
+    min-height: 400px;           /* never tiny on phones */
+    max-height: 90vh;            /* never covers the whole page */
+    margin: 20px 0;
+    border: 3px solid #319795;
+    border-radius: 8px;
+    display: none;               /* still hidden until results */
+    overflow: hidden;            /* Leaflet handles its own scroll */
 }
